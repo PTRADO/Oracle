@@ -1,12 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ================================================================================
- ORACLE v2.0 MAX — Loto + EuroMillions
+ ORACLE v2.2 MAX — Loto + EuroMillions
  Pronostiqueur multi-techniques · Calibration empirique · EV jackpot · Systèmes
 ================================================================================
 
 Un seul fichier, zéro dépendance (stdlib pure). Python 3.10+.
+
+NOUVEAUTÉS v2.2 — données réelles fiabilisées
+---------------------------------------------
+• MULTI-ÉPOQUES : l'historique FDJ est publié en archives successives, une par
+  formule du jeu. On concatène désormais toutes celles dont la structure de
+  gains correspond à `rang_gagne` (Loto 1056 → 1473 tirages, EuroMillions
+  679 → 1029), en excluant explicitement tirages spéciaux et vieilles
+  formules — voir `JEUX[...]["archives"]` et `["exclus"]`.
+• AUTO-DÉCOUVERTE RÉPARÉE : la page FDJ est devenue une appli JS ; l'ancien
+  regex href+title ne trouvait plus rien, ce qui rendait l'EuroMillions
+  (sans URL directe) impossible à télécharger.
+• CONTRÔLE D'INTÉGRITÉ : chaque chargement audite les données et publie ses
+  constats dans `meta.alertes[]`, affichées sur la page. Rien n'est absorbé
+  en silence.
 
 NOUVEAUTÉS v2 (vs v1.1)
 -----------------------
@@ -71,6 +84,27 @@ from datetime import date, datetime, timedelta
 # ==============================================================================
 # 0. CONFIGURATION DES JEUX
 # ==============================================================================
+#
+# ARCHIVES FDJ — pourquoi une LISTE d'époques et pas un seul fichier (v2.2)
+# ------------------------------------------------------------------------
+# FDJ publie son historique en archives successives, une par « formule » du
+# jeu. Deux règles président à la sélection ci-dessous :
+#
+#   1. On ne concatène QUE des époques dont la structure de gains est
+#      identique à celle codée dans `rang_gagne` (sinon le grand livre
+#      réglerait des grilles avec la mauvaise table de rangs).
+#   2. On EXCLUT les tirages spéciaux (Super Loto, Grand Loto, Loto de Noël) :
+#      prix et grille de gains différents, et surtout jours de tirage
+#      atypiques qui pollueraient la technique T7 « jour ». Ils vivent dans
+#      des fichiers séparés chez FDJ — il suffit de ne pas les lister.
+#
+# `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
+# futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
+
+VERSION = "2.2"          # bump obligatoire à tout changement du contrat JSON
+
+FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
+           "v3/documentations/")
 
 JEUX = {
     "loto": {
@@ -83,10 +117,22 @@ JEUX = {
         "jours": {0, 2, 5},          # lundi, mercredi, samedi
         "page_hist": "https://www.fdj.fr/jeux-de-tirage/loto/historique",
         "page_jeu": "https://www.fdj.fr/jeux-de-tirage/loto",
-        "url_directe": ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
-                        "v3/documentations/1a2b3c4d-9876-4562-b3fc-2c963f66afp6"),
-        "pref_lien": "novembre 2019",
         "titre_lien": r"historique\s+loto",
+        # Époques 5/49 + Chance 1-10 à 9 rangs (structure de `rang_gagne`).
+        "archives": [
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afn6",
+             "label": "loto_2017", "depuis": "2017-03-06", "close": True},
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afo6",
+             "label": "loto_201902", "depuis": "2019-02-27", "close": True},
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afp6",
+             "label": "loto_201911", "depuis": "2019-11-06", "close": False},
+        ],
+        "exclus": {
+            "nouveau_loto (2008-10 → 2017-03)": "6 rangs, table de gains ≠",
+            "loto.csv (1976 → 2008-10)": "formule 6/49, sans n° Chance",
+            "superloto · grandloto · lotonoel": "tirages spéciaux (prix et "
+                                                "jours différents)",
+        },
     },
     "euromillions": {
         "nom": "EUROMILLIONS",
@@ -99,9 +145,23 @@ JEUX = {
         "page_hist": ("https://www.fdj.fr/jeux-de-tirage/"
                       "euromillions-my-million/historique"),
         "page_jeu": "https://www.fdj.fr/jeux-de-tirage/euromillions-my-million",
-        "url_directe": None,          # résolu par auto-découverte
-        "pref_lien": "2020",
         "titre_lien": r"historique\s+euro\s*millions",
+        # Époques à 12 étoiles / 13 rangs (depuis le 24/09/2016).
+        "archives": [
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afc6",
+             "label": "euromillions_4", "depuis": "2016-09-27", "close": True},
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afd6",
+             "label": "euromillions_201902", "depuis": "2019-03-01",
+             "close": True},
+            {"id": "1a2b3c4d-9876-4562-b3fc-2c963f66afe6",
+             "label": "euromillions_202002", "depuis": "2020-02-04",
+             "close": False},
+        ],
+        "exclus": {
+            "euromillions_3 · euromillions_2 (2011-05 → 2016-09)":
+                "11 étoiles — bonus_max ≠",
+            "euromillions.csv (2004 → 2011-05)": "9 étoiles — bonus_max ≠",
+        },
     },
 }
 
@@ -140,49 +200,112 @@ def _http_get(url: str, timeout: int = 25) -> bytes:
 
 
 def decouvrir_liens_fdj(cfg) -> list[str]:
-    """Scrape la page d'historique FDJ du jeu et extrait les liens ZIP.
-    Auto-réparation : survit aux changements d'URLs FDJ tant que la page
-    liste ses archives. Priorité à l'archive de la formule actuelle."""
+    """Scrape la page d'historique FDJ et extrait les identifiants d'archives.
+
+    v2.2 — la page FDJ est désormais une appli JS : les URLs vivent dans le
+    payload JSON, plus dans des `<a href=… title=…>`. L'ancien regex (qui
+    exigeait href ET title) ne trouvait donc plus RIEN — panne silencieuse
+    fatale pour EuroMillions, qui n'avait aucune URL directe en secours.
+    On cherche maintenant le motif stable `documentations/<id>` où qu'il soit.
+    """
     try:
         html = _http_get(cfg["page_hist"]).decode("utf-8", errors="replace")
     except Exception as e:  # noqa: BLE001
         print(f"    (scrape page FDJ impossible : {type(e).__name__})")
         return []
-    liens = re.findall(
-        r'href="(https?://[^"]+?)"[^>]*title="([^"]*)"', html)
-    utiles = [(u, t) for u, t in liens
-              if re.search(cfg["titre_lien"], t, re.I)
-              or ("sto.api.fdj.fr" in u and "documentations" in u)]
-    prio = [u for u, t in utiles if cfg["pref_lien"] in t.lower()]
-    autres = [u for u, t in utiles if u not in prio]
-    return list(dict.fromkeys(prio + autres))[:4]
+    ids = re.findall(r"documentations/([0-9a-zA-Z][0-9a-zA-Z\-]{20,})", html)
+    return list(dict.fromkeys(FDJ_DOC + i for i in ids))
 
 
-def telecharger_archive(cfg, dest_dir: str, mirror: str | None) -> str | None:
-    """Ordre : URL directe connue → auto-découverte → mirror perso."""
+def _ecrire_archive(data: bytes, dest_dir: str, label: str) -> str:
+    ext = ".zip" if data[:2] == b"PK" else ".csv"
+    path = os.path.join(dest_dir, f"{label}{ext}")
+    with open(path, "wb") as f:
+        f.write(data)
+    return path
+
+
+def telecharger_archives(cfg, dest_dir: str,
+                         mirror: str | None = None) -> list[tuple[str, str]]:
+    """Récupère TOUTES les époques déclarées du jeu → [(label, chemin)].
+
+    Par archive, ordre de secours : URL directe déclarée → auto-découverte
+    → mirror perso. Les époques closes (`close: True`) ne bougeront plus
+    jamais chez FDJ : si le fichier est déjà en cache local on le réutilise,
+    ce qui rend le cron rapide et résilient à une panne FDJ partielle.
+    Une époque manquante n'est pas fatale : on continue avec les autres et
+    le contrôle d'intégrité le signalera dans `meta.alertes`.
+    """
     os.makedirs(dest_dir, exist_ok=True)
-    candidates = [u for u in [cfg["url_directe"]] if u]
-    print("  → auto-découverte des liens sur la page FDJ…")
-    candidates += [u for u in decouvrir_liens_fdj(cfg) if u not in candidates]
-    if mirror:
-        candidates.append(mirror)
-    for url in candidates:
+    decouverts: list[str] | None = None
+    obtenus: list[tuple[str, str]] = []
+
+    for arc in cfg["archives"]:
+        label = arc["label"]
+        cache = [os.path.join(dest_dir, label + e) for e in (".zip", ".csv")]
+        cache = [p for p in cache if os.path.exists(p)]
+        if arc["close"] and cache:
+            print(f"  ↺ {label} : époque close, cache local réutilisé")
+            obtenus.append((label, cache[0]))
+            continue
+
+        data = None
         try:
-            print(f"  → tentative : {url[:76]}…" if len(url) > 78 else
-                  f"  → tentative : {url}")
-            data = _http_get(url)
+            data = _http_get(FDJ_DOC + arc["id"])
             if len(data) < 500:
-                print("    ✗ réponse trop courte, ignorée")
-                continue
-            ext = ".zip" if data[:2] == b"PK" else ".csv"
-            path = os.path.join(dest_dir, f"{cfg['nom'].lower()}_fdj{ext}")
-            with open(path, "wb") as f:
-                f.write(data)
-            print(f"  ✔ historique récupéré ({len(data)//1024} Ko, {ext[1:]})")
-            return path
+                data = None
         except Exception as e:  # noqa: BLE001
-            print(f"    ✗ échec ({type(e).__name__})")
-    return None
+            print(f"    ✗ {label} : {type(e).__name__} sur l'URL directe")
+
+        if data is None:                      # secours 1 : auto-découverte
+            if decouverts is None:
+                print("  → auto-découverte des archives sur la page FDJ…")
+                decouverts = decouvrir_liens_fdj(cfg)
+                print(f"    {len(decouverts)} archive(s) listée(s)")
+            for url in decouverts:
+                try:
+                    d = _http_get(url)
+                except Exception:  # noqa: BLE001
+                    continue
+                if len(d) < 500 or not _archive_correspond(cfg, d, arc):
+                    continue
+                data = d
+                print(f"    ✔ {label} retrouvée par auto-découverte")
+                break
+
+        if data is None and mirror:           # secours 2 : mirror perso
+            try:
+                data = _http_get(mirror.replace("{label}", label))
+                print(f"    ✔ {label} récupérée depuis le mirror")
+            except Exception:  # noqa: BLE001
+                data = None
+
+        if data is None and cache:            # secours 3 : cache périmé
+            print(f"    ↺ {label} : réseau KO, cache local (peut-être daté)")
+            obtenus.append((label, cache[0]))
+            continue
+        if data is None:
+            print(f"    ✗ {label} : introuvable, époque ignorée")
+            continue
+
+        path = _ecrire_archive(data, dest_dir, label)
+        print(f"  ✔ {label} ({len(data)//1024} Ko)")
+        obtenus.append((label, path))
+    return obtenus
+
+
+def _archive_correspond(cfg, data: bytes, arc: dict) -> bool:
+    """L'auto-découverte renvoie TOUTES les archives du jeu, y compris les
+    tirages spéciaux et les vieilles formules. On identifie la bonne par le
+    nom du CSV qu'elle contient, sinon par sa date de début."""
+    try:
+        texte = _texte_archive(data)
+    except Exception:  # noqa: BLE001
+        return False
+    tirages = parser_csv(cfg, texte, tolerant=True)
+    if not tirages:
+        return False
+    return tirages[0]["date"].isoformat() == arc["depuis"]
 
 
 def scraper_jackpot(cfg) -> float | None:
@@ -204,6 +327,19 @@ def _decoder(raw: bytes) -> str:
         except UnicodeDecodeError:
             continue
     return raw.decode("latin-1", errors="replace")
+
+
+def _texte_archive(brut: bytes) -> str:
+    """Rend le texte CSV d'une archive FDJ, qu'elle soit ZIP ou CSV nu.
+    Dans un ZIP, on prend le plus gros CSV (les archives FDJ n'en contiennent
+    qu'un, mais certaines embarquent un fichier de notes)."""
+    if brut[:2] != b"PK":
+        return _decoder(brut)
+    with zipfile.ZipFile(io.BytesIO(brut)) as z:
+        noms = [n for n in z.namelist() if n.lower().endswith(".csv")]
+        if not noms:
+            raise ValueError("aucun CSV dans l'archive")
+        return _decoder(z.read(max(noms, key=lambda n: z.getinfo(n).file_size)))
 
 
 def _sniff_delim(header_line: str) -> str:
@@ -239,15 +375,19 @@ def _to_float(s: str) -> float | None:
         return None
 
 
-def parser_csv(cfg, texte: str) -> list[dict]:
+def parser_csv(cfg, texte: str, tolerant: bool = False) -> list[dict]:
     """Parse un CSV FDJ (Loto ou EuroMillions), tolérant aux variantes.
     Retourne des tirages triés par date : {date, jour, balls, bonus,
-    gagnants{rang:int}, rapports{rang:float}}."""
-    lignes = [l for l in texte.splitlines() if l.strip()]
+    gagnants{rang:int}, rapports{rang:float}}.
+
+    `tolerant=True` : rend [] au lieu de lever quand les colonnes attendues
+    manquent — utilisé pour trier à l'aveugle les archives de l'auto-
+    découverte (elles mélangent formules et jeux)."""
+    lignes = [ligne for ligne in texte.splitlines() if ligne.strip()]
     if not lignes:
         return []
     delim = _sniff_delim(lignes[0])
-    reader = csv.reader(io.StringIO(texte), delimiter=delim)
+    reader = csv.reader(io.StringIO("\n".join(lignes)), delimiter=delim)
     header = [h.strip().lower() for h in next(reader)]
 
     def find_col(pattern: str) -> int | None:
@@ -276,7 +416,14 @@ def parser_csv(cfg, texte: str) -> list[dict]:
         elif "rapport" in h and r not in cols_rapports:
             cols_rapports[r] = i
 
-    if col_date is None or any(c is None for c in cols_boules):
+    # Les colonnes bonus sont EXIGÉES : sans elles, un fichier d'une vieille
+    # formule (Loto 6/49 d'avant 2008, qui a bien boule_1..5 mais pas de
+    # n° Chance) se parserait silencieusement en perdant sa 6e boule.
+    manque = (col_date is None or any(c is None for c in cols_boules)
+              or any(c is None for c in cols_bonus))
+    if manque:
+        if tolerant:
+            return []
         raise ValueError(
             f"Colonnes introuvables dans le CSV {cfg['nom']} "
             "(attendu : date_de_tirage, boule_1..boule_5"
@@ -324,47 +471,157 @@ def parser_csv(cfg, texte: str) -> list[dict]:
     return tirages
 
 
-def charger_tirages(cfg, args) -> list[dict]:
-    texte = None
-    if args.csv:
-        with open(args.csv, "rb") as f:
-            texte = _decoder(f.read())
+def controle_integrite(cfg, tirages, sources, aujourdhui: date,
+                       doublons=(), multi_epoques: bool = True) -> list[dict]:
+    """Audit des données chargées → liste d'alertes exportée en `meta.alertes`.
+
+    Le principe du produit vaut aussi pour ses données : on ne masque rien.
+    Une anomalie visible dans l'UI vaut mieux qu'un pronostic calculé en
+    silence sur un historique troué.
+    """
+    al: list[dict] = []
+
+    def dire(niveau, message):
+        al.append({"niveau": niveau, "message": message})
+
+    # -- couverture des époques déclarées --------------------------------------
+    # En mode --zip/--csv l'utilisateur impose SA source : lui reprocher les
+    # époques absentes serait du bruit. On le dit, sans crier.
+    if not multi_epoques:
+        dire("attention", "Source unique imposée (--zip/--csv) : l'historique "
+             "multi-époques n'a pas été chargé.")
     else:
-        zpath = args.zip
-        if not zpath:
-            print(f"Téléchargement de l'historique {cfg['nom']}…")
-            zpath = telecharger_archive(
-                cfg, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "data"),
-                mirror=getattr(args, "mirror", None))
-        if not zpath:
-            print(f"\n✗ Téléchargement impossible.\n"
-                  f"  Télécharge le ZIP à la main : {cfg['page_hist']}\n"
+        attendues = {a["label"] for a in cfg["archives"]}
+        manquantes = attendues - {lbl for lbl, _ in sources}
+        if manquantes:
+            dire("attention", "Époque(s) non chargée(s) : "
+                 + ", ".join(sorted(manquantes))
+                 + " — historique amputé, calibration moins fiable.")
+
+    if not tirages:
+        dire("critique", "Aucun tirage exploitable.")
+        return al
+
+    # -- doublons et monotonie -------------------------------------------------
+    if doublons:
+        dbl = sorted(set(doublons))
+        dire("attention", f"{len(dbl)} date(s) présente(s) dans deux archives "
+             f"(ex. {dbl[0]}) — l'époque la plus récente a été retenue.")
+    if any(a["date"] >= b["date"] for a, b in zip(tirages, tirages[1:], strict=False)):
+        dire("critique", "Dates non strictement croissantes après tri — "
+             "données corrompues.")
+
+    # -- trous > 7 jours -------------------------------------------------------
+    trous = [(a["date"], b["date"], (b["date"] - a["date"]).days)
+             for a, b in zip(tirages, tirages[1:], strict=False)
+             if (b["date"] - a["date"]).days > 7]
+    if trous:
+        ex = ", ".join(f"{a}→{b} ({n} j)" for a, b, n in trous[:3])
+        dire("attention", f"{len(trous)} trou(s) de plus de 7 jours : {ex}"
+             + (" …" if len(trous) > 3 else ""))
+
+    # -- jours de tirage inattendus (= tirage spécial infiltré) ----------------
+    intrus = [t["date"] for t in tirages if t["jour"] not in cfg["jours"]]
+    if intrus:
+        dire("attention", f"{len(intrus)} tirage(s) un jour inhabituel "
+             f"(ex. {intrus[0]}) — tirage spécial mêlé à l'historique ?")
+
+    # -- intégrité ligne à ligne ----------------------------------------------
+    bonus_ko = sum(1 for t in tirages if len(t["bonus"]) != cfg["bonus_pick"])
+    if bonus_ko:
+        dire("attention", f"{bonus_ko} tirage(s) sans {cfg['bonus_nom']} "
+             "complet — exclus des scores bonus.")
+    # Un bonus maximal JAMAIS tiré trahit une époque à formule différente
+    # (EuroMillions 9 ou 11 étoiles avant sept. 2016) : elle se parse sans
+    # erreur puisque ses valeurs restent dans la plage — seule cette absence
+    # statistique la démasque.
+    if len(tirages) > 200:
+        vus_bonus = {b for t in tirages for b in t["bonus"]}
+        absents = [n for n in bonus_nums(cfg) if n not in vus_bonus]
+        if absents:
+            dire("critique", f"{cfg['bonus_nom'].capitalize()} jamais tiré(es) "
+                 f"sur {len(tirages)} tirages : {absents} — une époque d'une "
+                 "ancienne formule s'est glissée dans l'historique.")
+
+    sans_gagnants = sum(1 for t in tirages if not t["gagnants"])
+    if sans_gagnants > len(tirages) * 0.05:
+        dire("attention", f"{sans_gagnants} tirage(s) sans colonne gagnants "
+             "— calibration et EV portent sur moins de données.")
+
+    # -- fraîcheur -------------------------------------------------------------
+    dernier = tirages[-1]["date"]
+    attendu = None
+    for k in range(1, 10):
+        c = aujourdhui - timedelta(days=k)
+        if c.weekday() in cfg["jours"]:
+            attendu = c
+            break
+    if attendu and dernier < attendu:
+        dire("attention", f"Dernier tirage connu {dernier}, or un tirage a eu "
+             f"lieu le {attendu} — historique en retard.")
+
+    # -- volume ----------------------------------------------------------------
+    if len(tirages) < 300:
+        dire("attention", f"Seulement {len(tirages)} tirages : la calibration "
+             "empirique reste bruitée sous ~300.")
+    if not al:
+        dire("info", f"{len(tirages)} tirages, aucune anomalie détectée "
+             f"({tirages[0]['date']} → {dernier}).")
+    return al
+
+
+def charger_tirages(cfg, args, aujourdhui: date):
+    """Rend (tirages, sources, alertes). Concatène les époques compatibles."""
+    sources: list[tuple[str, str]] = []
+    textes: list[tuple[str, str]] = []
+
+    if args.csv or args.zip:                   # mode fichier unique (tests)
+        chemin = args.csv or args.zip
+        with open(chemin, "rb") as f:
+            brut = f.read()
+        textes.append((os.path.basename(chemin), _texte_archive(brut)))
+        sources.append((os.path.basename(chemin), chemin))
+        if getattr(args, "save_csv", None):
+            os.makedirs(os.path.dirname(os.path.abspath(args.save_csv)),
+                        exist_ok=True)
+            with open(args.save_csv, "w", encoding="utf-8") as f:
+                f.write(textes[0][1])
+            print(f"  💾 CSV sauvegardé : {args.save_csv}")
+    else:
+        print(f"Historique {cfg['nom']} — {len(cfg['archives'])} époques…")
+        sources = telecharger_archives(
+            cfg, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "data"),
+            mirror=getattr(args, "mirror", None))
+        if not sources:
+            print(f"\n✗ Aucune archive récupérée.\n"
+                  f"  Télécharge un ZIP à la main : {cfg['page_hist']}\n"
                   f"  puis relance avec --zip fichier.zip\n")
             sys.exit(1)
-        with open(zpath, "rb") as f:
-            brut = f.read()
-        if brut[:2] == b"PK":
-            with zipfile.ZipFile(io.BytesIO(brut)) as z:
-                noms = [n for n in z.namelist() if n.lower().endswith(".csv")]
-                if not noms:
-                    print("✗ Aucun CSV dans l'archive.")
-                    sys.exit(1)
-                nom = max(noms, key=lambda n: z.getinfo(n).file_size)
-                texte = _decoder(z.read(nom))
-        else:
-            texte = _decoder(brut)
-    tirages = parser_csv(cfg, texte)
-    if getattr(args, "save_csv", None):
-        os.makedirs(os.path.dirname(os.path.abspath(args.save_csv)),
-                    exist_ok=True)
-        with open(args.save_csv, "w", encoding="utf-8") as f:
-            f.write(texte)
-        print(f"  💾 CSV mirror sauvegardé : {args.save_csv}")
+        for label, chemin in sources:
+            with open(chemin, "rb") as f:
+                textes.append((label, _texte_archive(f.read())))
+
+    # Fusion : les époques récentes priment en cas de date en double.
+    par_date: dict[date, dict] = {}
+    doublons: list[date] = []
+    for label, texte in textes:
+        for t in parser_csv(cfg, texte):
+            t["source"] = label
+            if t["date"] in par_date:
+                doublons.append(t["date"])
+            par_date[t["date"]] = t
+    tirages = sorted(par_date.values(), key=lambda t: t["date"])
+
+    alertes = controle_integrite(cfg, tirages, sources, aujourdhui,
+                                 doublons=doublons,
+                                 multi_epoques=not (args.csv or args.zip))
     if len(tirages) < 60:
         print(f"✗ Seulement {len(tirages)} tirages exploitables — trop peu.")
         sys.exit(1)
-    return tirages
+    print(f"  ⚑ {len(tirages)} tirages ({tirages[0]['date']} → "
+          f"{tirages[-1]['date']}) depuis {len(sources)} archive(s)")
+    return tirages, sources, alertes
 
 
 # ==============================================================================
@@ -375,7 +632,7 @@ def normaliser(scores: dict[int, float]) -> dict[int, float]:
     vals = list(scores.values())
     lo, hi = min(vals), max(vals)
     if math.isclose(hi, lo):
-        return {k: 50.0 for k in scores}
+        return dict.fromkeys(scores, 50.0)
     return {k: 100.0 * (v - lo) / (hi - lo) for k, v in scores.items()}
 
 
@@ -401,7 +658,7 @@ def t1_frequence(cfg, tirages):
 
 def t2_retard(cfg, tirages):
     """T2 — Numéros 'en retard'. LE sophisme du joueur : zéro mémoire."""
-    dernier = {n: -1 for n in nums(cfg)}
+    dernier = dict.fromkeys(nums(cfg), -1)
     for i, t in enumerate(tirages):
         for b in t["balls"]:
             dernier[b] = i
@@ -413,7 +670,7 @@ def t2_retard(cfg, tirages):
 def t3_ewma(cfg, tirages, demi_vie: int = 30):
     """T3 — Chauds récents pondérés exponentiellement. Bruit lissé."""
     n_t = len(tirages)
-    s = {n: 0.0 for n in nums(cfg)}
+    s = dict.fromkeys(nums(cfg), 0.0)
     for i, t in enumerate(tirages):
         w = 0.5 ** ((n_t - 1 - i) / demi_vie)
         for b in t["balls"]:
@@ -436,11 +693,11 @@ def t4_momentum(cfg, tirages, fenetre: int = 20):
 def t5_markov(cfg, tirages):
     """T5 — Transitions tirage N-1 → N. Converge vers l'uniforme (indép.)."""
     M = defaultdict(Counter)
-    for prev, cur in zip(tirages, tirages[1:]):
+    for prev, cur in zip(tirages, tirages[1:], strict=False):
         for i in prev["balls"]:
             M[i].update(cur["balls"])
     dernier = tirages[-1]["balls"]
-    s = {n: 0.0 for n in nums(cfg)}
+    s = dict.fromkeys(nums(cfg), 0.0)
     for i in dernier:
         total = sum(M[i].values()) or 1
         for j in nums(cfg):
@@ -526,7 +783,7 @@ def _resoudre(A, b):
         for r in range(n):
             if r != col and M[r][col] != 0:
                 f = M[r][col]
-                M[r] = [a - f * c for a, c in zip(M[r], M[col])]
+                M[r] = [a - f * c for a, c in zip(M[r], M[col], strict=True)]
     return [M[i][n] for i in range(n)]
 
 
@@ -587,7 +844,7 @@ def calibration_empirique(cfg, tirages, lam: float = 4.0):
     # R²
     ys = [y for _, y in lignes]
     ybar = statistics.mean(ys)
-    sse = sum((y - sum(bi * xi for bi, xi in zip(beta, x))) ** 2
+    sse = sum((y - sum(bi * xi for bi, xi in zip(beta, x, strict=True))) ** 2
               for x, y in lignes)
     sst = sum((y - ybar) ** 2 for y in ys) or 1.0
     r2 = 1 - sse / sst
@@ -646,8 +903,8 @@ def popularite_grille_penalite(balls) -> float:
 
 def bonus_scores(cfg, tirages):
     valides = [t for t in tirages if len(t["bonus"]) == cfg["bonus_pick"]]
-    freq, dernier = Counter(), {n: -1 for n in bonus_nums(cfg)}
-    ewma = {n: 0.0 for n in bonus_nums(cfg)}
+    freq, dernier = Counter(), dict.fromkeys(bonus_nums(cfg), -1)
+    ewma = dict.fromkeys(bonus_nums(cfg), 0.0)
     n_t = len(valides)
     for i, t in enumerate(valides):
         for b in t["bonus"]:
@@ -928,7 +1185,7 @@ def maj_historique(cfg, ctx, args) -> dict:
             continue
         t = par_date[d]
         e["resultat"] = {"numeros": list(t["balls"]), "bonus": list(t["bonus"])}
-        for mode, grs in e["modes"].items():
+        for grs in e["modes"].values():
             for g in grs:
                 g["reglement"] = regler_grille(cfg, g, t)
         if e.get("systeme"):
@@ -989,8 +1246,8 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
     itérations complètes) — largement suffisant pour mesurer le ROI réel."""
     N = list(nums(cfg))
     debut = max(60, len(tirages) - n_derniers)
-    freq, dernier = Counter(), {n: -1 for n in N}
-    ewma = {n: 0.0 for n in N}
+    freq, dernier = Counter(), dict.fromkeys(N, -1)
+    ewma = dict.fromkeys(N, 0.0)
     decay = 0.5 ** (1 / 30)
     fen = deque()
     bonus_freq = Counter()
@@ -1073,8 +1330,8 @@ def backtest(cfg, tirages, rng, depart: int = 60, fen_mom: int = 20):
     """Walk-forward : à chaque tirage, top-pick du folklore (fréq+retard+
     EWMA+momentum, incrémental) vs hasard. Attendu : pick²/n_max."""
     N = list(nums(cfg))
-    freq, dernier = Counter(), {n: -1 for n in N}
-    ewma = {n: 0.0 for n in N}
+    freq, dernier = Counter(), dict.fromkeys(N, -1)
+    ewma = dict.fromkeys(N, 0.0)
     decay = 0.5 ** (1 / 30)
     fen = deque()
     h_mod, h_froid, h_rand = [], [], []
@@ -1128,7 +1385,7 @@ def test_popularite(tirages):
         r = statistics.correlation(xs, ys)
     except Exception:  # noqa: BLE001
         mx, my = statistics.mean(xs), statistics.mean(ys)
-        num = sum((a - mx) * (b - my) for a, b in zip(xs, ys))
+        num = sum((a - mx) * (b - my) for a, b in zip(xs, ys, strict=True))
         den = math.sqrt(sum((a - mx) ** 2 for a in xs)
                         * sum((b - my) ** 2 for b in ys)) or 1.0
         r = num / den
@@ -1164,27 +1421,41 @@ def barre(score, largeur=20):
     return BAR_FULL * plein + BAR_EMPTY * (largeur - plein)
 
 
-def prochain_tirage(cfg, aujourdhui: date) -> date:
+def prochain_tirage(cfg, aujourdhui: date, dernier_connu: date | None = None) -> date:
+    """Premier jour de tirage à venir.
+
+    `dernier_connu` évite un faux « prochain tirage : aujourd'hui » les soirs
+    où le tirage a déjà eu lieu et figure déjà dans l'historique FDJ (cas
+    courant pour l'EuroMillions du mardi, publié dans la nuit) : le prochain
+    tirage est alors STRICTEMENT postérieur au dernier tirage connu.
+    """
     d = aujourdhui
+    if dernier_connu and d <= dernier_connu:
+        d = dernier_connu + timedelta(days=1)
     for _ in range(9):
         if d.weekday() in cfg["jours"]:
             return d
         d += timedelta(days=1)
-    return aujourdhui
+    return d
 
 
 def afficher(cfg, ctx):
     p = print
     t0, t1 = ctx["tirages"][0]["date"], ctx["tirages"][-1]["date"]
     p("\n" + "═" * 68)
-    p(f"   🎱  ORACLE v2.0 MAX — {cfg['nom']}")
+    p(f"   🎱  ORACLE v{VERSION} MAX — {cfg['nom']}")
     p("═" * 68)
     p(f"   Tirages analysés : {len(ctx['tirages'])}  "
       f"({t0:%d/%m/%Y} → {t1:%d/%m/%Y})")
     p(f"   Prochain tirage : {JOURS_FR[ctx['date_tirage'].weekday()]} "
       f"{ctx['date_tirage']:%d/%m/%Y}   |   Mode : {ctx['mode'].upper()}")
+    if ctx.get("sources"):
+        p(f"   Archives FDJ : {', '.join(lb for lb, _ in ctx['sources'])}")
     if ctx["jackpot"]:
         p(f"   Jackpot pris en compte : {ctx['jackpot']/1e6:.0f} M€")
+    for a in ctx.get("alertes", []):
+        icone = {"critique": "✗", "attention": "⚠", "info": "✔"}[a["niveau"]]
+        p(f"   {icone} {a['message']}")
     p("─" * 68)
 
     final = ctx["final"]
@@ -1223,7 +1494,7 @@ def afficher(cfg, ctx):
     if ctx["systeme"]:
         s = ctx["systeme"]
         p(f"\n▶ SYSTÈME RÉDUCTEUR — pool {s['pool']}")
-        p(f"   Garantie VÉRIFIÉE : ≥3 bons numéros si les 5 sortants ∈ pool")
+        p("   Garantie VÉRIFIÉE : ≥3 bons numéros si les 5 sortants ∈ pool")
         for i, g in enumerate(s["grilles"], 1):
             p(f"   S{i} : {list(g['numeros'])} + {'+'.join(map(str, g['bonus']))}")
         p(f"   Coût : {s['cout']:.2f} € ({len(s['grilles'])} grilles)")
@@ -1322,7 +1593,7 @@ def export_web(chemin, cfg, ctx, args):
     calib = ctx["calib"]
     rapport = {
         "meta": {
-            "version": "2.1", "source": "fdj",
+            "version": VERSION, "source": "fdj",
             "jeu": args.jeu, "nom": cfg["nom"],
             "bonus_nom": cfg["bonus_nom"], "bonus_pick": cfg["bonus_pick"],
             "bonus_max": cfg["bonus_max"], "n_max": cfg["n_max"],
@@ -1336,6 +1607,10 @@ def export_web(chemin, cfg, ctx, args):
             "proba_jackpot": proba_jackpot(cfg),
             "jackpot": ctx["jackpot"],
             "page_jeu": cfg["page_jeu"],
+            # v2.2 — traçabilité et transparence des données d'entrée
+            "alertes": ctx.get("alertes", []),
+            "archives": [lbl for lbl, _ in ctx.get("sources", [])],
+            "epoques_exclues": cfg.get("exclus", {}),
         },
         "dernier_tirage": {"date": dern["date"].isoformat(),
                            "numeros": list(dern["balls"]),
@@ -1370,7 +1645,7 @@ def export_web(chemin, cfg, ctx, args):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="ORACLE v2.0 MAX — Loto + EuroMillions")
+        description=f"ORACLE v{VERSION} MAX — Loto + EuroMillions")
     ap.add_argument("--jeu", choices=list(JEUX), default="loto")
     ap.add_argument("--mode", choices=["pronostic", "anti", "hybride"],
                     default="hybride")
@@ -1396,10 +1671,10 @@ def main():
 
     cfg = JEUX[args.jeu]
     rng = random.Random(args.seed)
-    tirages = charger_tirages(cfg, args)
     ref = (date.fromisoformat(args.aujourdhui) if args.aujourdhui
            else date.today())
-    date_tirage = prochain_tirage(cfg, ref)
+    tirages, sources, alertes = charger_tirages(cfg, args, ref)
+    date_tirage = prochain_tirage(cfg, ref, tirages[-1]["date"])
 
     calib = calibration_empirique(cfg, tirages)
     couches, folklore, anti, anti_mode = calculer_scores(
@@ -1440,7 +1715,8 @@ def main():
            "couches": couches, "folklore": folklore, "anti": anti,
            "anti_mode": anti_mode, "calib": calib, "final": final, "sb": sb,
            "grilles": grilles, "jackpot": jackpot, "ev_p": ev_p,
-           "systeme": systeme, "bt": bt, "pop": pop, "chi2": chi2}
+           "systeme": systeme, "bt": bt, "pop": pop, "chi2": chi2,
+           "alertes": alertes, "sources": sources}
 
     ctx["histo"] = maj_historique(cfg, ctx, args)
     ctx["sim"] = (retro_simulation(cfg, tirages, args.simulation)

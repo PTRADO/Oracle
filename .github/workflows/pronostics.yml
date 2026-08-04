@@ -1,13 +1,17 @@
 # ============================================================================
 # ORACLE MAX — mise à jour automatique Loto + EuroMillions
-# À placer dans le repo à :  .github/workflows/pronostics.yml
 #
 # Tous les matins à 04h30 UTC (couvre les lendemains de tous les tirages :
 # Loto lun/mer/sam · EuroMillions mar/ven) :
-#   1. télécharge les historiques FDJ (auto-découverte si les URLs changent)
+#   1. télécharge les archives FDJ — TOUTES les époques compatibles du jeu,
+#      avec auto-découverte si les identifiants changent
 #   2. recalcule tout : scores, calibration empirique, EV, système, verdicts
 #   3. écrit docs/loto.json + docs/euromillions.json (consommés par la page)
-#   4. commit les CSV dans data/ → ton repo devient son propre mirror
+#   4. commit les archives dans data/ → le repo devient son propre mirror
+#
+# Le mirror utilise le gabarit {label}, remplacé par le nom de l'époque
+# (loto_2017, euromillions_202002, …). Les époques closes ne sont
+# re-téléchargées qu'une fois : ensuite le cache data/ suffit.
 # Aucune dépendance, aucun secret. Bouton "Run workflow" pour lancer à la main.
 # ============================================================================
 
@@ -24,6 +28,8 @@ permissions:
 jobs:
   pronostics:
     runs-on: ubuntu-latest
+    env:
+      MIRROR: "https://raw.githubusercontent.com/${{ github.repository }}/main/data/{label}.zip"
     steps:
       - uses: actions/checkout@v4
 
@@ -34,18 +40,30 @@ jobs:
       - name: Loto
         run: |
           python3 oracle.py --jeu loto \
-            --mirror "https://raw.githubusercontent.com/${{ github.repository }}/main/data/loto_mirror.csv" \
-            --save-csv data/loto_mirror.csv \
+            --mirror "$MIRROR" \
             --export-web docs/loto.json \
             --systeme 9 --grilles 4 --seed 0
 
       - name: EuroMillions
         run: |
           python3 oracle.py --jeu euromillions \
-            --mirror "https://raw.githubusercontent.com/${{ github.repository }}/main/data/euromillions_mirror.csv" \
-            --save-csv data/euromillions_mirror.csv \
+            --mirror "$MIRROR" \
             --export-web docs/euromillions.json \
             --grilles 4 --seed 0
+
+      - name: Échouer si une alerte critique est remontée
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          souci = False
+          for f in ("docs/loto.json", "docs/euromillions.json"):
+              meta = json.loads(pathlib.Path(f).read_text(encoding="utf-8"))["meta"]
+              for a in meta.get("alertes", []):
+                  marque = {"critique": "✗", "attention": "⚠", "info": "✔"}[a["niveau"]]
+                  print(f"{marque} [{meta['jeu']}] {a['message']}")
+                  souci |= a["niveau"] == "critique"
+          sys.exit(1 if souci else 0)
+          PY
 
       - name: Commit et push si changements
         run: |

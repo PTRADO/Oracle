@@ -182,6 +182,14 @@ footer.page b{color:var(--encre)}
   padding:9px 14px;border-radius:10px;color:var(--encre);margin-top:10px;font-size:13px}
 .bandeau-demo{padding:10px 16px;margin-bottom:16px;font-size:13px;color:var(--ambre);
   border-color:rgba(255,180,84,.45)}
+.alertes{padding:10px 16px;margin-bottom:16px;font-size:13px}
+.alertes ul{margin:0;padding-left:18px}
+.alertes li+li{margin-top:4px}
+.alertes .a-critique{color:var(--rouge)}
+.alertes .a-attention{color:var(--ambre)}
+.alertes.n-critique{border-color:rgba(255,90,78,.5)}
+.alertes.n-attention{border-color:rgba(255,180,84,.45)}
+.alertes .src{margin-top:6px;color:var(--brume);font-size:12px}
 @media (prefers-reduced-motion:no-preference){
   .case svg.croix path{stroke-dasharray:62;stroke-dashoffset:62;animation:tracer .5s ease forwards}
   @keyframes tracer{to{stroke-dashoffset:0}}
@@ -204,6 +212,7 @@ footer.page b{color:var(--encre)}
   <div id="bandeau-demo" class="verre bandeau-demo" hidden>
     Données de démonstration (synthétiques). Lance <b>oracle.py --export-web</b> sur le vrai historique FDJ.
   </div>
+  <div id="alertes" class="verre alertes" hidden></div>
 
   <section class="heros verre">
     <div class="quand"><b id="quand">—</b><span id="compte"></span></div>
@@ -496,6 +505,30 @@ function rendreVerdicts(){
   }
   $("verdicts").innerHTML = html;
 }
+/* Alertes d'intégrité des données (moteur ≥ 2.2 ; absentes = rien à dire).
+   On les montre plutôt que de les absorber : un pronostic calculé sur un
+   historique troué doit se voir. */
+function rendreAlertes(){
+  const meta = D().meta, box = $("alertes");
+  const brutes = meta.alertes || [];
+  const notables = brutes.filter(a => a.niveau !== "info");
+  if(!notables.length && !(meta.archives||[]).length){ box.hidden = true; return; }
+  const critique = notables.some(a => a.niveau === "critique");
+  box.className = "verre alertes " + (notables.length ? (critique?"n-critique":"n-attention") : "");
+  let html = "";
+  if(notables.length){
+    html += `<b>Intégrité des données</b><ul>` + notables.map(a =>
+      `<li class="a-${a.niveau}">${esc(a.message)}</li>`).join("") + `</ul>`;
+  }
+  if((meta.archives||[]).length){
+    html += `<div class="src">Archives FDJ concaténées : ${meta.archives.map(esc).join(" · ")}</div>`;
+  }
+  box.innerHTML = html;
+  box.hidden = false;
+}
+function esc(s){
+  return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+}
 function rendreMeta(){
   const meta = D().meta;
   const d = new Date(meta.prochain_tirage+"T12:00:00Z");
@@ -508,7 +541,7 @@ function rendreMeta(){
   $("bandeau-demo").hidden = !(meta.source||"").startsWith("demo");
 }
 function rendreTout(){
-  rendreMeta(); fraicheur(); rendre(); rendreLivre(); rendreVerdicts(); majCompte();
+  rendreMeta(); rendreAlertes(); fraicheur(); rendre(); rendreLivre(); rendreVerdicts(); majCompte();
   if(TIMER) clearInterval(TIMER);
   TIMER = setInterval(majCompte, 30000);
 }

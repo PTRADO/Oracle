@@ -1,8 +1,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-data/*.csv
-data/*.zip
-*.zip
-!loto-oracle-max.zip
+.venv/
 .DS_Store
+
+# ZIP de livraison initiale — pas le projet lui-même
+loto-oracle-max.zip
+
+# data/ est VOLONTAIREMENT versionné : les archives FDJ qu'il contient font
+# du dépôt son propre mirror (secours quand fdj.fr change ses identifiants).

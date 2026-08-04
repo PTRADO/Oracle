@@ -1,0 +1,14 @@
+# Lint de dev uniquement — le moteur reste stdlib pure à l'exécution.
+line-length = 88
+target-version = "py310"
+exclude = [".venv", "tests/fixtures"]
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = [
+  "E501",   # longueur : le code est déjà en colonnes ~79, quelques tableaux débordent
+  "B008",
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["E402"]   # conftest doit régler sys.path avant d'importer oracle

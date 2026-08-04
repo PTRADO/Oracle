@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oracle — Loto & EuroMillions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fond:#05070F;
+  --encre:#F2F5FC; --brume:#9AA6BD;
+  --verre:rgba(255,255,255,.055);
+  --verre-fort:rgba(255,255,255,.09);
+  --bord:rgba(255,255,255,.12);
+  --rouge:#FF5A4E; --or:#FFC85C; --vert:#4ADE9C; --ambre:#FFB454;
+  --r:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--fond); color:var(--encre); min-height:100vh;
+  font:15px/1.55 "Instrument Sans",system-ui,sans-serif;
+  overflow-x:hidden;
+}
+/* ------- aurora d'arrière-plan ------- */
+.aurora{position:fixed;inset:-20%;z-index:-1;filter:blur(70px);opacity:.55;pointer-events:none}
+.aurora i{position:absolute;border-radius:50%}
+.aurora i:nth-child(1){width:44vw;height:44vw;left:-8vw;top:-10vh;background:radial-gradient(circle,#4353FF,transparent 65%)}
+.aurora i:nth-child(2){width:38vw;height:38vw;right:-6vw;top:12vh;background:radial-gradient(circle,#8B4DFF,transparent 65%)}
+.aurora i:nth-child(3){width:40vw;height:40vw;left:24vw;bottom:-18vh;background:radial-gradient(circle,#19C6B7,transparent 65%)}
+@media (prefers-reduced-motion:no-preference){
+  .aurora i{animation:derive 46s ease-in-out infinite alternate}
+  .aurora i:nth-child(2){animation-duration:58s}
+  .aurora i:nth-child(3){animation-duration:64s}
+  @keyframes derive{to{transform:translate(6vw,4vh) scale(1.12)}}
+}
+.wrap{max-width:1140px;margin:0 auto;padding:26px 20px 70px}
+
+/* ------- verre ------- */
+.verre{
+  background:var(--verre);
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+  border:1px solid var(--bord); border-radius:var(--r);
+  box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+/* ------- entête ------- */
+header{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;margin-bottom:18px}
+.marque{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(24px,3.4vw,34px);letter-spacing:-.01em}
+.marque em{font-style:normal;color:var(--rouge)}
+.marque small{display:block;font-family:"Instrument Sans";font-weight:500;font-size:11px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--brume)}
+.jeux{margin-left:auto;display:flex;gap:8px;padding:6px;border-radius:16px}
+.jeux button{appearance:none;border:0;cursor:pointer;border-radius:11px;
+  padding:10px 18px;background:transparent;color:var(--brume);
+  font:700 13px "Bricolage Grotesque";letter-spacing:.06em}
+.jeux button[aria-pressed="true"]{background:var(--verre-fort);color:var(--encre);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.jeux button:disabled{opacity:.35;cursor:not-allowed}
+.jeux button:focus-visible,.modes button:focus-visible,.cta:focus-visible,#jackpot:focus-visible{
+  outline:2px solid var(--or);outline-offset:2px}
+
+/* ------- héros ------- */
+.heros{display:flex;flex-wrap:wrap;gap:18px 34px;align-items:center;padding:20px 24px;margin-bottom:18px}
+.heros .quand b{font-family:"Bricolage Grotesque";font-weight:700;font-size:20px;display:block}
+.heros .quand span{font-size:13px;color:var(--brume)}
+.badge{font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  padding:4px 10px;border-radius:99px;border:1px solid var(--bord);color:var(--brume)}
+.badge.ok{color:var(--vert);border-color:rgba(74,222,156,.4)}
+.badge.warn{color:var(--ambre);border-color:rgba(255,180,84,.45)}
+.jack{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.jack label{font-size:12px;color:var(--brume);letter-spacing:.08em;text-transform:uppercase}
+.jack .champ{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;
+  background:var(--verre-fort);border:1px solid var(--bord)}
+#jackpot{appearance:none;border:0;background:transparent;color:var(--encre);
+  font:700 18px "Bricolage Grotesque";width:130px;text-align:right}
+#jackpot::-webkit-outer-spin-button,#jackpot::-webkit-inner-spin-button{-webkit-appearance:none}
+.jack .champ b{color:var(--or)}
+.jack small{font-size:11px;color:var(--brume)}
+
+/* ------- modes ------- */
+.modes{display:inline-flex;gap:6px;padding:6px;border-radius:14px;margin:4px 0 8px}
+.modes button{appearance:none;border:0;background:transparent;color:var(--brume);cursor:pointer;
+  font:600 13px "Instrument Sans";padding:9px 15px;border-radius:9px}
+.modes button[aria-pressed="true"]{background:var(--rouge);color:#fff}
+.mode-note{font-size:13px;color:var(--brume);margin:8px 2px 18px;max-width:660px}
+
+/* ------- layout principal ------- */
+.principal{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:20px;align-items:start}
+@media(max-width:920px){.principal{grid-template-columns:1fr}}
+.carte{padding:20px}
+.carte h2{font-family:"Bricolage Grotesque";font-weight:700;font-size:13px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--brume);margin-bottom:16px}
+
+/* ------- bulletin (signature) ------- */
+.bulletin{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.case{position:relative;aspect-ratio:1;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-family:"Bricolage Grotesque";font-weight:700;font-size:16px;cursor:default;
+  background:var(--verre);border:1px solid var(--bord);transition:transform .12s}
+.case:hover{transform:scale(1.07);z-index:2}
+.case svg.croix{position:absolute;inset:9%;width:82%;height:82%;pointer-events:none;overflow:visible}
+.case svg.croix path{stroke:var(--rouge);stroke-width:3.6;fill:none;stroke-linecap:round;
+  filter:drop-shadow(0 0 7px rgba(255,90,78,.7))}
+.case.etoile-t{border-radius:14px}
+.case.bonus-top{border-color:var(--or);box-shadow:inset 0 0 0 1px rgba(255,200,92,.55),0 0 18px rgba(255,200,92,.25);color:var(--or)}
+.rang-bonus{display:grid;gap:8px;margin-top:16px}
+.legende{display:flex;justify-content:space-between;font-size:11px;color:var(--brume);margin-top:14px}
+.sous{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brume);margin:18px 0 10px}
+
+/* ------- top & boules ------- */
+.top-liste{display:flex;flex-direction:column;gap:9px}
+.top-item{display:grid;grid-template-columns:42px 1fr 40px;align-items:center;gap:12px}
+.boule{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:"Bricolage Grotesque";font-weight:800;font-size:16px;
+  background:linear-gradient(145deg,#FDFBF4,#D9D4C6);color:#0B1020;
+  box-shadow:inset -3px -4px 7px rgba(11,16,32,.30),0 4px 10px rgba(0,0,0,.35)}
+.boule.or{background:linear-gradient(145deg,#FFE2A0,#E5A93F);color:#3A2404}
+.barre{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.barre i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#B5382F,var(--rouge))}
+.top-item b{font-size:12px;color:var(--brume);text-align:right}
+
+/* ------- grilles EV ------- */
+.section-titre{font-family:"Bricolage Grotesque";font-weight:700;font-size:13px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--brume);margin:26px 0 12px}
+.grilles{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:14px}
+.gcarte{padding:16px;display:flex;flex-direction:column;gap:12px}
+.gcarte .nums{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.gcarte .plus{color:var(--brume);font-weight:700}
+.gcarte .ligne{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--brume)}
+.ev{font-family:"Bricolage Grotesque";font-weight:800;font-size:17px}
+.ev.neg{color:var(--ambre)} .ev.pos{color:var(--vert)}
+.cta{display:inline-block;text-decoration:none;text-align:center;font:600 12px "Instrument Sans";
+  color:var(--encre);padding:9px 12px;border-radius:11px;background:var(--verre-fort);
+  border:1px solid var(--bord)}
+.cta:hover{background:rgba(255,255,255,.14)}
+
+/* ------- système ------- */
+.sys{padding:18px;margin-top:16px}
+.puces{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 12px}
+.puce{padding:5px 10px;border-radius:99px;font:700 12px "Bricolage Grotesque";
+  background:var(--verre-fort);border:1px solid var(--bord)}
+.sys-grilles{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.sys .garantie{color:var(--vert);font-size:13px}
+
+/* ------- verdicts ------- */
+.verdicts{margin-top:26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.verdict{padding:16px 18px}
+.verdict h3{font-family:"Bricolage Grotesque";font-weight:700;font-size:13.5px;margin-bottom:5px}
+.verdict .chiffre{font-family:"Bricolage Grotesque";font-weight:800;font-size:24px;margin:2px 0 6px}
+.verdict p{font-size:12.5px;color:var(--brume)}
+.c-vert{color:var(--vert)} .c-rouge{color:var(--rouge)} .c-ambre{color:var(--ambre)} .c-or{color:var(--or)}
+.mini-puces{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.mini-puces span{font:700 11.5px "Bricolage Grotesque";padding:3px 8px;border-radius:99px;border:1px solid var(--bord)}
+.mini-puces .sur{color:var(--rouge);border-color:rgba(255,90,78,.4)}
+.mini-puces .del{color:var(--vert);border-color:rgba(74,222,156,.4)}
+
+/* ------- grand livre ------- */
+.boule.hit{box-shadow:inset -3px -4px 7px rgba(11,16,32,.30),0 0 0 2px var(--vert),0 0 16px rgba(74,222,156,.5)}
+.livre-cumul{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.roi-carte{padding:16px 18px}
+.roi-carte h4{font-family:"Bricolage Grotesque";font-weight:700;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--brume);margin-bottom:8px}
+.roi-carte .roi{font-family:"Bricolage Grotesque";font-weight:800;font-size:26px}
+.roi-carte p{font-size:12.5px;color:var(--brume);margin-top:4px}
+.dernier-regle{padding:18px;margin-top:14px}
+.dr-tete{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px}
+.dr-tete .nums{display:flex;gap:7px;align-items:center}
+.dr-grille{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 0;
+  border-top:1px solid rgba(255,255,255,.07);font-size:13px}
+.dr-grille .nums{display:flex;gap:6px;align-items:center}
+.dr-grille .boule{width:32px;height:32px;font-size:14px}
+.dr-gain{margin-left:auto;font:700 13px "Bricolage Grotesque"}
+.attente{margin-top:12px;font-size:12.5px;color:var(--brume)}
+.attente b{color:var(--or)}
+
+footer.page{margin-top:40px;padding:18px 22px;font-size:12px;color:var(--brume)}
+footer.page b{color:var(--encre)}
+.etat{margin-top:60px;text-align:center;color:var(--brume)}
+.etat code{display:inline-block;background:var(--verre);border:1px solid var(--bord);
+  padding:9px 14px;border-radius:10px;color:var(--encre);margin-top:10px;font-size:13px}
+.bandeau-demo{padding:10px 16px;margin-bottom:16px;font-size:13px;color:var(--ambre);
+  border-color:rgba(255,180,84,.45)}
+@media (prefers-reduced-motion:no-preference){
+  .case svg.croix path{stroke-dasharray:62;stroke-dashoffset:62;animation:tracer .5s ease forwards}
+  @keyframes tracer{to{stroke-dashoffset:0}}
+}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="wrap">
+
+<header>
+  <div class="marque">ORACLE<em>.</em><small>Loto · EuroMillions — 9 techniques, 1 seule qui compte</small></div>
+  <nav class="jeux verre" aria-label="Jeu">
+    <button data-jeu="loto" aria-pressed="true">LOTO</button>
+    <button data-jeu="euromillions" aria-pressed="false">EUROMILLIONS</button>
+  </nav>
+</header>
+
+<div id="app" hidden>
+  <div id="bandeau-demo" class="verre bandeau-demo" hidden>
+    Données de démonstration (synthétiques). Lance <b>oracle.py --export-web</b> sur le vrai historique FDJ.
+  </div>
+
+  <section class="heros verre">
+    <div class="quand"><b id="quand">—</b><span id="compte"></span></div>
+    <span class="badge" id="fraicheur">…</span>
+    <div class="jack">
+      <label for="jackpot">Jackpot</label>
+      <div class="champ"><input id="jackpot" type="number" step="1" min="1"> <b>M€</b></div>
+      <small>l'EV des grilles se recalcule en direct</small>
+    </div>
+  </section>
+
+  <div class="modes verre" role="group" aria-label="Mode">
+    <button data-mode="hybride" aria-pressed="true">Hybride</button>
+    <button data-mode="pronostic" aria-pressed="false">Pronostic</button>
+    <button data-mode="anti" aria-pressed="false">Anti-partage</button>
+  </div>
+  <p class="mode-note" id="mode-note"></p>
+
+  <div class="principal">
+    <section class="carte verre">
+      <h2>Le bulletin — score par numéro</h2>
+      <div class="bulletin" id="bulletin"></div>
+      <div class="sous" id="bonus-titre"></div>
+      <div class="rang-bonus" id="rang-bonus"></div>
+      <div class="legende"><span>score faible</span><span>croix = sélection</span><span>score fort</span></div>
+    </section>
+    <section class="carte verre">
+      <h2>Top 10 du tirage</h2>
+      <div class="top-liste" id="top-liste"></div>
+      <div class="sous" id="bonus-mini-titre"></div>
+      <div class="nums" id="bonus-mini" style="display:flex;gap:8px"></div>
+    </section>
+  </div>
+
+  <div class="section-titre">Grilles prêtes à jouer — espérance en direct</div>
+  <div class="grilles" id="grilles"></div>
+
+  <div id="systeme"></div>
+
+  <div id="livre"></div>
+
+  <div class="verdicts" id="verdicts"></div>
+
+  <footer class="page verre">
+    <p><b id="pied-meta"></b></p>
+    <p style="margin-top:6px">Rappel assumé : chaque grille garde exactement <b>1 chance sur
+      <span id="proba"></span></b>. L'EV affichée reste négative — c'est un jeu, pas un placement.
+      Le folklore (T1-T8) est surveillé par le backtest ; seuls le partage calibré, l'EV et le χ² sont réels.</p>
+    <p style="margin-top:6px">Jouer comporte des risques : endettement, isolement, dépendance.
+      09 74 75 13 13 (joueurs-info-service.fr).</p>
+  </footer>
+</div>
+
+<div class="etat" id="etat"><p>Chargement…</p></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const FICHIERS = {loto:"./loto.json", euromillions:"./euromillions.json"};
+const NOTES = {
+  hybride:"Mélange 50/50 : folklore complet (T1-T8) pondéré par l'anti-partage calibré. Le défaut raisonnable.",
+  pronostic:"Folklore pur — fréquences, retards, EWMA, momentum, Markov, paires, jour. Zéro pouvoir prédictif : le backtest en bas de page le vérifie en continu.",
+  anti:"La seule technique réelle : combinaisons délaissées par les joueurs français (mesuré par régression sur les gagnants). Même probabilité, jackpot non partagé."
+};
+const DONNEES = {loto:null, euromillions:null};
+let JEU = "loto", MODE = "hybride", TIMER = null;
+const $ = id => document.getElementById(id);
+const D = () => DONNEES[JEU];
+
+/* ---------- temps Europe/Paris ---------- */
+function offsetParis(d){
+  const part = new Intl.DateTimeFormat("en-US",{timeZone:"Europe/Paris",timeZoneName:"longOffset"})
+    .formatToParts(d).find(p=>p.type==="timeZoneName").value;
+  const m = part.match(/([+-])(\d{2}):(\d{2})/);
+  return m ? (m[1]==="-"?-1:1)*(+m[2]*60 + +m[3]) : 0;
+}
+function tirageTs(iso){
+  const base = new Date(iso+"T20:15:00Z");
+  return base.getTime() - offsetParis(base)*60000;
+}
+function majCompte(){
+  if(!D()) return;
+  const diff = tirageTs(D().meta.prochain_tirage) - Date.now();
+  if(diff <= 0){ $("compte").textContent = "prise de jeu terminée — relance la mise à jour"; return; }
+  const h = Math.floor(diff/3.6e6), mn = Math.floor(diff%3.6e6/6e4), j = Math.floor(h/24);
+  $("compte").textContent = `fermeture des jeux dans ${j?j+" j ":""}${h%24} h ${String(mn).padStart(2,"0")} min`;
+}
+function fraicheur(){
+  const meta = D().meta, badge = $("fraicheur");
+  if((meta.source||"").startsWith("demo")){ badge.textContent="démo"; badge.className="badge warn"; return; }
+  const fin = new Date(meta.periode_fin+"T12:00:00Z");
+  let attendu=null;
+  // dernier jour de tirage attendu
+  const tirDays = JEU==="loto" ? [1,3,6] : [2,5];    // getDay: lun=1 mer=3 sam=6 / mar=2 ven=5
+  for(let k=0;k<=9 && !attendu;k++){
+    const c=new Date(Date.now()-k*864e5);
+    if(tirDays.includes(c.getDay()) && c.getTime() < Date.now()-2*36e5) attendu=c;
+  }
+  if(attendu && fin.getTime() >= attendu.getTime()-864e5){
+    badge.textContent="données à jour"; badge.className="badge ok";
+  } else { badge.textContent="à rafraîchir"; badge.className="badge warn"; }
+}
+
+/* ---------- rendu ---------- */
+const heat = s => `rgba(255,90,78,${(0.05+0.55*s/100).toFixed(3)})`;
+function croix(delai, or){
+  const c = or ? "stroke:var(--or);filter:drop-shadow(0 0 7px rgba(255,200,92,.7))" : "";
+  return `<svg class="croix" viewBox="0 0 40 40" aria-hidden="true">
+    <path style="animation-delay:${delai}ms;${c}" d="M6 7 C 16 16, 26 26, 34 34"/>
+    <path style="animation-delay:${delai+130}ms;${c}" d="M34 6 C 25 15, 15 25, 6 33"/></svg>`;
+}
+function infoNum(n){
+  const t = D().techniques, noms = {frequence:"fréq",retard:"retard",ewma:"EWMA",momentum:"momentum",markov:"Markov",paires:"paires",jour:"jour"};
+  const parts = Object.keys(noms).filter(k=>t[k]).map(k=>`${noms[k]} ${Math.round(t[k][n])}`);
+  const cal = D().calibration;
+  if(cal) parts.push(`β ${cal.beta[n]>0?"+":""}${cal.beta[n]} (${cal.beta[n]>0?"sur-joué":"délaissé"})`);
+  return `n°${n} — ${parts.join(" · ")}`;
+}
+function evGrille(popRel){
+  const e = D().ev_params, meta = D().meta;
+  const J = (parseFloat($("jackpot").value)||0)*1e6;
+  if(!e || !J) return null;
+  const p1 = 1/e.p_jackpot_inv;
+  const partage = e.n_est * p1 * popRel;
+  return (e.ev_fixe||0) + p1*J/(1+partage) - meta.prix;
+}
+function rendre(){
+  const d = D(), m = d.modes[MODE], meta = d.meta;
+  $("mode-note").textContent = NOTES[MODE];
+  const topN = m.classement.slice(0, meta.bonus_pick===1?5:5);
+
+  /* bulletin */
+  let html = "", delai = 140;
+  for(let n=1;n<=meta.n_max;n++){
+    const s = m.scores[String(n)];
+    const coche = topN.includes(n);
+    html += `<div class="case" style="background:${heat(s)}" title="${infoNum(String(n))}">${n}${coche?croix(delai+=120,false):""}</div>`;
+  }
+  $("bulletin").innerHTML = html;
+
+  /* rang bonus */
+  $("bonus-titre").textContent = meta.bonus_nom + (meta.bonus_pick>1?" (2 à cocher)":"");
+  const triB = Object.keys(m.bonus).sort((a,b)=>m.bonus[b]-m.bonus[a]);
+  const topB = triB.slice(0, meta.bonus_pick).map(Number);
+  const cols = meta.bonus_max<=10 ? meta.bonus_max : 6;
+  let bh = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px">`;
+  for(let n=1;n<=meta.bonus_max;n++){
+    const s = m.bonus[String(n)], top = topB.includes(n);
+    bh += `<div class="case etoile-t${top?" bonus-top":""}" style="background:${top?"rgba(255,200,92,.14)":heat(s*0.55)}">${meta.bonus_pick>1?"★":""}${n}${top?croix(delai+=120,true):""}</div>`;
+  }
+  $("rang-bonus").innerHTML = bh + "</div>";
+
+  /* top 10 */
+  html = "";
+  for(let i=0;i<10;i++){
+    const n = m.classement[i], s = m.scores[String(n)];
+    html += `<div class="top-item"><span class="boule">${n}</span>
+      <span class="barre"><i style="width:${s}%"></i></span><b>${s.toFixed(0)}</b></div>`;
+  }
+  $("top-liste").innerHTML = html;
+  $("bonus-mini-titre").textContent = meta.bonus_nom + " conseillé" + (meta.bonus_pick>1?"es":"");
+  $("bonus-mini").innerHTML = triB.slice(0,3).map((n,i)=>
+    `<span class="boule${i<meta.bonus_pick?" or":""}">${n}</span>`).join("");
+
+  rendreGrilles();
+  rendreSysteme();
+}
+function chipsEV(popRel){
+  const ev = evGrille(popRel);
+  if(ev===null) return `<span class="ev" style="color:var(--brume)">EV —</span>`;
+  return `<span class="ev ${ev<0?"neg":"pos"}">${ev>0?"+":""}${ev.toFixed(2)} €</span>`;
+}
+function rendreGrilles(){
+  const d = D(), m = d.modes[MODE], meta = d.meta;
+  $("grilles").innerHTML = m.grilles.map((g,idx)=>{
+    const nums = g.numeros.map(x=>`<span class="boule">${x}</span>`).join("");
+    const bons = g.bonus.map(b=>`<span class="boule or">${b}</span>`).join("");
+    return `<div class="gcarte verre">
+      <div class="nums">${nums}<span class="plus">+</span>${bons}</div>
+      <div class="ligne"><span>Grille ${idx+1} · partage ×${g.pop_rel}</span>${chipsEV(g.pop_rel)}</div>
+      <a class="cta" href="${meta.page_jeu}" target="_blank" rel="noopener">Jouer sur FDJ ↗</a>
+    </div>`;
+  }).join("");
+}
+function rendreSysteme(){
+  const s = D().systeme, meta = D().meta, el = $("systeme");
+  if(!s){ el.innerHTML=""; return; }
+  el.innerHTML = `<div class="section-titre">Système réducteur — garantie vérifiée</div>
+    <div class="sys verre">
+      <div class="puces">${s.pool.map(n=>`<span class="puce">${n}</span>`).join("")}</div>
+      <p class="garantie">✔ ${s.garantie} — vérifié exhaustivement par le moteur</p>
+      <div class="sys-grilles" style="margin-top:10px">${s.grilles.map((g,i)=>
+        `<div>S${i+1} · ${g.numeros.join(" - ")} <span style="color:var(--or)">+ ${g.bonus.join("+")}</span>
+         <span style="color:var(--brume)"> · partage ×${g.pop_rel}</span></div>`).join("")}</div>
+      <p style="margin-top:10px;color:var(--brume);font-size:13px">Coût total : <b style="color:var(--encre)">${s.cout.toFixed(2)} €</b> (${s.grilles.length} grilles)</p>
+    </div>`;
+}
+function rendreLivre(){
+  const h = D().historique, sim = D().simulation, el = $("livre");
+  if(!h && !sim){ el.innerHTML=""; return; }
+  let html = `<div class="section-titre">Le grand livre — ce que les annonces ont vraiment donné</div>`;
+  const noms = {hybride:"Hybride",pronostic:"Pronostic",anti:"Anti-partage",systeme:"Système"};
+  if(h && h.cumul && Object.keys(h.cumul).length){
+    html += `<div class="livre-cumul">` + Object.entries(h.cumul).map(([m,c])=>{
+      const pos = c.gain >= c.mise;
+      return `<div class="roi-carte verre"><h4>${noms[m]||m}</h4>
+        <div class="roi ${pos?"c-vert":"c-ambre"}">${c.roi_pct>0?"+":""}${c.roi_pct} %</div>
+        <p>${c.tirages_regles} tirage${c.tirages_regles>1?"s":""} réglé${c.tirages_regles>1?"s":""} ·
+        misé ${c.mise.toFixed(2)} € · gagné ${c.gain.toFixed(2)} €${
+        c.meilleur?` · meilleur : rang ${c.meilleur.rang}`:""}</p></div>`;
+    }).join("") + `</div>`;
+  } else if(h){
+    html += `<div class="dernier-regle verre"><p style="color:var(--brume);font-size:13.5px">
+      Le grand livre démarre : chaque annonce est verrouillée, puis réglée en euros
+      avec les vrais rapports FDJ dès que le tirage tombe. Rien n'est réécrit.</p></div>`;
+  }
+  if(h && h.derniers_regles && h.derniers_regles.length){
+    const e = h.derniers_regles[0], res = e.resultat;
+    const grs = e.modes[MODE] || e.modes.hybride;
+    html += `<div class="dernier-regle verre">
+      <div class="dr-tete"><b>Dernier tirage réglé — ${new Date(e.date+"T12:00:00Z")
+        .toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"})}</b>
+        <span style="color:var(--brume);font-size:13px">sortis :</span>
+        <span class="nums">${res.numeros.map(n=>`<span class="boule" style="width:32px;height:32px;font-size:14px">${n}</span>`).join("")}
+        <span class="plus">+</span>${res.bonus.map(b=>`<span class="boule or" style="width:32px;height:32px;font-size:14px">${b}</span>`).join("")}</span></div>`
+      + grs.map(g=>{
+        const r = g.reglement||{bons:[],bonus_ok:[],rang:null,gain:0};
+        return `<div class="dr-grille"><span class="nums">${
+          g.numeros.map(n=>`<span class="boule${r.bons.includes(n)?" hit":""}">${n}</span>`).join("")}
+          <span class="plus">+</span>${
+          g.bonus.map(b=>`<span class="boule or${r.bonus_ok.includes(b)?" hit":""}">${b}</span>`).join("")}</span>
+          <span style="color:var(--brume)">${r.bons.length} bon${r.bons.length>1?"s":""}${r.bonus_ok.length?` + ${D().meta.bonus_nom}`:""}</span>
+          <span class="dr-gain ${r.rang?"c-vert":""}" style="${r.rang?"":"color:var(--brume)"}">${
+          r.rang?`rang ${r.rang} · ${r.gain.toFixed(2)} €`:"—"}</span></div>`;
+      }).join("") + `</div>`;
+  }
+  if(h && h.en_attente && h.en_attente.length){
+    html += `<p class="attente">🔒 Annonces verrouillées en attente de tirage : <b>${
+      h.en_attente.map(d=>new Date(d+"T12:00:00Z").toLocaleDateString("fr-FR",{day:"numeric",month:"long",timeZone:"UTC"})).join(", ")}</b>
+      — impossible de les réécrire, c'est la règle.</p>`;
+  }
+  if(sim){
+    html += `<div class="dernier-regle verre"><div class="dr-tete"><b>Rétro-simulation — ${sim.n_tirages} tirages rejoués</b>
+      <span style="color:var(--brume);font-size:12.5px">${sim.note}</span></div>`
+      + Object.entries(sim.modes).map(([m,v])=>
+        `<div class="dr-grille"><span>${noms[m]||m}</span>
+         <span style="color:var(--brume)">misé ${v.mise.toFixed(2)} € · gagné ${v.gain.toFixed(2)} €</span>
+         <span class="dr-gain c-ambre">${v.roi_pct} %</span></div>`).join("")
+      + `<p style="margin-top:10px;font-size:12.5px;color:var(--brume)">Le ROI long terme converge vers −(1−TRJ) ≈ −46 %. La maison gagne ; ce compteur est là pour ne jamais l'oublier.</p></div>`;
+  }
+  el.innerHTML = html;
+}
+function rendreVerdicts(){
+  const v = D().verdicts, cal = D().calibration;
+  let html = "";
+  if(v.backtest){
+    const bt = v.backtest, delta = bt.modele-bt.theorique;
+    const bruit = Math.abs(delta) <= 2*Math.sqrt(0.45/Math.max(bt.n_tests,1));
+    html += `<div class="verdict verre"><h3>Backtest — folklore vs hasard</h3>
+      <div class="chiffre ${bruit?"c-vert":"c-ambre"}">${bt.modele.toFixed(3)} <span style="font-size:13px;color:var(--brume)">vs ${bt.theorique.toFixed(3)}</span></div>
+      <p>${bt.n_tests} tirages rejoués en aveugle. ${bruit
+        ?"Écart dans le bruit : le folklore ne bat pas le hasard."
+        :"Écart ~2σ : fluctuation probable, surveillé à chaque mise à jour."}</p></div>`;
+  }
+  if(cal){
+    html += `<div class="verdict verre"><h3>Calibration — popularité mesurée</h3>
+      <div class="chiffre c-or">R² = ${cal.r2}</div>
+      <p>Régression sur ${cal.n_tirages} tirages réels (colonnes gagnants FDJ).</p>
+      <div class="mini-puces">${cal.top_surjoues.slice(0,4).map(n=>`<span class="sur">${n}</span>`).join("")}
+        <span style="border:0;color:var(--brume)">sur-joués ·</span>
+        ${cal.top_delaisses.slice(0,4).map(n=>`<span class="del">${n}</span>`).join("")}
+        <span style="border:0;color:var(--brume)">délaissés</span></div></div>`;
+  }
+  if(v.effet_anniversaire){
+    const ea = v.effet_anniversaire;
+    html += `<div class="verdict verre"><h3>Effet anniversaire — partage</h3>
+      <div class="chiffre ${ea.r>0.05?"c-rouge":"c-vert"}">r = ${ea.r>0?"+":""}${ea.r.toFixed(3)}</div>
+      <p>${ea.r>0.05
+        ?"Les tirages riches en numéros ≤ 31 font plus de gagnants : l'effet dates de naissance est réel — l'anti-partage se justifie."
+        :"Effet faible sur cet échantillon."} (${ea.n} tirages)</p></div>`;
+  }
+  if(v.chi2){
+    const c2 = v.chi2;
+    html += `<div class="verdict verre"><h3>Biais physique — test χ²</h3>
+      <div class="chiffre ${c2.biais_detecte?"c-ambre":"c-vert"}">χ² = ${c2.chi2} <span style="font-size:13px;color:var(--brume)">/ ${c2.seuil_5pct}</span></div>
+      <p>${c2.biais_detecte
+        ?`Au-dessus du seuil — suspects ${c2.top_suspects.join(", ")}. Probable fluctuation, à suivre.`
+        :"Boules équilibrées : le seul edge théorique reste fermé. Test rejoué à chaque mise à jour."}</p></div>`;
+  }
+  $("verdicts").innerHTML = html;
+}
+function rendreMeta(){
+  const meta = D().meta;
+  const d = new Date(meta.prochain_tirage+"T12:00:00Z");
+  const jour = meta.prochain_jour.charAt(0).toUpperCase()+meta.prochain_jour.slice(1);
+  $("quand").textContent = `${meta.nom} — ${jour} ${d.toLocaleDateString("fr-FR",{day:"numeric",month:"long",timeZone:"UTC"})}`;
+  $("proba").textContent = meta.proba_jackpot.toLocaleString("fr-FR");
+  $("jackpot").value = meta.jackpot ? Math.round(meta.jackpot/1e6) : (JEU==="loto"?6:50);
+  const deb = new Date(meta.periode_debut+"T12:00:00Z"), fin = new Date(meta.periode_fin+"T12:00:00Z");
+  $("pied-meta").textContent = `${meta.n_tirages} tirages analysés (${deb.toLocaleDateString("fr-FR",{timeZone:"UTC"})} → ${fin.toLocaleDateString("fr-FR",{timeZone:"UTC"})}) · généré le ${new Date(meta.genere_le).toLocaleString("fr-FR")} · moteur v${meta.version}`;
+  $("bandeau-demo").hidden = !(meta.source||"").startsWith("demo");
+}
+function rendreTout(){
+  rendreMeta(); fraicheur(); rendre(); rendreLivre(); rendreVerdicts(); majCompte();
+  if(TIMER) clearInterval(TIMER);
+  TIMER = setInterval(majCompte, 30000);
+}
+
+/* ---------- interactions ---------- */
+document.querySelectorAll(".jeux button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    if(!DONNEES[b.dataset.jeu]) return;
+    JEU = b.dataset.jeu;
+    document.querySelectorAll(".jeux button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    rendreTout();
+  });
+});
+document.querySelectorAll(".modes button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    MODE = b.dataset.mode;
+    document.querySelectorAll(".modes button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    rendre(); rendreLivre();
+  });
+});
+$("jackpot").addEventListener("input", rendreGrilles);
+
+/* ---------- chargement ---------- */
+Promise.allSettled(Object.entries(FICHIERS).map(([jeu,url])=>
+  fetch(url,{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.json(); })
+    .then(d=>{ DONNEES[jeu]=d; })
+)).then(()=>{
+  document.querySelectorAll(".jeux button").forEach(b=>{ b.disabled = !DONNEES[b.dataset.jeu]; });
+  const dispo = Object.keys(DONNEES).find(j=>DONNEES[j]);
+  if(!dispo){
+    $("etat").innerHTML = `<p><b>Aucune donnée trouvée.</b><br>Génère les JSON puis place-les à côté de cette page :</p>
+      <code>python3 oracle.py --jeu loto --export-web loto.json</code><br>
+      <code>python3 oracle.py --jeu euromillions --export-web euromillions.json</code>`;
+    return;
+  }
+  JEU = dispo;
+  document.querySelectorAll(".jeux button").forEach(b=>
+    b.setAttribute("aria-pressed", String(b.dataset.jeu===JEU)));
+  $("etat").hidden = true; $("app").hidden = false;
+  rendreTout();
+});
+})();
+</script>
+</body>
+</html>

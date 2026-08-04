@@ -1,0 +1,56 @@
+# ============================================================================
+# ORACLE MAX — mise à jour automatique Loto + EuroMillions
+# À placer dans le repo à :  .github/workflows/pronostics.yml
+#
+# Tous les matins à 04h30 UTC (couvre les lendemains de tous les tirages :
+# Loto lun/mer/sam · EuroMillions mar/ven) :
+#   1. télécharge les historiques FDJ (auto-découverte si les URLs changent)
+#   2. recalcule tout : scores, calibration empirique, EV, système, verdicts
+#   3. écrit docs/loto.json + docs/euromillions.json (consommés par la page)
+#   4. commit les CSV dans data/ → ton repo devient son propre mirror
+# Aucune dépendance, aucun secret. Bouton "Run workflow" pour lancer à la main.
+# ============================================================================
+
+name: Pronostics Oracle
+
+on:
+  schedule:
+    - cron: "30 4 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  pronostics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Loto
+        run: |
+          python3 oracle.py --jeu loto \
+            --mirror "https://raw.githubusercontent.com/${{ github.repository }}/main/data/loto_mirror.csv" \
+            --save-csv data/loto_mirror.csv \
+            --export-web docs/loto.json \
+            --systeme 9 --grilles 4 --seed 0
+
+      - name: EuroMillions
+        run: |
+          python3 oracle.py --jeu euromillions \
+            --mirror "https://raw.githubusercontent.com/${{ github.repository }}/main/data/euromillions_mirror.csv" \
+            --save-csv data/euromillions_mirror.csv \
+            --export-web docs/euromillions.json \
+            --grilles 4 --seed 0
+
+      - name: Commit et push si changements
+        run: |
+          git config user.name "oracle-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data docs
+          git diff --cached --quiet || git commit -m "🎱 Pronostics du $(date -u +%d/%m/%Y)"
+          git push

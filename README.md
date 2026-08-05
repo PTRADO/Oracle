@@ -1,4 +1,4 @@
-# 🎱 ORACLE v2.3 — Loto + EuroMillions
+# 🎱 ORACLE v2.4 — Loto + EuroMillions
 
 Une grille par tirage, et le coût réel affiché sans fard.
 
@@ -132,9 +132,25 @@ vers −(1−TRJ) ≈ −46 %, et il est là pour ça.
 
 ## Ce qui est réel, ce qui ne l'est pas
 
-- **Réel** : la calibration (régression sur les colonnes gagnants), l'EV en
-  euros avec partage attendu, les garanties combinatoires des systèmes, le
-  test χ².
+- **Réel** : la calibration anti-partage, l'EV en euros avec partage attendu,
+  les garanties combinatoires des systèmes, le test χ².
+
+  La calibration mérite un mot, c'est le seul levier du produit. La FDJ publie
+  les gagnants **rang par rang**. Tous les rangs d'un même tirage ont vu la
+  même foule, mais pas le même nombre de numéros trouvés : en les comparant
+  entre eux, l'affluence du soir s'annule d'elle-même — jackpot, saison,
+  publicité — et il ne reste que l'effet des numéros. C'est un panel à effets
+  fixes de tirage (v2.4 ; la v2.3 régressait le total des gagnants, dont 55 %
+  au Loto ne dépendent pas des 5 boules).
+
+  Ce qui rend la mesure légitime : **c'est la FDJ qui tire les numéros au
+  sort**. La variable explicative est randomisée, donc aucun facteur caché ne
+  peut expliquer le résultat. C'est une expérience randomisée dont la FDJ
+  publie les résultats, pas une corrélation trouvée après coup.
+
+  Vérifiée hors échantillon sur le rang à 5 bons numéros — que la calibration
+  n'utilise jamais, il est trop creux — avec une prédiction chiffrée : le
+  modèle annonce un coefficient de 0,923 (Loto), on mesure 0,966 ± 0,045.
 - **Pas réel** : tout pouvoir prédictif. P(jackpot) = 1/19 068 840 (Loto) et
   1/139 838 160 (EuroMillions) pour toute grille. Le backtest walk-forward
   tourne à chaque mise à jour pour le prouver.

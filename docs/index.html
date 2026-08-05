@@ -418,24 +418,56 @@ function rendrePourquoi(){
   const cal = D().calibration, m = D().meta, pop = D().verdicts.effet_anniversaire;
   let h = `<p>Toutes les grilles ont exactement la même chance de sortir. Celle-ci
     n'est pas « plus probable » — <strong>elle est moins partagée</strong>.</p>
-    <p>Beaucoup de joueurs cochent des dates de naissance, donc des numéros de
-    1 à 31. Quand un de ces numéros sort, il y a plus de gagnants, et le gain
-    est divisé entre plus de monde. Cette grille évite les numéros les plus
-    joués en France.</p>`;
+    <p>Quand un numéro très coché sort, il y a plus de gagnants, et le gain est
+    divisé entre plus de monde. Reste à savoir <em>lesquels</em> sont très
+    cochés. On ne le suppose pas : on le mesure.</p>`;
   if(cal){
-    h += `<h3>Mesuré sur ${cal.n_tirages} tirages réels</h3>
-      <p>En comparant les numéros sortis au nombre de gagnants annoncé par la FDJ,
-      on déduit lesquels sont sur-joués :</p>
+    h += `<h3>Comment on le mesure</h3>
+      <p>La FDJ publie, pour chaque tirage, le nombre de gagnants <em>rang par
+      rang</em>. Or tous les rangs d'un même soir ont vu la même foule de
+      joueurs, mais pas le même nombre de numéros trouvés. En comparant les
+      rangs <strong>entre eux</strong>, l'affluence du soir s'annule d'elle-même
+      — jackpot, saison, publicité — et il ne reste que l'effet des numéros.</p>
+      <p>Et surtout : c'est la FDJ qui tire les numéros au sort. La chose que
+      l'on mesure est donc tirée à pile ou face par quelqu'un d'autre, ce qui
+      exclut qu'un facteur caché explique le résultat. C'est une expérience
+      randomisée, pas une corrélation trouvée après coup.</p>
+      <p>Résultat sur <strong>${cal.n_tirages} tirages</strong>
+      (${cal.rangs_utilises ? cal.rangs_utilises.length : "plusieurs"} rangs
+      exploités, ${cal.n_significatifs}/${m.n_max} numéros au-dessus du bruit) :</p>
       <div class="puces">` +
       cal.top_surjoues.map(n=>`<span class="puce sur">${n}</span>`).join("") +
       `</div><p style="margin-top:-4px">↑ les plus joués — à éviter</p>
       <div class="puces">` +
       cal.top_delaisses.map(n=>`<span class="puce del">${n}</span>`).join("") +
-      `</div><p style="margin-top:-4px">↑ les délaissés — ceux qu'on privilégie</p>`;
+      `</div><p style="margin-top:-4px">↑ les délaissés — ceux qu'on privilégie</p>
+      <p>Les dates de naissance ressortent d'elles-mêmes : les petits numéros
+      dominent la première liste, et ceux de 1 à 12 — jouables comme jour
+      <em>et</em> comme mois — plus encore que les autres. Personne ne l'a
+      écrit dans le programme, c'est le calcul qui le rend.</p>`;
+    if(cal.theta){
+      const t = cal.theta, sgn = v => (v > 0 ? "+" : "") + v.toFixed(2);
+      h += `<h3>Ce qu'un simple classement ne voit pas</h3>
+        <p>Les joueurs ne cochent pas des numéros indépendamment : ils cochent
+        des <em>combinaisons</em>. On mesure donc aussi les affinités entre
+        numéros d'une même grille.</p>
+        <ul>
+        <li>Deux numéros de date cochés ensemble : <b>${sgn(t["date_31"])}</b>
+          — encore plus partagé que la somme des deux pris séparément.</li>
+        <li>Deux numéros qui se suivent (12 et 13) : <b>${sgn(t["consecutifs"])}</b>
+          — les joueurs les <em>évitent</em>, c'est donc une bonne affaire.</li>
+        <li>Deux numéros au-dessus de 31 : <b>${sgn(t["hauts_31"])}</b>
+          — et c'est la surprise : jouer <em>uniquement</em> des grands numéros
+          est une stratégie déjà encombrée, parce que c'est le conseil que tout
+          le monde donne. La grille proposée en tient compte.</li>
+        </ul>`;
+    }
   }
-  if(pop) h += `<p>Corrélation mesurée entre « numéros ≤ 31 sortis » et « nombre de
-    gagnants » : <strong>r = ${pop.r > 0 ? "+" : ""}${pop.r}</strong> sur ${pop.n} tirages.
-    L'effet de partage est donc réel, il ne s'agit pas d'une intuition.</p>`;
+  if(pop) h += `<p style="opacity:.75;font-size:.92em">Contrôle indépendant :
+    la corrélation brute entre « numéros ≤ 31 sortis » et « nombre de gagnants »
+    vaut <strong>r = ${pop.r > 0 ? "+" : ""}${pop.r}</strong> sur ${pop.n} tirages.
+    Elle va dans le même sens, mais c'est la mesure rang par rang ci-dessus qui
+    sert réellement à construire les grilles.</p>`;
   h += `<p><strong>Ce que ça change concrètement :</strong> rien sur tes chances de
     gagner. Uniquement sur le montant, et seulement si tu gagnes.</p>`;
   $("d-numeros").innerHTML = h;

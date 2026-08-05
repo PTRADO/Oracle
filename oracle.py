@@ -1253,7 +1253,8 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
     bonus_freq = Counter()
     calib, prochaine_calib = None, debut
     res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter(),
-               "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None}
+               "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None,
+               "gains": []}
            for m in ("hybride", "pronostic", "anti")}
     # préchauffe
     for i in range(debut):
@@ -1303,6 +1304,19 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
             if r["rang"]:
                 res[mode]["rangs"][r["rang"]] += 1
                 res[mode]["n_gains"] += 1
+                # Détail de chaque gain : sans lui, le total « récupéré » reste
+                # un chiffre à croire sur parole. Là, chaque euro est traçable
+                # à un tirage, un rang et un rapport FDJ réels.
+                res[mode]["gains"].append({
+                    "date": t["date"].isoformat(),
+                    "grille": list(grille),
+                    "bonus": list(bons_b),
+                    "sortis": list(t["balls"]),
+                    "bons": r["bons"],
+                    "bonus_ok": r["bonus_ok"],
+                    "rang": r["rang"],
+                    "gain": round(r["gain"], 2),
+                })
                 if r["gain"] > res[mode]["meilleur_gain"]:
                     res[mode]["meilleur_gain"] = r["gain"]
                     res[mode]["meilleur_date"] = t["date"].isoformat()
@@ -1325,6 +1339,7 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
                           "roi_pct": round(100 * (v["gain"] - v["mise"])
                                            / v["mise"], 1) if v["mise"] else 0,
                           "n_gains": v["n_gains"],
+                          "gains": sorted(v["gains"], key=lambda g: -g["gain"]),
                           "meilleur_gain": round(v["meilleur_gain"], 2),
                           "meilleur_date": v["meilleur_date"],
                           "rangs": dict(sorted(v["rangs"].items()))}

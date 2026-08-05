@@ -166,22 +166,20 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
     </div>
   </section>
 
-  <!-- 2 · CE QUE ÇA COÛTE ------------------------------------------------ -->
-  <section class="bloc verre">
-    <h2>Ce que ça coûte vraiment</h2>
-    <div class="ligne"><span>Ce ticket coûte</span><b id="prix">—</b></div>
-    <div class="ligne"><span>Il rapporte en moyenne</span><b id="rend">—</b></div>
-    <div class="ligne total"><span>Tu perds en moyenne</span><b id="perte">—</b></div>
-    <p class="note" id="note-cout"></p>
-  </section>
+  <!-- 2 · JOUER PLUSIEURS TICKETS ---------------------------------------- -->
+  <details class="verre" id="det-tickets">
+    <summary>Jouer plusieurs tickets</summary>
+    <div class="corps" id="d-tickets"></div>
+  </details>
 
-  <!-- 3 · SI TU AVAIS JOUÉ ----------------------------------------------- -->
+  <!-- 3 · HISTORIQUE DES GAINS ------------------------------------------- -->
   <section class="bloc verre" id="bloc-histo" hidden>
     <h2 id="titre-histo">Si tu avais joué</h2>
     <div class="ligne"><span>Misé</span><b id="h-mise">—</b></div>
     <div class="ligne"><span>Récupéré</span><b id="h-gain">—</b></div>
     <div class="ligne total"><span>Perdu</span><b id="h-perte">—</b></div>
     <p class="note" id="h-note"></p>
+    <div id="h-detail"></div>
   </section>
 
   <!-- 4 · SECTIONS REPLIÉES ---------------------------------------------- -->
@@ -191,13 +189,13 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
   </details>
 
   <details class="verre">
-    <summary>Est-ce que ça marche&nbsp;?</summary>
-    <div class="corps" id="d-marche"></div>
+    <summary>Combien coûte le jeu&nbsp;?</summary>
+    <div class="corps" id="d-cout"></div>
   </details>
 
   <details class="verre">
-    <summary>Jouer plusieurs tickets</summary>
-    <div class="corps" id="d-tickets"></div>
+    <summary>Est-ce que ça marche&nbsp;?</summary>
+    <div class="corps" id="d-marche"></div>
   </details>
 
   <details class="verre">
@@ -301,16 +299,32 @@ function rendreGrille(){
   $("lien-fdj").href = m.page_jeu;
 }
 
+/* Le coût moyen d'un ticket n'est PAS une propriété de la grille affichée :
+   c'est une propriété du jeu, identique pour toutes les combinaisons. Il vit
+   donc dans sa propre section, et non collé sous les numéros conseillés — où
+   il laissait croire qu'il jugeait ces numéros-là. Il reste affiché : une EV
+   honnête est la promesse centrale du produit. */
 function rendreCout(){
   const m = D().meta, ev = esperance(grillePrincipale().pop_rel);
-  if(!ev){ $("note-cout").textContent = ""; return; }
-  $("prix").textContent = eur(ev.prix);
-  $("rend").textContent = eur(ev.rend);
-  $("perte").textContent = eur(ev.perte);
-  const jack = m.jackpot ? `Jackpot de ce tirage : <strong>${ent(m.jackpot/1e6)} M€</strong>, relevé sur fdj.fr ce matin. ` : "";
-  $("note-cout").innerHTML =
-    jack + `C'est le prix du jeu : la FDJ garde environ la moitié des mises. ` +
-    `Aucune grille n'y échappe, celle-ci pas plus qu'une autre.`;
+  if(!ev){ $("d-cout").innerHTML = ""; return; }
+  const jack = m.jackpot
+    ? `<p>Jackpot annoncé pour ce tirage : <strong>${ent(m.jackpot/1e6)} M€</strong>,
+       relevé sur fdj.fr ce matin.</p>` : "";
+  $("d-cout").innerHTML = `
+    <p>Ces chiffres valent pour <strong>n'importe quelle grille</strong> de ce jeu,
+    pas seulement celle du haut. Aucune combinaison n'y échappe.</p>
+    <div class="defile"><table>
+      <tr><td>Un ticket coûte</td><td><b>${eur(ev.prix)}</b></td></tr>
+      <tr><td>Il rapporte en moyenne</td><td><b>${eur(ev.rend)}</b></td></tr>
+      <tr><td>Soit une perte moyenne de</td><td><b class="c-ambre">${eur(ev.perte)}</b></td></tr>
+    </table></div>
+    ${jack}
+    <p>La FDJ reverse environ la moitié des mises aux joueurs et garde le reste.
+    C'est le prix du jeu, connu d'avance et le même pour tout le monde.</p>
+    <p><strong>Ce que ça ne dit pas :</strong> ce n'est pas ce que tu vas perdre
+    ce soir. Tu perdras 2,20 € neuf fois sur dix, et parfois tu gagneras. La
+    moyenne ne décrit personne en particulier — elle décrit ce qui arrive quand
+    on joue longtemps.</p>`;
 }
 
 function rendreHistorique(){
@@ -323,12 +337,37 @@ function rendreHistorique(){
   $("h-gain").textContent = eur(v.gain);
   $("h-perte").textContent = eur(v.mise - v.gain);
   const n = v.n_gains || 0;
-  let txt = `Une grille à chaque tirage, à ${eur(prix)}. `;
-  txt += n ? `Tu aurais gagné <strong>${n} fois sur ${sim.n_tirages}</strong>, presque toujours de petits montants.`
+  let txt = `Une grille à chaque tirage, à ${eur(prix)}, réglée aux vrais rapports FDJ. `;
+  txt += n ? `Tu aurais gagné <strong>${n} fois sur ${sim.n_tirages}</strong>.`
            : `Tu n'aurais jamais rien gagné sur cette période.`;
-  if(v.meilleur_gain) txt += ` Meilleur coup : <strong>${eur(v.meilleur_gain)}</strong>.`;
   txt += ` Sur la durée, ce compteur converge vers −46 % : c'est la part que garde la FDJ.`;
   $("h-note").innerHTML = txt;
+
+  const gains = v.gains || [];
+  if(!gains.length){ $("h-detail").innerHTML = ""; return; }
+  const bonusNom = D().meta.bonus_nom;
+  $("h-detail").innerHTML = `
+    <details style="margin-top:14px;border:1px solid var(--bord)">
+      <summary>Le détail des ${gains.length} gains</summary>
+      <div class="corps" style="padding-top:12px">
+        <div class="defile"><table>
+          <tr><th>tirage</th><th>trouvé</th><th>rang</th><th>gain</th></tr>` +
+          gains.map(g=>{
+            const b = g.bons.length, bb = g.bonus_ok.length;
+            const quoi = `${b} bon${b>1?"s":""}${bb?` + ${bonusNom}`:""}`;
+            return `<tr>
+              <td>${new Date(g.date+"T12:00:00Z").toLocaleDateString("fr-FR",{timeZone:"UTC"})}</td>
+              <td>${quoi}<br><span style="opacity:.65">${g.bons.join(" · ") || "—"}</span></td>
+              <td>${g.rang}</td>
+              <td><b>${eur(g.gain)}</b></td></tr>`;
+          }).join("") +
+        `</table></div>
+        <p style="margin-top:12px">Chaque ligne est un tirage réel : les numéros
+        trouvés, le rang officiel atteint, et le rapport FDJ exact de ce
+        soir-là. Total : <strong>${eur(v.gain)}</strong> pour
+        <strong>${eur(v.mise)}</strong> misés.</p>
+      </div>
+    </details>`;
 }
 
 function rendreAlertes(){
@@ -479,8 +518,8 @@ function rendreDonnees(){
 }
 
 function rendreTout(){
-  rendreAlertes(); rendreGrille(); rendreCout(); rendreHistorique();
-  rendrePourquoi(); rendreMarche(); rendreTickets(); rendreDonnees();
+  rendreAlertes(); rendreGrille(); rendreTickets(); rendreHistorique(); rendreCout();
+  rendrePourquoi(); rendreMarche(); rendreDonnees();
   const m = D().meta;
   $("proba-txt").textContent = "1 chance sur " + m.proba_jackpot.toLocaleString("fr-FR");
   $("pied-meta").textContent =

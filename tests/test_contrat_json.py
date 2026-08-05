@@ -185,7 +185,30 @@ def test_l_historique_jouable_est_exporte(export):
     assert sim, "simulation absente — relancer avec --simulation"
     assert sim["n_tirages"] >= 50
     a = sim["modes"]["anti"]
-    for cle in ("mise", "gain", "n_gains", "meilleur_gain", "roi_pct"):
+    for cle in ("mise", "gain", "n_gains", "meilleur_gain", "roi_pct", "gains"):
         assert cle in a, cle
     assert a["mise"] > a["gain"], "un ROI positif sur 100 tirages doit alerter"
     assert 0 <= a["n_gains"] <= sim["n_tirages"]
+
+
+def test_chaque_gain_est_tracable_a_un_tirage_reel(export):
+    """Le total « récupéré » ne doit pas être un chiffre à croire sur parole :
+    chaque euro s'explique par un tirage, un rang officiel et un rapport FDJ."""
+    a = export["simulation"]["modes"]["anti"]
+    cfg = JEUX[export["meta"]["jeu"]]
+    gains = a["gains"]
+    assert len(gains) == a["n_gains"]
+    total = 0.0
+    for g in gains:
+        for cle in ("date", "grille", "bonus", "sortis", "bons", "bonus_ok",
+                    "rang", "gain"):
+            assert cle in g, cle
+        assert g["gain"] > 0
+        assert 1 <= g["rang"] <= (9 if cfg["bonus_pick"] == 1 else 13)
+        # les bons numéros sont bien l'intersection annoncée
+        assert set(g["bons"]) == set(g["grille"]) & set(g["sortis"])
+        assert len(g["grille"]) == cfg["pick"]
+        total += g["gain"]
+    assert abs(total - a["gain"]) < 0.02, "le détail ne recompose pas le total"
+    if gains:
+        assert gains[0]["gain"] == a["meilleur_gain"], "gains non triés"

@@ -20,6 +20,9 @@ recherche.py                      # recherche de formule + modèle nul
 docs/index.html                   # la mini-app (1 fichier, vanilla)
 docs/loto.json                    # pronostics Loto (généré)
 docs/euromillions.json            # pronostics EuroMillions (généré)
+docs/favicon.svg                  # la marque (source vectorielle)
+docs/*.png, favicon.ico           # icônes générées par tools/icones.py
+tools/icones.py                   # fabrique d'icônes (stdlib, à la demande)
 data/                             # archives FDJ (versionnées = mirror)
 tests/                            # pytest + fixtures d'archives réelles
 .github/workflows/pronostics.yml  # cron quotidien 04h30 UTC

@@ -113,7 +113,10 @@ JEUX = {
         "bonus_max": 10, "bonus_pick": 1, "bonus_nom": "chance",
         "bonus_patterns": [r"numero[_ ]?chance"],
         "prix": 2.20,
-        "p_any_win": 1 / 6,          # "1 chance sur 6 de gagner" (FDJ)
+        # Combinatoire exacte : (142 121 × 10 + 1 764 763) / 19 068 840.
+        # La FDJ communique « 1 chance sur 6 » ; la vraie valeur est 1/5,985.
+        # C'est le diviseur de n_est, donc de toute l'EV : on prend l'exact.
+        "p_any_win": 3_185_973 / 19_068_840,          # 0,1670772
         "jours": {0, 2, 5},          # lundi, mercredi, samedi
         "page_hist": "https://www.fdj.fr/jeux-de-tirage/loto/historique",
         "page_jeu": "https://www.fdj.fr/jeux-de-tirage/loto",
@@ -140,7 +143,9 @@ JEUX = {
         "bonus_max": 12, "bonus_pick": 2, "bonus_nom": "étoiles",
         "bonus_patterns": [r"etoile[_ ]?1", r"etoile[_ ]?2"],
         "prix": 2.50,
-        "p_any_win": 1 / 13,         # ~1 chance sur 13 de gagner
+        # Combinatoire exacte : (152 026 × 66 + 744 975) / 139 838 160.
+        # La FDJ communique « 1 chance sur 13 » ; la vraie valeur est 1/12,974.
+        "p_any_win": 10_778_691 / 139_838_160,        # 0,0770792
         "jours": {1, 4},             # mardi, vendredi
         "page_hist": ("https://www.fdj.fr/jeux-de-tirage/"
                       "euromillions-my-million/historique"),

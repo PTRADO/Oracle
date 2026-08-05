@@ -62,9 +62,32 @@ def proba_par_rang(cfg) -> dict[int, float]:
 def test_p_any_win_coherent_avec_la_table(cfg):
     """La probabilité de gagner quelque chose, recomposée rang par rang,
     doit retomber sur le p_any_win de la config (qui sert à estimer la
-    participation, donc toute l'EV)."""
+    participation, donc toute l'EV).
+
+    Tolérance serrée : « 1 chance sur 6 » et « 1 sur 13 » sont les arrondis
+    commerciaux de la FDJ, pas les vraies valeurs (1/5,985 et 1/12,974).
+    Les employer comme diviseur de `n_est` biaise l'estimation de la
+    participation, donc `ev_fixe`. Le moteur doit utiliser la combinatoire
+    exacte et laisser les arrondis à la communication.
+    """
     assert sum(proba_par_rang(cfg).values()) == pytest.approx(
-        cfg["p_any_win"], rel=0.01)
+        cfg["p_any_win"], rel=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("cle", "attendu"),
+    [("loto", 3_185_973 / 19_068_840),
+     ("euromillions", 10_778_691 / 139_838_160)],
+    ids=IDS)
+def test_p_any_win_est_la_valeur_combinatoire_exacte(cle, attendu):
+    """Ancrage sur un dénombrement fait à la main, hors du moteur.
+
+    Loto : (142 121 × 10 + 1 764 763) / 19 068 840 = 0,1670772
+      · 142 121 = tirages ayant ≥ 2 numéros en commun avec une grille
+      · 1 764 763 = tirages en ayant ≤ 1 (gagnants par le seul n° Chance)
+    EuroMillions : (152 026 × 66 + 744 975) / 139 838 160 = 0,0770792
+    """
+    assert JEUX[cle]["p_any_win"] == pytest.approx(attendu, rel=1e-12)
 
 
 @pytest.mark.parametrize("cfg", TOUS, ids=IDS)

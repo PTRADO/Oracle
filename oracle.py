@@ -670,11 +670,20 @@ def charger_tirages(cfg, args, aujourdhui: date):
 # ==============================================================================
 
 def normaliser(scores: dict[int, float]) -> dict[int, float]:
+    """Étale les scores sur [0, 100], bornes incluses et GARANTIES.
+
+    Le bornage explicite n'est pas décoratif : 100·(v−lo)/(hi−lo) peut rendre
+    100,000000000000014 par simple arrondi flottant. Mesuré, le dépassement
+    plafonne à 1,4·10⁻¹⁴ — inoffensif ici, mais un invariant annoncé qui ne
+    tient pas est un invariant sur lequel on finira par s'appuyer à tort.
+    """
     vals = list(scores.values())
     lo, hi = min(vals), max(vals)
     if math.isclose(hi, lo):
         return dict.fromkeys(scores, 50.0)
-    return {k: 100.0 * (v - lo) / (hi - lo) for k, v in scores.items()}
+    ecart = hi - lo
+    return {k: min(100.0, max(0.0, 100.0 * (v - lo) / ecart))
+            for k, v in scores.items()}
 
 
 def combiner(couches, poids) -> dict[int, float]:

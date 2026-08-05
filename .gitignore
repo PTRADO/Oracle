@@ -4,7 +4,25 @@ __pycache__/
 .venv/
 .DS_Store
 
-# ZIP de livraison initiale — pas le projet lui-même
+# ─── DOCUMENTS INTERNES — restent locaux, jamais dans le dépôt ───────────────
+# Le dépôt est PUBLIC. Tout ce qui décrit la stratégie, les objectifs, les
+# notes de travail ou les données de jeu personnelles reste sur la machine.
+# Le dépôt ne publie que le produit : moteur, page, tests, données FDJ.
+# Un test (tests/test_confidentialite.py) échoue si l'un d'eux réapparaît.
+MASTERPROMPT.md
+NOTES.md
+TODO.md
+notes/
+prive/
+*.local.md
+*.perso.md
+
+# Données de jeu personnelles — ne doivent JAMAIS être publiées.
+mes_grilles*
+paris*.json
+data/mes_*.json
+
+# Archive de livraison, sans intérêt pour le dépôt
 loto-oracle-max.zip
 
 # data/ est VOLONTAIREMENT versionné : les archives FDJ qu'il contient font

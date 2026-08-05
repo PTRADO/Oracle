@@ -14,7 +14,6 @@ actuelle du jeu : 1473 tirages Loto (depuis mars 2017) et 1029 EuroMillions
 
 ```
 oracle.py                         # moteur bi-jeux (Python stdlib)
-MASTERPROMPT.md                   # ← à donner à Claude Code pour la suite
 docs/index.html                   # la mini-app (1 fichier, vanilla)
 docs/loto.json                    # pronostics Loto (généré)
 docs/euromillions.json            # pronostics EuroMillions (généré)
@@ -34,7 +33,7 @@ cd docs && python3 -m http.server 8000     # → http://localhost:8000
 
 Le moteur télécharge seul **toutes les époques** de l'historique FDJ : URL
 directe → auto-découverte sur la page FDJ (auto-réparation si les
-identifiants changent) → ton mirror GitHub → cache local. Une époque close ne
+identifiants changent) → mirror GitHub du dépôt → cache local. Une époque close ne
 bouge plus jamais : elle n'est téléchargée qu'une fois.
 Secours manuel : télécharger un ZIP sur fdj.fr et passer `--zip fichier.zip`.
 
@@ -63,7 +62,7 @@ se voit ; elle ne s'absorbe pas en silence.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pytest ruff
-.venv/bin/python -m pytest tests/ -q     # 76 tests, hors ligne
+.venv/bin/python -m pytest tests/ -q     # 81 tests, hors ligne
 .venv/bin/ruff check .
 ```
 
@@ -75,23 +74,28 @@ backtest, EV négative, grand livre non masqué.
 
 ## Déploiement auto-hébergé (10 minutes)
 
-1. Nouveau repo GitHub avec cette structure (le dossier du ZIP est prêt :
-   `git init && git add -A && git commit && git push`).
-2. Settings → Pages → Deploy from branch → `main` `/docs` → ta page est en ligne.
-3. Onglet Actions → « Pronostics Oracle » → Run workflow (1er lancement).
+1. Cloner ce dépôt (ou le forker).
+2. Settings → Actions → General → Workflow permissions → **Read and write** —
+   sans quoi le cron ne pourra pas committer ses résultats.
+3. Settings → Pages → Deploy from branch → `main` `/docs` → la page est en ligne.
+4. Onglet Actions → « Pronostics Oracle » → Run workflow (1er lancement).
    Ensuite il tourne tout seul chaque matin : télécharge, recalcule
-   (calibration comprise), commit les JSON + les CSV mirrors.
+   (calibration comprise), commit les JSON et les archives.
 
-## Intégration dans ton app (Next.js)
+## Consommer les exports depuis une autre application
+
+Les deux JSON sont servis avec un CORS ouvert : n'importe quelle page peut
+les lire directement.
 
 ```js
 const r = await fetch(
-  "https://raw.githubusercontent.com/TON_USER/TON_REPO/main/docs/loto.json",
-  { cache: "no-store" });          // CORS ouvert sur raw.githubusercontent
+  "https://raw.githubusercontent.com/UTILISATEUR/DEPOT/main/docs/loto.json",
+  { cache: "no-store" });
 const data = await r.json();
 ```
-Ou copie `docs/` dans `/public/oracle/` de ton Next.js. Le portage en
-composant React est la phase 5 du MASTERPROMPT.
+
+Le contrat de ces fichiers est documenté par `tests/test_contrat_json.py` et
+versionné par `meta.version` : tout changement cassant impose un bump.
 
 ## Le grand livre (nouveau)
 

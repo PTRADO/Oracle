@@ -135,6 +135,14 @@ header{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;margin-botto
   color:var(--encre);padding:9px 12px;border-radius:11px;background:var(--verre-fort);
   border:1px solid var(--bord)}
 .cta:hover{background:rgba(255,255,255,.14)}
+.gcarte .actions{display:flex;gap:8px}
+.gcarte .actions .cta{flex:1}
+.copier{cursor:pointer;font:600 12px "Instrument Sans";color:var(--encre);
+  padding:9px 12px;border-radius:11px;background:var(--verre-fort);
+  border:1px solid var(--bord);transition:background .15s,border-color .15s}
+.copier:hover{background:rgba(255,255,255,.14)}
+.copier.ok{color:var(--vert);border-color:rgba(74,222,156,.55)}
+.copier-tout{margin:2px 0 14px;align-self:flex-start}
 
 /* ------- système ------- */
 .sys{padding:18px;margin-top:16px}
@@ -248,6 +256,7 @@ footer.page b{color:var(--encre)}
   </div>
 
   <div class="section-titre">Grilles prêtes à jouer — espérance en direct</div>
+  <div id="grilles-actions"></div>
   <div class="grilles" id="grilles"></div>
 
   <div id="systeme"></div>
@@ -386,17 +395,60 @@ function chipsEV(popRel){
   if(ev===null) return `<span class="ev" style="color:var(--brume)">EV —</span>`;
   return `<span class="ev ${ev<0?"neg":"pos"}">${ev>0?"+":""}${ev.toFixed(2)} €</span>`;
 }
+/* Texte d'une grille, prêt à être recopié sur un bulletin ou collé ailleurs. */
+function texteGrille(g){
+  const meta = D().meta;
+  return `${g.numeros.join(" ")} + ${meta.bonus_nom} ${g.bonus.join(" ")}`;
+}
+/* Copie robuste : l'API presse-papier exige un contexte sécurisé (https ou
+   localhost). Ouvert en file:// ou en http, on retombe sur execCommand. */
+async function copier(texte, bouton){
+  let ok = false;
+  try {
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(texte); ok = true;
+    }
+  } catch(e){ ok = false; }
+  if(!ok){
+    const z = document.createElement("textarea");
+    z.value = texte;
+    z.setAttribute("readonly","");
+    z.style.cssText = "position:fixed;top:-1000px;opacity:0";
+    document.body.appendChild(z); z.select();
+    try { ok = document.execCommand("copy"); } catch(e){ ok = false; }
+    document.body.removeChild(z);
+  }
+  if(bouton){
+    const avant = bouton.dataset.libelle || bouton.textContent;
+    bouton.dataset.libelle = avant;
+    bouton.textContent = ok ? "Copié ✓" : "Copie impossible";
+    bouton.classList.toggle("ok", ok);
+    clearTimeout(bouton._t);
+    bouton._t = setTimeout(()=>{
+      bouton.textContent = avant; bouton.classList.remove("ok");
+    }, 1600);
+  }
+  return ok;
+}
 function rendreGrilles(){
   const d = D(), m = d.modes[MODE], meta = d.meta;
-  $("grilles").innerHTML = m.grilles.map((g,idx)=>{
+  const cartes = m.grilles.map((g,idx)=>{
     const nums = g.numeros.map(x=>`<span class="boule">${x}</span>`).join("");
     const bons = g.bonus.map(b=>`<span class="boule or">${b}</span>`).join("");
     return `<div class="gcarte verre">
       <div class="nums">${nums}<span class="plus">+</span>${bons}</div>
       <div class="ligne"><span>Grille ${idx+1} · partage ×${g.pop_rel}</span>${chipsEV(g.pop_rel)}</div>
-      <a class="cta" href="${meta.page_jeu}" target="_blank" rel="noopener">Jouer sur FDJ ↗</a>
+      <div class="actions">
+        <button type="button" class="copier" data-grille="${idx}"
+                aria-label="Copier les numéros de la grille ${idx+1}">Copier</button>
+        <a class="cta" href="${meta.page_jeu}" target="_blank" rel="noopener">Jouer sur FDJ ↗</a>
+      </div>
     </div>`;
   }).join("");
+  $("grilles").innerHTML = cartes;
+  $("grilles-actions").innerHTML = m.grilles.length > 1
+    ? `<button type="button" class="copier copier-tout" data-grille="tout">Copier les ${m.grilles.length} grilles</button>`
+    : "";
 }
 function rendreSysteme(){
   const s = D().systeme, meta = D().meta, el = $("systeme");
@@ -563,6 +615,17 @@ document.querySelectorAll(".modes button").forEach(b=>{
   });
 });
 $("jackpot").addEventListener("input", rendreGrilles);
+
+/* Copie des numéros — délégation, pour survivre au re-rendu des grilles. */
+document.addEventListener("click", ev => {
+  const b = ev.target.closest(".copier");
+  if(!b || !D()) return;
+  const grilles = D().modes[MODE].grilles;
+  const texte = b.dataset.grille === "tout"
+    ? grilles.map(texteGrille).join("\n")
+    : texteGrille(grilles[+b.dataset.grille]);
+  copier(texte, b);
+});
 
 /* ---------- chargement ---------- */
 Promise.allSettled(Object.entries(FICHIERS).map(([jeu,url])=>

@@ -61,11 +61,22 @@ def test_grille_valide_exige_au_moins_deux_dizaines(cfg):
     plausibilité gagnée : la meilleure grille qu'il interdisait est
     4-31-32-36-37, qui n'a rien d'étrange à l'œil.
 
-    Une grille sur UNE seule dizaine reste refusée : 21-23-25-27-29 se voit.
+    Une grille sur UNE seule dizaine reste refusée.
+
+    ATTENTION au choix des cas — c'est le test de mutation qui l'a montré.
+    21-23-25-27-29 et 2-4-6-8-10 tiennent bien sur une seule dizaine, mais ils
+    sont TOUT impairs / TOUT pairs : c'est la contrainte de PARITÉ qui les
+    rejette, pas celle des dizaines. Écrire le test avec ces cas-là le laissait
+    vert alors même qu'on retirait la contrainte testée.
+
+    Les cas ci-dessous isolent la contrainte : parité valide (2 pairs), pas de
+    suite de 3, somme dans les bornes. Seules les dizaines peuvent les refuser.
     """
     cts = {"somme_min": 0, "somme_max": 10_000}
-    assert not grille_valide(cfg, (21, 23, 25, 27, 29), cts), "1 dizaine accepté"
-    assert not grille_valide(cfg, (2, 4, 6, 8, 10), cts), "1 dizaine accepté"
+    assert not grille_valide(cfg, (21, 22, 24, 27, 29), cts), (
+        "1 dizaine accepté (2 pairs, pas de suite de 3 : rien d'autre ne "
+        "peut rejeter cette grille)")
+    assert not grille_valide(cfg, (31, 32, 34, 37, 39), cts), "1 dizaine accepté"
     assert grille_valide(cfg, (4, 31, 32, 36, 37), cts), "2 dizaines refusé"
     assert grille_valide(cfg, (2, 4, 15, 27, 39), cts), "4 dizaines refusé"
 

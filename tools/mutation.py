@@ -113,7 +113,7 @@ MUTATIONS: list[tuple[str, str, str, str]] = [
      "    if pairs not in (2, 3):\n        return False",
      "    pass"),
     ("grille_valide_sans_contrainte_de_dizaines", "oracle.py",
-     "    if len({(b - 1) // 10 for b in balls}) < 3:\n        return False",
+     "    if len({(b - 1) // 10 for b in balls}) < 2:\n        return False",
      "    pass"),
 
     # ---- règlement --------------------------------------------------------

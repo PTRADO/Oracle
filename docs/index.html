@@ -372,6 +372,16 @@ function rendreHistorique(){
   let txt = `Une grille à chaque tirage, à ${eur(prix)}, réglée aux vrais rapports FDJ. `;
   txt += n ? `Tu aurais gagné <strong>${n} fois sur ${sim.n_tirages}</strong>.`
            : `Tu n'aurais jamais rien gagné sur cette période.`;
+  const d = sim.dispersion_anti;
+  if(d){
+    txt += ` <br><br>Ce chiffre est <em>une</em> réalisation, pas une moyenne :
+      le générateur de grilles tire au sort. Avec la même stratégie et
+      ${d.n_graines} autres séries de grilles, le total va de
+      <strong>${eur(d.min)}</strong> à <strong>${eur(d.max)}</strong>
+      (moitié des cas entre ${eur(d.p10)} et ${eur(d.p90)}, médiane
+      ${eur(d.mediane)}). Le résultat reste perdant dans tous les cas —
+      seul le montant bouge.`;
+  }
   txt += ` Sur la durée, ce compteur converge vers −46 % : c'est la part que garde la FDJ.`;
   $("h-note").innerHTML = txt;
 

@@ -53,12 +53,20 @@ def test_grille_valide_refuse_une_parite_hors_bornes(cfg):
 
 
 @pytest.mark.parametrize("cfg", TOUS, ids=IDS)
-def test_grille_valide_exige_au_moins_trois_dizaines(cfg):
-    """Au moins 3 dizaines distinctes. Une grille concentrée sur deux dizaines
-    est rejetée, quelle que soit sa parité."""
+def test_grille_valide_exige_au_moins_deux_dizaines(cfg):
+    """Au moins 2 dizaines distinctes — seuil abaissé de 3 à 2 en v2.4.
+
+    Le seuil à 3 coûtait le plus cher des quatre contraintes de forme
+    (15,2 % de partage au Loto, 23,0 % à l'EuroMillions) pour le moins de
+    plausibilité gagnée : la meilleure grille qu'il interdisait est
+    4-31-32-36-37, qui n'a rien d'étrange à l'œil.
+
+    Une grille sur UNE seule dizaine reste refusée : 21-23-25-27-29 se voit.
+    """
     cts = {"somme_min": 0, "somme_max": 10_000}
-    assert not grille_valide(cfg, (1, 3, 5, 12, 14), cts), "2 dizaines accepté"
     assert not grille_valide(cfg, (21, 23, 25, 27, 29), cts), "1 dizaine accepté"
+    assert not grille_valide(cfg, (2, 4, 6, 8, 10), cts), "1 dizaine accepté"
+    assert grille_valide(cfg, (4, 31, 32, 36, 37), cts), "2 dizaines refusé"
     assert grille_valide(cfg, (2, 4, 15, 27, 39), cts), "4 dizaines refusé"
 
 
@@ -366,3 +374,36 @@ def test_le_backtest_recalcule_ne_bat_pas_le_hasard_sur_les_vraies_donnees(cle):
         f"à la découverte, suspecter l'intégrité des données ou une fuite du "
         f"futur dans le walk-forward")
     assert r["n_tests"] > 100
+
+
+# ===========================================================================
+# v2.5 — la dispersion de « si tu avais joué »
+# ===========================================================================
+
+@pytest.mark.parametrize("cle", IDS, ids=IDS)
+def test_la_dispersion_mesure_bien_l_effet_de_la_seule_graine(cle):
+    """Les graines alternatives doivent différer entre elles — sinon le champ
+    affiché ne mesure rien et donne une fausse impression de rigueur.
+
+    Elles doivent aussi rester du même ordre de grandeur que le résultat
+    publié : c'est la même stratégie, seule la graine change.
+    """
+    cfg = JEUX[cle]
+    tir = tirages_des_archives(cle)
+    s = retro_simulation(cfg, tir, 25, iters=2000,
+                         n_graines_dispersion=10, iters_dispersion=1200)
+    d = s["dispersion_anti"]
+    assert d is not None and d["n_graines"] == 10
+    assert d["min"] <= d["p10"] <= d["mediane"] <= d["p90"] <= d["max"]
+    assert d["max"] > d["min"], (
+        "toutes les graines rendent le même total — la dispersion mesurée "
+        "est nulle, donc le champ ne mesure rien")
+
+
+@pytest.mark.parametrize("cle", IDS, ids=IDS)
+def test_pas_de_dispersion_demandee_pas_de_champ(cle):
+    """Le calcul est optionnel : il coûte du temps et n'a pas à s'imposer."""
+    cfg = JEUX[cle]
+    tir = tirages_des_archives(cle)
+    s = retro_simulation(cfg, tir, 8, iters=1200)
+    assert s["dispersion_anti"] is None

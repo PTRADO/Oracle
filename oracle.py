@@ -101,7 +101,7 @@ from datetime import date, datetime, timedelta
 # `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
 # futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
 
-VERSION = "2.4"          # bump obligatoire à tout changement du contrat JSON
+VERSION = "2.5"          # bump obligatoire à tout changement du contrat JSON
 
 FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
            "v3/documentations/")
@@ -1376,13 +1376,32 @@ def contraintes_historiques(tirages):
 
 
 def grille_valide(cfg, balls, cts) -> bool:
+    """Contraintes de FORME : une grille publiée doit rester plausible à l'œil.
+
+    Elles ont un coût, parce qu'elles travaillent contre l'anti-partage :
+    `meme_dizaine` et `consecutifs` ont un theta NÉGATIF, c'est-à-dire que ces
+    motifs sont sous-joués, donc rentables. Chaque contrainte a donc été pesée
+    séparément (150 000 grilles tirées au sort, meilleure de chaque pool) :
+
+        contrainte          coût en partage (Loto / Euro)   décision
+        parité 2-3 pairs           0 % / 0 %                gardée, gratuite
+        pas 3 consécutifs        7,0 % / 9,2 %              gardée
+        somme dans les bornes   13,7 % / 11,7 %             gardée
+        AU MOINS 2 DIZAINES     15,2 % / 23,0 %             RELÂCHÉE (v2.4)
+
+    Le seuil des dizaines était à 3 et coûtait le plus cher des quatre, pour
+    le moins de plausibilité gagnée : la meilleure grille qu'il interdisait
+    est 4-31-32-36-37, qui n'a rien d'étrange. Il passe à 2. Les trois autres
+    sont conservées — 3 numéros qui se suivent ou une somme extrême sautent
+    aux yeux, et la parité ne coûte rien.
+    """
     s = sum(balls)
     if not (cts["somme_min"] <= s <= cts["somme_max"]):
         return False
     pairs = sum(1 for b in balls if b % 2 == 0)
     if pairs not in (2, 3):
         return False
-    if len({(b - 1) // 10 for b in balls}) < 3:
+    if len({(b - 1) // 10 for b in balls}) < 2:
         return False
     b, run = sorted(balls), 1
     for k in range(1, len(b)):
@@ -1744,7 +1763,9 @@ def maj_historique(cfg, ctx, args) -> dict:
 # ==============================================================================
 
 def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
-                     iters: int = 30000, retour_grilles: bool = False):
+                     iters: int = 30000, retour_grilles: bool = False,
+                     n_graines_dispersion: int = 0,
+                     iters_dispersion: int = 3000):
     """Rejoue les N derniers tirages en jouant LES GRILLES QUI AURAIENT ÉTÉ
     PUBLIÉES, réglées aux rapports réels du tirage.
 
@@ -1770,6 +1791,15 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
     pipeline (contraintes de forme comprises) sans payer les 30 000 tirages
     aléatoires de la publication.
 
+    `n_graines_dispersion` rejoue le mode « anti » avec d'autres graines, à
+    stratégie STRICTEMENT identique, pour mesurer ce que le hasard du
+    générateur pèse à lui seul. Sans cela le produit affiche un nombre unique
+    là où la loi s'étale d'un facteur 25 à 27 : ce n'est pas une mesure, c'est
+    un échantillon de taille 1. Les scores étant déjà calculés pour le tirage
+    courant, seul le tirage de grilles est refait — d'où `iters_dispersion`
+    plus petit, la dispersion n'ayant pas besoin de la même finesse que la
+    grille publiée.
+
     `retour_grilles` ajoute la liste des grilles jouées, tirage par tirage.
     Hors export (le contrat JSON n'en veut pas), mais c'est ce qui rend
     vérifiable la propriété la plus importante de cette fonction : la grille
@@ -1783,6 +1813,7 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None,
                "gains": [], "grilles_jouees": []}
            for m in ("hybride", "pronostic", "anti")}
+    autres_graines = [0.0] * n_graines_dispersion
 
     for i in range(debut, len(tirages)):
         passe = tirages[:i]                       # strictement le passé
@@ -1804,6 +1835,15 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                 res[mode]["grilles_jouees"].append(
                     {"date": t["date"].isoformat(), "numeros": grille,
                      "bonus": bons_b})
+            if mode == "anti" and n_graines_dispersion:
+                for k in range(n_graines_dispersion):
+                    alt = generer_grilles(cfg, fin, sb, passe, mode, 1,
+                                          random.Random(seed + 1 + k), calib,
+                                          iters=iters_dispersion)
+                    if alt:
+                        autres_graines[k] += regler_grille(
+                            cfg, {"numeros": alt[0]["numeros"],
+                                  "bonus": alt[0]["bonus"]}, t)["gain"]
             r = regler_grille(cfg, {"numeros": grille, "bonus": bons_b}, t)
             res[mode]["mise"] += prix_du_tirage(cfg, t["date"])
             res[mode]["gain"] += r["gain"]
@@ -1827,8 +1867,21 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                     res[mode]["meilleur_gain"] = r["gain"]
                     res[mode]["meilleur_date"] = t["date"].isoformat()
 
+    dispersion = None
+    if n_graines_dispersion >= 5:
+        g = sorted(autres_graines)
+        dispersion = {
+            "n_graines": len(g),
+            "p10": round(g[max(int(0.10 * len(g)) - 1, 0)], 2),
+            "mediane": round(statistics.median(g), 2),
+            "p90": round(g[min(int(0.90 * len(g)), len(g) - 1)], 2),
+            "min": round(g[0], 2), "max": round(g[-1], 2),
+            "note": ("mêmes scores, mêmes contraintes, seule la graine du "
+                     "générateur change"),
+        }
+
     n_sim = len(tirages) - debut
-    return {"n_tirages": n_sim,
+    return {"n_tirages": n_sim, "dispersion_anti": dispersion,
             "note": "grilles réellement générées, réglées aux rapports FDJ",
             "prix": cfg["prix"],
             "modes": {m: {"mise": round(v["mise"], 2),
@@ -2139,6 +2192,14 @@ def afficher(cfg, ctx):
         for mode, v in s["modes"].items():
             p(f"   {mode:9s} : misé {v['mise']:.2f} € · gagné {v['gain']:.2f} € "
               f"· ROI {v['roi_pct']}%  · rangs touchés {v['rangs'] or '∅'}")
+        d = s.get("dispersion_anti")
+        if d:
+            p(f"   → Dispersion du mode anti sur {d['n_graines']} autres "
+              f"graines, stratégie IDENTIQUE :")
+            p(f"     {d['min']:.2f} € … {d['p10']:.2f} € … "
+              f"médiane {d['mediane']:.2f} € … {d['p90']:.2f} € … "
+              f"{d['max']:.2f} €")
+            p("     Le chiffre ci-dessus est UNE réalisation, pas une moyenne.")
         p("   → Le ROI long terme converge vers -(1-TRJ). C'est la maison qui")
         p("     gagne ; ce compteur est là pour ne jamais l'oublier.")
 
@@ -2326,8 +2387,13 @@ def main():
             budget=args.recherche, n_nuls=12)
 
     ctx["histo"] = maj_historique(cfg, ctx, args)
+    # 12 graines suffisent pour un intervalle honnête : ce qu'on veut dire au
+    # lecteur, c'est « ce nombre aurait pu être très différent », pas un
+    # percentile au centième. Coût borné, les scores n'étant calculés qu'une
+    # fois par tirage.
     ctx["sim"] = (retro_simulation(cfg, tirages, args.simulation,
-                                   seed=args.seed or 0)
+                                   seed=args.seed or 0,
+                                   n_graines_dispersion=12)
                   if args.simulation else None)
 
     afficher(cfg, ctx)

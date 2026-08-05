@@ -18,7 +18,13 @@
        10
       ],
       "score": 66.4,
-      "pop_rel": 0.875
+      "pop_rel": 0.875,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -32,7 +38,17 @@
        9
       ],
       "score": 65.7,
-      "pop_rel": 0.906
+      "pop_rel": 0.906,
+      "reglement": {
+       "bons": [
+        38
+       ],
+       "bonus_ok": [
+        9
+       ],
+       "rang": 9,
+       "gain": 2.2
+      }
      },
      {
       "numeros": [
@@ -46,7 +62,13 @@
        8
       ],
       "score": 64.6,
-      "pop_rel": 0.887
+      "pop_rel": 0.887,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      }
     ],
     "pronostic": [
@@ -62,7 +84,13 @@
        3
       ],
       "score": 72.7,
-      "pop_rel": 1.017
+      "pop_rel": 1.017,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -76,7 +104,13 @@
        2
       ],
       "score": 72.1,
-      "pop_rel": 0.975
+      "pop_rel": 0.975,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -90,7 +124,13 @@
        7
       ],
       "score": 71.7,
-      "pop_rel": 1.043
+      "pop_rel": 1.043,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      }
     ],
     "anti": [
@@ -106,7 +146,15 @@
        10
       ],
       "score": 78.6,
-      "pop_rel": 0.807
+      "pop_rel": 0.807,
+      "reglement": {
+       "bons": [
+        38
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -120,7 +168,15 @@
        8
       ],
       "score": 78.0,
-      "pop_rel": 0.811
+      "pop_rel": 0.811,
+      "reglement": {
+       "bons": [
+        38
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -134,14 +190,291 @@
        9
       ],
       "score": 77.7,
-      "pop_rel": 0.814
+      "pop_rel": 0.814,
+      "reglement": {
+       "bons": [
+        38
+       ],
+       "bonus_ok": [
+        9
+       ],
+       "rang": 9,
+       "gain": 2.2
+      }
      }
     ]
    },
    "systeme": null,
+   "regle": true,
+   "resultat": {
+    "numeros": [
+     12,
+     22,
+     24,
+     33,
+     38
+    ],
+    "bonus": [
+     9
+    ]
+   }
+  },
+  "2026-08-08": {
+   "annonce_le": "2026-08-05T23:11:15",
+   "jeu": "LOTO",
+   "prix": 2.2,
+   "modes": {
+    "hybride": [
+     {
+      "numeros": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 68.4,
+      "pop_rel": 0.265
+     },
+     {
+      "numeros": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 68.3,
+      "pop_rel": 0.274
+     },
+     {
+      "numeros": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "score": 67.7,
+      "pop_rel": 0.276
+     },
+     {
+      "numeros": [
+       2,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 66.8,
+      "pop_rel": 0.248
+     }
+    ],
+    "pronostic": [
+     {
+      "numeros": [
+       13,
+       15,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       3
+      ],
+      "score": 69.2,
+      "pop_rel": 1.635
+     },
+     {
+      "numeros": [
+       13,
+       15,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 69.0,
+      "pop_rel": 1.19
+     },
+     {
+      "numeros": [
+       13,
+       15,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       7
+      ],
+      "score": 68.8,
+      "pop_rel": 0.733
+     },
+     {
+      "numeros": [
+       6,
+       13,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       3
+      ],
+      "score": 68.8,
+      "pop_rel": 1.705
+     }
+    ],
+    "anti": [
+     {
+      "numeros": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 79.8,
+      "pop_rel": 0.214
+     },
+     {
+      "numeros": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "score": 79.1,
+      "pop_rel": 0.219
+     },
+     {
+      "numeros": [
+       1,
+       31,
+       32,
+       36,
+       37
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 78.5,
+      "pop_rel": 0.225
+     },
+     {
+      "numeros": [
+       3,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 78.1,
+      "pop_rel": 0.227
+     }
+    ]
+   },
+   "systeme": {
+    "pool": [
+     31,
+     32,
+     34,
+     35,
+     36,
+     38,
+     41,
+     46,
+     47
+    ],
+    "garantie": "≥3 numéros si les 5 sortants sont dans le pool",
+    "grilles": [
+     {
+      "numeros": [
+       31,
+       32,
+       34,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "pop_rel": 0.177
+     },
+     {
+      "numeros": [
+       31,
+       38,
+       41,
+       46,
+       47
+      ],
+      "bonus": [
+       1
+      ],
+      "pop_rel": 0.409
+     }
+    ],
+    "cout": 4.4
+   },
    "regle": false
   }
  },
- "cumul": {},
- "maj_le": "2026-08-05T20:42:33"
+ "cumul": {
+  "hybride": {
+   "tirages_regles": 1,
+   "mise": 6.6,
+   "gain": 2.2,
+   "roi_pct": -66.7,
+   "meilleur": {
+    "date": "2026-08-05",
+    "rang": 9,
+    "gain": 2.2
+   }
+  },
+  "pronostic": {
+   "tirages_regles": 1,
+   "mise": 6.6,
+   "gain": 0.0,
+   "roi_pct": -100.0,
+   "meilleur": null
+  },
+  "anti": {
+   "tirages_regles": 1,
+   "mise": 6.6,
+   "gain": 2.2,
+   "roi_pct": -66.7,
+   "meilleur": {
+    "date": "2026-08-05",
+    "rang": 9,
+    "gain": 2.2
+   }
+  }
+ },
+ "maj_le": "2026-08-05T23:11:15"
 }

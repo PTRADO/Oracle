@@ -44,7 +44,9 @@ def test_meta_complet(export):
     # rang 1, ~5,4× les beta 2.3) et trois clés apparaissent. Le bump n'est pas
     # une formalité : une page 2.3 lisant un export 2.4 afficherait des
     # multiplicateurs de partage faux d'un facteur 5.
-    assert m["version"] == "2.4"
+    # 2.5 : le seuil des dizaines passe de 3 à 2 dans `grille_valide` (les
+    # grilles publiées changent) et la simulation expose `dispersion_anti`.
+    assert m["version"] == "2.5"
     assert m["source"] == "fdj", "export encore basé sur des données de démo"
 
 
@@ -223,6 +225,25 @@ def test_la_formule_s_effondre_hors_echantillon(export):
     assert r["score_entrainement"] > r["score_validation"]
 
 
+def test_la_simulation_expose_sa_dispersion(export):
+    """v2.5 — « si tu avais joué » affichait un nombre unique là où la loi
+    s'étale d'un facteur 25 à 27 selon la graine du générateur. Ce n'est pas
+    une mesure, c'est un échantillon de taille 1. La page a besoin de
+    l'intervalle pour cesser de suggérer une précision qui n'existe pas.
+    """
+    d = export["simulation"]["dispersion_anti"]
+    assert d, "dispersion absente — la page afficherait un nombre nu"
+    assert d["n_graines"] >= 5
+    assert d["min"] <= d["p10"] <= d["mediane"] <= d["p90"] <= d["max"]
+    assert d["min"] >= 0
+    # le gain publié doit tomber dans la plage observée, à l'ordre de grandeur
+    # près : les autres graines tournent à moins d'itérations.
+    gain = export["simulation"]["modes"]["anti"]["gain"]
+    assert gain <= 3 * max(d["max"], 1.0), (
+        f"le gain publié ({gain} €) est hors de toute plage plausible "
+        f"(max observé {d['max']} €)")
+
+
 def test_l_historique_jouable_est_exporte(export):
     """La section « si tu avais joué » a besoin de ces champs."""
     sim = export["simulation"]
@@ -277,7 +298,7 @@ def test_la_simulation_joue_les_grilles_vraiment_publiees(export):
         b = sorted(g["grille"])
         pairs = sum(1 for x in b if x % 2 == 0)
         assert pairs in (2, 3), f"{b} : parité hors contrainte"
-        assert len({(x - 1) // 10 for x in b}) >= 3, f"{b} : moins de 3 dizaines"
+        assert len({(x - 1) // 10 for x in b}) >= 2, f"{b} : moins de 2 dizaines"
         suite = 1
         for k in range(1, len(b)):
             suite = suite + 1 if b[k] == b[k - 1] + 1 else 1

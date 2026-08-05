@@ -9,7 +9,7 @@
   "bonus_max": 12,
   "n_max": 50,
   "prix": 2.5,
-  "genere_le": "2026-08-05T14:07:13",
+  "genere_le": "2026-08-05T15:32:45",
   "n_tirages": 1029,
   "periode_debut": "2016-09-27",
   "periode_fin": "2026-08-04",
@@ -963,8 +963,9 @@
   }
  },
  "ev_params": {
-  "n_est": 5083260,
-  "ev_fixe": 0.4437,
+  "n_est": 5072927,
+  "ev_fixe": 0.4446,
+  "trj_hors_jackpot": 0.1778,
   "p_jackpot_inv": 139838160,
   "prix": 2.5
  },
@@ -1739,15 +1740,22 @@
   },
   "chi2": {
    "chi2": 46.61,
-   "ddl": 49,
-   "seuil_5pct": 66.34,
-   "seuil_1pct": 74.92,
+   "ddl": 50,
+   "esperance": 45,
+   "seuil_5pct": 60.75,
+   "seuil_1pct": 68.54,
    "biais_detecte": false,
    "top_suspects": [
     42,
     17,
     23
    ]
+  },
+  "trj": {
+   "n_tirages": 1029,
+   "trj_total": 0.4094,
+   "trj_hors_jackpot": 0.1962,
+   "part_jackpot": 0.5207
   },
   "recherche": {
    "n_tirages_evalues": 969,

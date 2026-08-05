@@ -58,18 +58,33 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 .quand{text-align:center;margin-bottom:10px}
 .quand b{display:block;font-family:"Bricolage Grotesque";font-weight:700;font-size:19px}
 .quand span{font-size:13.5px;color:var(--brume)}
-.carte-grille{padding:24px 18px;text-align:center;margin-bottom:14px}
-.boules{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
-.boule{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-family:"Bricolage Grotesque";font-weight:800;font-size:21px;color:#0B1020;
+.carte-grille{padding:24px 18px;text-align:center;margin-bottom:14px;container-type:inline-size}
+
+/* La grille conseillée est LE contenu de la page : elle doit se lire d'un coup
+   d'œil, donc tenir sur une seule ligne. En EuroMillions cela fait 7 pastilles
+   plus le « + » — impossible à taille fixe sur un téléphone étroit. Les boules
+   rétrécissent donc (flex-shrink) au lieu de passer à la ligne, et leur taille
+   comme leur écart suivent la largeur réelle de la carte (unités cq*), pas
+   celle de l'écran. Les valeurs en dur qui précèdent chaque clamp() sont le
+   repli pour les navigateurs sans container queries. */
+.boules{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;
+  gap:9px;gap:clamp(4px,1.6cqi,9px);margin-bottom:6px}
+.boule{flex:0 1 52px;min-width:0;aspect-ratio:1;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"Bricolage Grotesque";font-weight:800;color:#0B1020;
+  font-size:21px;font-size:clamp(13px,5.4cqi,21px);
   background:linear-gradient(150deg,#FFFFFF,#C8D2E6);
   box-shadow:inset -3px -4px 8px rgba(11,16,32,.28)}
 .boule.or{background:linear-gradient(150deg,#FFE2A0,#E5A93F);color:#3A2404}
-.plus{color:var(--brume);font-weight:700;font-size:19px}
+.plus{flex:0 0 auto;color:var(--brume);font-weight:700;
+  font-size:19px;font-size:clamp(13px,4cqi,19px)}
 .actions{display:flex;gap:10px;margin-top:18px}
 .bouton{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
   text-decoration:none;cursor:pointer;font:600 15px "Instrument Sans";color:var(--encre);
-  padding:14px 12px;border-radius:14px;background:var(--verre-fort);border:1px solid var(--bord)}
+  padding:14px 12px;border-radius:14px;background:var(--verre-fort);border:1px solid var(--bord);
+  /* « Jouer sur FDJ ↗ » sur deux lignes coupe la flèche de son libellé : le
+     texte reste d'un bloc et c'est le corps qui cède sur les petits écrans. */
+  white-space:nowrap;font-size:clamp(12.5px,3.7cqi,15px)}
 .bouton:hover{background:rgba(255,255,255,.14)}
 .bouton.primaire{background:var(--rouge);border-color:transparent;color:#fff}
 .bouton.primaire:hover{background:#E8483D}
@@ -113,13 +128,15 @@ th{color:var(--brume);font-weight:600;font-size:12px}
 .puce.sur{color:var(--rouge);border-color:rgba(255,90,78,.4)}
 .puce.del{color:var(--vert);border-color:rgba(74,222,156,.4)}
 
-.mini-grille{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0;font-size:14px}
-.mini-grille .b{min-width:30px;height:30px;padding:0 5px;border-radius:8px;display:flex;
+/* Même règle que la grille principale : une grille = une ligne, sinon on ne
+   sait plus où finit un ticket et où commence le suivant. */
+.mini-grille{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;margin:7px 0;font-size:14px}
+.mini-grille .b{flex:0 1 30px;min-width:0;height:30px;padding:0 4px;border-radius:8px;display:flex;
   align-items:center;justify-content:center;background:var(--verre-fort);
   border:1px solid var(--bord);font:700 13px "Bricolage Grotesque"}
 .mini-grille .b.or{color:var(--or);border-color:rgba(255,200,92,.45)}
-.mini-grille .copier-mini{margin-left:auto;background:none;border:0;color:var(--brume);
-  cursor:pointer;font:600 13px "Instrument Sans";padding:5px 8px;border-radius:8px}
+.mini-grille .copier-mini{flex:0 0 auto;margin-left:auto;background:none;border:0;color:var(--brume);
+  cursor:pointer;font:600 13px "Instrument Sans";padding:5px 7px;border-radius:8px}
 .mini-grille .copier-mini:hover{background:var(--verre-fort);color:var(--encre)}
 
 .verdict{padding:12px 14px;border-radius:12px;background:var(--verre-fort);margin-top:12px}
@@ -137,9 +154,14 @@ footer b{color:var(--encre)}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
   background:var(--verre-fort);padding:2px 6px;border-radius:6px;display:inline-block;margin:3px 0}
 
+/* Sur les écrans étroits, on ne rapetisse plus les boules à la main (elles s'en
+   chargent) : on leur rend de la place en rognant les marges de la page. */
 @media (max-width:380px){
-  .boule{width:45px;height:45px;font-size:18px}
-  .boules{gap:7px}
+  .wrap{padding:20px 12px 44px}
+  .carte-grille{padding:22px 12px}
+  .corps{padding:14px 13px 18px}
+  .actions{gap:8px}
+  .bouton{padding:13px 8px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>

@@ -1085,8 +1085,13 @@ def parametres_ev(cfg, tirages):
         # Ce que récupère VRAIMENT un joueur d'un ticket par tirage, en part
         # du prix payé. À ne pas confondre avec le TRJ du jeu (~50 %), qui
         # inclut un jackpot que ce joueur ne touchera jamais.
-        "trj_hors_jackpot": (round(ev_fixe / cfg["prix"], 4)
-                             if ev_fixe else None),
+        #
+        # Nom explicite (v2.4) : cette valeur porte sur les 160 derniers
+        # tirages, alors que `verdicts.trj.trj_hors_jackpot` porte sur tout
+        # l'historique. Deux chiffres proches sous le même nom dans le même
+        # export, c'est un piège pour qui consomme le contrat.
+        "trj_hors_jackpot_recent": (round(ev_fixe / cfg["prix"], 4)
+                                    if ev_fixe else None),
         "p_jackpot_inv": proba_jackpot(cfg),
         "prix": cfg["prix"],
     }
@@ -1111,7 +1116,6 @@ def decomposition_trj(cfg, tirages):
     jackpot est européen. Les rares rangs 1 français rendent `trj_total`
     volatil et plutôt sous-estimé ; `trj_hors_jackpot`, lui, reste solide.
     """
-    prix = cfg["prix"]
     mises = paye_tot = paye_hors = 0.0
     n = 0
     for t in tirages:
@@ -1119,7 +1123,13 @@ def decomposition_trj(cfg, tirages):
         if total_gagnants <= 0 or not t["rapports"]:
             continue
         n += 1
-        mises += (total_gagnants / cfg["p_any_win"]) * prix
+        # Prix DE L'ÉPOQUE : le Loto valait 2,00 € avant novembre 2019, et
+        # 417 des 1473 tirages sont concernés. Facturer le passé au tarif
+        # d'aujourd'hui gonfle les mises et sous-estime le TRJ de 1,3 point —
+        # exactement le défaut corrigé dans la rétro-simulation, qui
+        # subsistait ici.
+        mises += (total_gagnants / cfg["p_any_win"]) * prix_du_tirage(
+            cfg, t["date"])
         for rang, rapport in t["rapports"].items():
             montant = t["gagnants"].get(rang, 0) * rapport
             paye_tot += montant

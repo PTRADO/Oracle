@@ -9,7 +9,7 @@
   "bonus_max": 10,
   "n_max": 49,
   "prix": 2.2,
-  "genere_le": "2026-08-05T18:03:50",
+  "genere_le": "2026-08-05T18:59:13",
   "n_tirages": 1473,
   "periode_debut": "2017-03-06",
   "periode_fin": "2026-08-03",
@@ -934,7 +934,7 @@
  "ev_params": {
   "n_est": 3864274,
   "ev_fixe": 0.7659,
-  "trj_hors_jackpot": 0.3481,
+  "trj_hors_jackpot_recent": 0.3481,
   "p_jackpot_inv": 19068840,
   "prix": 2.2
  },
@@ -2170,8 +2170,8 @@
   },
   "trj": {
    "n_tirages": 1473,
-   "trj_total": 0.4986,
-   "trj_hors_jackpot": 0.3513,
+   "trj_total": 0.512,
+   "trj_hors_jackpot": 0.3607,
    "part_jackpot": 0.2955
   },
   "recherche": {

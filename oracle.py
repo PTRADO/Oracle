@@ -113,6 +113,11 @@ JEUX = {
         "bonus_max": 10, "bonus_pick": 1, "bonus_nom": "chance",
         "bonus_patterns": [r"numero[_ ]?chance"],
         "prix": 2.20,
+        # Tarifs successifs de la grille simple, du plus récent au plus ancien.
+        # Le « nouveau Loto » du 04/11/2019 a porté la grille de 2,00 à 2,20 €.
+        # Rejouer le passé au tarif d'aujourd'hui gonfle la mise et noircit
+        # le ROI affiché : la rétro-simulation applique le prix de l'époque.
+        "prix_historique": [("2019-11-04", 2.20), ("1900-01-01", 2.00)],
         # Combinatoire exacte : (142 121 × 10 + 1 764 763) / 19 068 840.
         # La FDJ communique « 1 chance sur 6 » ; la vraie valeur est 1/5,985.
         # C'est le diviseur de n_est, donc de toute l'EV : on prend l'exact.
@@ -177,6 +182,22 @@ POIDS_FOLKLORE = {"frequence": 1.0, "retard": 1.0, "ewma": 1.0,
                   "momentum": 1.0, "markov": 1.0, "paires": 1.0, "jour": 0.5}
 
 BAR_FULL, BAR_EMPTY = "█", "░"
+
+
+def prix_du_tirage(cfg, jour: date) -> float:
+    """Prix d'une grille simple à la date `jour`.
+
+    Sans `prix_historique`, le tarif est réputé constant. Sinon on prend le
+    premier palier dont la date d'entrée en vigueur précède le tirage.
+    """
+    paliers = cfg.get("prix_historique")
+    if not paliers:
+        return cfg["prix"]
+    iso = jour.isoformat()
+    for depuis, montant in paliers:
+        if iso >= depuis:
+            return montant
+    return cfg["prix"]
 
 
 def proba_jackpot(cfg) -> int:
@@ -1057,11 +1078,60 @@ def parametres_ev(cfg, tirages):
                 ev_fixes.append(paye / n_est)
     if not n_ests:
         return None
+    ev_fixe = round(statistics.mean(ev_fixes), 4) if ev_fixes else None
     return {
         "n_est": round(statistics.median(n_ests)),
-        "ev_fixe": round(statistics.mean(ev_fixes), 4) if ev_fixes else None,
+        "ev_fixe": ev_fixe,
+        # Ce que récupère VRAIMENT un joueur d'un ticket par tirage, en part
+        # du prix payé. À ne pas confondre avec le TRJ du jeu (~50 %), qui
+        # inclut un jackpot que ce joueur ne touchera jamais.
+        "trj_hors_jackpot": (round(ev_fixe / cfg["prix"], 4)
+                             if ev_fixe else None),
         "p_jackpot_inv": proba_jackpot(cfg),
         "prix": cfg["prix"],
+    }
+
+
+def decomposition_trj(cfg, tirages):
+    """Décompose le taux de retour joueur à partir des rapports FDJ réels.
+
+    Méthode, indépendante des probabilités théoriques :
+        TRJ = Σ(gagnants_k × rapport_k) / (N_est × prix)
+    avec N_est = total_gagnants / P(gagner quelque chose). Le même calcul
+    privé du rang 1 donne ce qui redescend réellement vers les joueurs
+    ordinaires.
+
+    Sur le Loto, le total retombe sur les ~50 % annoncés par la FDJ — ce qui
+    valide la mesure — tandis que la version hors rang 1 tombe à ~35 %. La
+    différence n'est pas une perte : c'est la part de la mise qui alimente
+    un jackpot dont l'espérance, pour un joueur d'un ticket, est nulle en
+    pratique.
+
+    Note EuroMillions : les gagnants comptés sont les FRANÇAIS, alors que le
+    jackpot est européen. Les rares rangs 1 français rendent `trj_total`
+    volatil et plutôt sous-estimé ; `trj_hors_jackpot`, lui, reste solide.
+    """
+    prix = cfg["prix"]
+    mises = paye_tot = paye_hors = 0.0
+    n = 0
+    for t in tirages:
+        total_gagnants = sum(t["gagnants"].values())
+        if total_gagnants <= 0 or not t["rapports"]:
+            continue
+        n += 1
+        mises += (total_gagnants / cfg["p_any_win"]) * prix
+        for rang, rapport in t["rapports"].items():
+            montant = t["gagnants"].get(rang, 0) * rapport
+            paye_tot += montant
+            if rang >= 2:
+                paye_hors += montant
+    if not mises:
+        return None
+    return {
+        "n_tirages": n,
+        "trj_total": round(paye_tot / mises, 4),
+        "trj_hors_jackpot": round(paye_hors / mises, 4),
+        "part_jackpot": round(1 - paye_hors / paye_tot, 4),
     }
 
 
@@ -1309,7 +1379,7 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
                                            + 8 * _pop_bonus_heuristique(cfg, x)))
             bons_b = tb[:cfg["bonus_pick"]]
             r = regler_grille(cfg, {"numeros": grille, "bonus": bons_b}, t)
-            res[mode]["mise"] += cfg["prix"]
+            res[mode]["mise"] += prix_du_tirage(cfg, t["date"])
             res[mode]["gain"] += r["gain"]
             if r["rang"]:
                 res[mode]["rangs"][r["rang"]] += 1
@@ -1428,19 +1498,36 @@ def test_popularite(tirages):
 
 def test_chi2(cfg, tirages):
     """χ² d'équiprobabilité des boules — le seul edge théorique (usure).
-    Seuils ~ ddl±2√(2·ddl) : approximation de Wilson-Hilferty codée en dur
-    pour les ddl usuels."""
-    SEUILS = {48: (65.17, 73.68), 49: (66.34, 74.92)}
+
+    Attention à la loi de référence : un tirage prend `pick` boules SANS
+    REMISE, ce n'est donc PAS une multinomiale. Chaque boule sort avec
+    p = pick/n_max, indépendamment d'un tirage à l'autre, d'où
+        Var(O_i) = n·p(1−p)   et   E[(O_i−E)²/E] = 1−p,
+    soit E[χ²] = n_max·(1−p) = n_max − pick — et non n_max − 1.
+
+    La statistique suit de près (1−p)·χ²(n_max). Comparer sa valeur brute
+    aux seuils d'un χ²(n_max−1) rend le test trop conservateur : mesuré par
+    simulation, l'ancien « seuil 5 % » ne déclenchait qu'à 2-3 %. Un test
+    qui alerte deux fois moins souvent qu'annoncé transforme son manque de
+    sensibilité en fausse certitude (« boules équilibrées »).
+
+    Seuils = (1 − pick/n_max) × quantiles d'un χ²(n_max), vérifiés par
+    simulation dans tests/test_chi2.py.
+    """
+    QUANTILES = {49: (66.339, 74.919), 50: (67.505, 76.154)}
     c = Counter()
     for t in tirages:
         c.update(t["balls"])
     n_total = len(tirages) * cfg["pick"]
     attendu = n_total / cfg["n_max"]
     chi2 = sum((c.get(n, 0) - attendu) ** 2 / attendu for n in nums(cfg))
-    ddl = cfg["n_max"] - 1
-    s5, s1 = SEUILS.get(ddl, (ddl + 2 * math.sqrt(2 * ddl),
-                              ddl + 3.1 * math.sqrt(2 * ddl)))
+    ddl = cfg["n_max"]                     # ddl effectif de la loi mise à l'échelle
+    echelle = 1.0 - cfg["pick"] / cfg["n_max"]
+    q5, q1 = QUANTILES.get(ddl, (ddl + 2 * math.sqrt(2 * ddl),
+                                 ddl + 3.1 * math.sqrt(2 * ddl)))
+    s5, s1 = echelle * q5, echelle * q1
     return {"chi2": round(chi2, 2), "ddl": ddl,
+            "esperance": cfg["n_max"] - cfg["pick"],
             "seuil_5pct": round(s5, 2), "seuil_1pct": round(s1, 2),
             "biais_detecte": chi2 > s5,
             "top_suspects": [n for n, _ in c.most_common(3)]}
@@ -1524,6 +1611,23 @@ def afficher(cfg, ctx):
         e = ctx["ev_p"]
         p(f"   (participation estimée ≈ {e['n_est']:,} grilles/tirage · "
           f"gains hors-jackpot ≈ {e['ev_fixe']} €/grille)".replace(",", " "))
+
+    trj = ctx.get("trj")
+    if trj:
+        p("\n▶ CE QUE TU RÉCUPÈRES VRAIMENT (et non ce qui est annoncé)")
+        p(f"   Sur {trj['n_tirages']} tirages, recomposé depuis les rapports "
+          "FDJ réels :")
+        p(f"   · retour total du jeu ........... {trj['trj_total']:.1%}  "
+          "(≈ le « 50 % reversé aux joueurs » annoncé)")
+        p(f"   · dont happé par le rang 1 ...... {trj['part_jackpot']:.1%} "
+          "de la cagnotte")
+        p(f"   · retour HORS jackpot ........... {trj['trj_hors_jackpot']:.1%} "
+          f"→ {cfg['prix'] * trj['trj_hors_jackpot']:.2f} € rendus "
+          f"par tranche de {cfg['prix']:.2f} €")
+        p("   Le « 50 % » est vrai pour le JEU, pas pour TOI : la moitié de "
+          "cette")
+        p("   somme dort dans un jackpot qu'un joueur d'un ticket ne touchera")
+        p("   jamais. Ton retour réel, c'est la troisième ligne.")
 
     if ctx["systeme"]:
         s = ctx["systeme"]
@@ -1683,6 +1787,7 @@ def export_web(chemin, cfg, ctx, args):
         "verdicts": {"backtest": ctx["bt"],
                      "effet_anniversaire": ctx["pop"],
                      "chi2": ctx["chi2"],
+                     "trj": ctx.get("trj"),
                      "recherche": ctx.get("recherche")},
     }
     os.makedirs(os.path.dirname(os.path.abspath(chemin)), exist_ok=True)
@@ -1772,6 +1877,7 @@ def main():
            "anti_mode": anti_mode, "calib": calib, "final": final, "sb": sb,
            "grilles": grilles, "jackpot": jackpot, "ev_p": ev_p,
            "systeme": systeme, "bt": bt, "pop": pop, "chi2": chi2,
+           "trj": decomposition_trj(cfg, tirages),
            "alertes": alertes, "sources": sources}
 
     if args.recherche:

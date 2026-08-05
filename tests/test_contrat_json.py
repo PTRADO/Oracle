@@ -125,7 +125,11 @@ def test_le_folklore_ne_bat_pas_le_hasard(export):
 
 
 def test_chi2_et_effet_anniversaire_presents(export):
-    assert export["verdicts"]["chi2"]["ddl"] == export["meta"]["n_max"] - 1
+    # Tirage sans remise : E[χ²] = n_max − pick (et non n_max − 1), la loi de
+    # référence étant (1 − pick/n_max)·χ²(n_max). Cf. tests/test_chi2.py.
+    c2 = export["verdicts"]["chi2"]
+    assert c2["ddl"] == export["meta"]["n_max"]
+    assert c2["esperance"] == export["meta"]["n_max"] - 5
     assert export["verdicts"]["effet_anniversaire"]["n"] > 0
 
 

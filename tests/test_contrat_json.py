@@ -39,7 +39,12 @@ def test_meta_complet(export):
                 "prochain_tirage", "prochain_jour", "n_tirages",
                 "periode_debut", "periode_fin", "genere_le"):
         assert cle in m, cle
-    assert m["version"] == "2.3"
+    # 2.4 : la calibration anti-partage passe au panel à effets fixes de
+    # tirage. `calibration.beta` change de SENS (log-popularité à l'échelle du
+    # rang 1, ~5,4× les beta 2.3) et trois clés apparaissent. Le bump n'est pas
+    # une formalité : une page 2.3 lisant un export 2.4 afficherait des
+    # multiplicateurs de partage faux d'un facteur 5.
+    assert m["version"] == "2.4"
     assert m["source"] == "fdj", "export encore basé sur des données de démo"
 
 
@@ -92,6 +97,41 @@ def test_calibration_exportee(export):
     assert len(cal["beta"]) == export["meta"]["n_max"]
     assert len(cal["top_surjoues"]) and len(cal["top_delaisses"])
     assert set(cal["top_surjoues"]).isdisjoint(cal["top_delaisses"])
+
+
+def test_calibration_v24_expose_de_quoi_juger_sa_solidite(export):
+    """La page affiche « mesuré sur N tirages ». Elle doit pouvoir dire
+    AVEC QUELLE FORCE, sinon la phrase n'engage à rien."""
+    cal, m = export["calibration"], export["meta"]
+    assert cal["t_median"] > 3, "signal trop faible pour piloter des grilles"
+    assert cal["n_significatifs"] >= 0.7 * m["n_max"]
+    assert len(cal["rangs_utilises"]) >= 2, (
+        "un seul rang ne permet aucun effet fixe de tirage")
+    assert len(cal["delta"]) == m["bonus_max"], "popularité du bonus absente"
+    assert set(cal["theta"]) == {"date_31", "mois_12", "consecutifs",
+                                 "meme_dizaine", "hauts_31"}
+
+
+def test_les_co_occurrences_gardent_le_signe_mesure(export):
+    """Un changement de signe ici inverserait le conseil donné : par exemple
+    recommander des numéros consécutifs alors qu'ils sont sous-joués, ou
+    l'inverse. Les signes sont ceux mesurés indépendamment sur les deux jeux.
+    """
+    t = export["calibration"]["theta"]
+    assert t["date_31"] > 0 and t["mois_12"] > 0
+    assert t["consecutifs"] < 0 and t["meme_dizaine"] < 0
+    assert t["hauts_31"] > 0, (
+        "hauts_31 doit rester positif : les grands numéros sont joués "
+        "ensemble, une grille tout-en-haut est plus partagée qu'il n'y paraît")
+
+
+def test_pop_rel_des_grilles_publiees_est_bien_inferieur_a_un(export):
+    """Le produit promet des grilles MOINS partagées. En mode anti, cela doit
+    se voir sur le multiplicateur exporté, sinon la promesse est verbale."""
+    for g in export["modes"]["anti"]["grilles"]:
+        assert g["pop_rel"] < 1.0, (
+            f"grille {g['numeros']} annoncée anti-partage avec "
+            f"pop_rel={g['pop_rel']} ≥ 1")
 
 
 def test_ev_params_permet_le_recalcul_live(export):

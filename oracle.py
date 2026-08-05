@@ -101,7 +101,7 @@ from datetime import date, datetime, timedelta
 # `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
 # futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
 
-VERSION = "2.3"          # bump obligatoire à tout changement du contrat JSON
+VERSION = "2.4"          # bump obligatoire à tout changement du contrat JSON
 
 FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
            "v3/documentations/")
@@ -817,141 +817,500 @@ def _pop_bonus_heuristique(cfg, n: int) -> float:
     return max(0.3, 1.25 - 0.06 * n) + (0.35 if n == 7 else 0)
 
 
-# ---- T9b : CALIBRATION EMPIRIQUE ---------------------------------------------
+# ---- T9b : CALIBRATION EMPIRIQUE (panel à effets fixes de tirage) ------------
+#
+# Ce qui a changé en v2.4, et pourquoi.
+#
+# La v2.3 régressait log(TOTAL des gagnants) sur les numéros sortis, avec une
+# tendance t/t² et des indicatrices de jour pour absorber la participation.
+# Deux défauts mesurés :
+#
+#   1. Au Loto, le rang 9 (« n° Chance seul ») pèse ~55 % des gagnants et ne
+#      dépend PAS des 5 boules. Plus de la moitié de la variable expliquée
+#      était donc du bruit vis-à-vis du signal cherché. |t| médian sur les
+#      49 coefficients : 1,87 — seuls 24/49 sortaient du bruit.
+#   2. Une tendance t/t² ne peut pas absorber les rollovers de jackpot, qui
+#      sont le premier moteur de la participation et sautent d'un tirage à
+#      l'autre.
+#
+# La v2.4 exploite le fait que la FDJ publie les gagnants RANG PAR RANG. Pour
+# un même tirage, chaque rang voit la MÊME participation mais un nombre
+# différent de boules appariées. On peut donc mettre un effet fixe par tirage
+# et éliminer la participation EXACTEMENT, au lieu de l'approximer :
+#
+#     log W(t,r) = alpha_t + mu_r
+#                  + (m_r/pick)  · Σ_j x(t,j)·gamma_j
+#                  + (b_r/bpick) · Σ_k z(t,k)·delta_k
+#                  + Σ_f (C(m_r,2)/C(pick,2)) · F_f(tirage) · theta_f + eps
+#
+#   · alpha_t : participation du tirage t (jackpot, saison, météo, pub…).
+#     Éliminé par centrage intra-tirage. Aucun contrôle à spécifier, donc
+#     aucun contrôle à mal spécifier.
+#   · gamma_j : log-popularité du numéro j chez les joueurs. CE QU'ON CHERCHE.
+#   · delta_k : idem pour le n° Chance / les Étoiles — mesuré, plus deviné.
+#   · theta_f : affinités de CO-OCCURRENCE (les joueurs cochent des dates
+#     ENSEMBLE). Le facteur C(m,2)/C(pick,2) est ce qui les rend identifiables
+#     séparément des gamma marginaux : un effet marginal croît en m, un effet
+#     de paire croît en m².
+#
+# Le facteur m/pick vient du développement de log W_m : chaque boule tirée
+# apparaît dans C(pick−1,m−1)/C(pick,m) = m/pick des sous-ensembles de
+# taille m appariables. Vérifié sur les données (cf. tests/test_popularite.py) :
+# gamma estimé sur les rangs à m faible et sur ceux à m fort donne la même
+# échelle à 3 % près, alors que les facteurs alternatifs (m/pick)² et
+# sqrt(m/pick) détruisent le signal.
+#
+# CE QUI REND CETTE RÉGRESSION LÉGITIME : x(t,·) est TIRÉ AU SORT par la FDJ.
+# La variable explicative est randomisée, donc orthogonale à alpha_t et à tout
+# confondant imaginable. Ce n'est pas une étude observationnelle, c'est une
+# expérience randomisée dont la FDJ publie les résultats.
+#
+# Mesures de contrôle (toutes dans tests/test_popularite.py) :
+#   · placebo (boules remplacées par un tirage indépendant) : |t| médian 0,71,
+#     2 coefficients sur 49 au-delà de 1,96 — soit exactement le taux d'erreur
+#     de première espèce attendu. L'estimateur ne fabrique pas de signal.
+#   · stabilité 1re moitié vs 2e moitié : Spearman +0,97 (Loto), +0,90 (Euro).
+#   · insensible à lambda (0,5→32), w_min (10→1000), phi (0→0,10).
 
-def _resoudre(A, b):
-    """Résout A·x = b par élimination de Gauss avec pivot partiel (stdlib)."""
+# Co-occurrences retenues : significatives à |t| > 3 dans les DEUX jeux,
+# de même signe, et nulles sous placebo. Les trois règles codées en dur de la
+# v2.3 sont supprimées : « tous ≤ 15 » n'est jamais arrivé en 1473 tirages
+# (inestimable) et « suite arithmétique » deux fois (2 occurrences ne
+# soutiennent aucun coefficient). « nb ≤ 31 ≥ 4 » est remplacé par sa version
+# continue et correctement pondérée, `date_31`.
+PAIRES_POPULARITE = (
+    # les joueurs cochent des dates : deux numéros de jour cochés ensemble
+    ("date_31", lambda x, y: x <= 31 and y <= 31),
+    # …et le numéro du mois compte double (jour ET mois)
+    ("mois_12", lambda x, y: x <= 12 and y <= 12),
+    # motifs de la grille papier
+    ("consecutifs", lambda x, y: y - x == 1),
+    ("meme_dizaine", lambda x, y: (x - 1) // 10 == (y - 1) // 10),
+    # signature d'un MÉLANGE de populations : les numéros hauts sont joués
+    # ensemble parce que seuls les joueurs « hors dates » les cochent. Sans ce
+    # terme, on surestime le bénéfice d'une grille tout-en-haut.
+    ("hauts_31", lambda x, y: x > 31 and y > 31),
+)
+
+# En deçà, on n'estime pas : on retombe sur le prior de la littérature.
+MIN_TIRAGES_CALIBRATION = 200
+
+
+def compter_paires(balls, pred) -> float:
+    """Nombre de paires du tirage vérifiant `pred` (les deux numéros triés)."""
+    b = sorted(balls)
+    return float(sum(1 for i in range(len(b)) for j in range(i + 1, len(b))
+                     if pred(b[i], b[j])))
+
+
+def traits_paires(balls) -> list[float]:
+    return [compter_paires(balls, pred) for _, pred in PAIRES_POPULARITE]
+
+
+def _poids_par_paire(theta: dict[str, float], n_max: int):
+    """Pré-calcule theta·traits pour CHAQUE paire (x, y) de numéros.
+
+    `generer_grilles` évalue jusqu'à 30 000 grilles candidates ; recalculer
+    les cinq prédicats sur les dix paires de chacune coûtait ~50 appels de
+    fonction par grille. Ici on paie n_max²/2 évaluations UNE fois, et le
+    score d'une grille se réduit à dix additions.
+    """
+    table = [[0.0] * (n_max + 1) for _ in range(n_max + 1)]
+    for x in range(1, n_max + 1):
+        for y in range(x + 1, n_max + 1):
+            v = sum(theta[nom] for nom, pred in PAIRES_POPULARITE
+                    if pred(x, y))
+            table[x][y] = table[y][x] = v
+    return table
+
+
+def somme_paires(balls, table) -> float:
+    """Σ theta sur les paires de la grille, par table pré-calculée.
+
+    `table` est symétrique : pas besoin de trier, et l'indexation par entiers
+    évite de construire puis hacher un tuple par paire — ce qui compte, cette
+    fonction étant appelée jusqu'à 30 000 fois par génération de grilles.
+    """
+    s = 0.0
+    for i in range(len(balls) - 1):
+        ligne = table[balls[i]]
+        for j in range(i + 1, len(balls)):
+            s += ligne[balls[j]]
+    return s
+
+
+def _log_normalisation(cfg, gamma, table, delta, n_ech: int = 40_000):
+    """Constante qui rend le multiplicateur de partage égal à 1 EN MOYENNE.
+
+    Pourquoi elle est indispensable
+    -------------------------------
+    `ev_grille` calcule les co-gagnants attendus par
+        partageurs = n_est · p1 · pop_rel
+    ce qui n'a de sens que si pop_rel vaut 1 pour une grille quelconque : p1
+    est déjà la probabilité d'une combinaison sous jeu uniforme, pop_rel n'a
+    donc à porter QUE l'écart à l'uniforme.
+
+    Or centrer gamma centre le LOGARITHME, pas le multiplicateur : par
+    inégalité de Jensen, E[exp(indice)] > exp(E[indice]) = 1. Mesuré, la
+    grille médiane sortait à 1,48 et la moyenne à ~2 — tous les pop_rel
+    étaient donc surestimés d'un facteur 2, et les co-gagnants avec eux.
+
+    En v2.3 l'écart était de ~1 % (les beta étaient 5,4× plus petits, et
+    exp(x) ≈ 1+x y suffisait). En v2.4, à la bonne échelle, il ne l'est plus.
+
+    Numéros : moyenne de Monte-Carlo sur des combinaisons tirées uniformément
+    (les termes de paires interdisent une forme produit). Graine fixe : la
+    calibration doit rester reproductible.
+    Bonus : énumération EXACTE, il y a au plus C(12,2) = 66 cas.
+    """
+    rng = random.Random(0xC0FFEE)
+    univers = list(nums(cfg))
+    g = [0.0] * (cfg["n_max"] + 1)
+    for n in univers:
+        g[n] = gamma[n]
+    exp_, sample, total = math.exp, rng.sample, 0.0
+    for _ in range(n_ech):
+        b = sample(univers, cfg["pick"])
+        s = 0.0
+        for i, x in enumerate(b):
+            s += g[x]
+            ligne = table[x]
+            for j in range(i + 1, len(b)):
+                s += ligne[b[j]]
+        total += exp_(s)
+    log_nums = math.log(total / n_ech)
+
+    combis = list(itertools.combinations(bonus_nums(cfg), cfg["bonus_pick"]))
+    log_bonus = math.log(
+        sum(math.exp(sum(delta[k] for k in c)) for c in combis) / len(combis))
+    return log_nums, log_bonus
+
+
+def _inverser(A):
+    """Inverse par Gauss-Jordan avec pivot partiel (stdlib)."""
     n = len(A)
-    M = [row[:] + [b[i]] for i, row in enumerate(A)]
+    M = [row[:] + [1.0 if i == j else 0.0 for j in range(n)]
+         for i, row in enumerate(A)]
     for col in range(n):
         piv = max(range(col, n), key=lambda r: abs(M[r][col]))
-        if abs(M[piv][col]) < 1e-12:
+        if abs(M[piv][col]) < 1e-13:
             raise ValueError("matrice singulière")
         M[col], M[piv] = M[piv], M[col]
-        div = M[col][col]
-        M[col] = [v / div for v in M[col]]
+        d = M[col][col]
+        M[col] = [v / d for v in M[col]]
         for r in range(n):
             if r != col and M[r][col] != 0:
                 f = M[r][col]
                 M[r] = [a - f * c for a, c in zip(M[r], M[col], strict=True)]
-    return [M[i][n] for i in range(n)]
+    return [row[n:] for row in M]
 
 
-def calibration_empirique(cfg, tirages, lam: float = 4.0):
-    """T9b — Apprend la popularité RÉELLE de chaque numéro depuis les données.
+def rangs_mb(cfg) -> dict[int, tuple[float, float]]:
+    """(m, b) EFFECTIFS de chaque rang, par dénombrement combinatoire exact.
 
-    Modèle : log(total_gagnants du tirage) = Σ β_n·x_n + contrôles + ε
-      · x_n = 1 si le numéro n est sorti à ce tirage
-      · contrôles : tendance temporelle (t, t²) + indicatrices de jour de
-        tirage — absorbent l'essentiel des variations de participation.
-      · Les gros écarts restants (jackpots exceptionnels → afflux de joueurs)
-        sont du bruit NON CORRÉLÉ aux numéros tirés (le tirage est aléatoire),
-        donc les β_n restent identifiés sans biais. C'est LA propriété qui
-        rend cette régression légitime.
-      · Ridge (λ) pour la stabilité ; β centrés (seuls les écarts relatifs
-        de popularité ont un sens, Σx_n = pick est constant).
-
-    Interprétation : β_n > 0 ⇒ quand n sort, il y a PLUS de gagnants ⇒ n est
-    SUR-JOUÉ par les Français ⇒ à éviter pour ne pas partager. R² faible
-    attendu (le signal popularité est petit vs le bruit participation) : ce
-    qui compte est le CLASSEMENT des β, pas le R².
+    La plupart des rangs correspondent à un couple (m, b) unique. Le rang 9 du
+    Loto agrège m ∈ {0, 1} : son m effectif est E[m | rang 9] = 0,3846, pas 0
+    ni 1. L'employer à tort décalerait l'échelle de tous les gamma.
     """
-    lignes = []
-    jours = sorted(cfg["jours"])
-    for i, t in enumerate(tirages):
-        tot = sum(t["gagnants"].values())
-        if tot <= 0:
-            continue
-        x = [0.0] * cfg["n_max"]
-        for b in t["balls"]:
-            x[b - 1] = 1.0
-        tr = i / max(len(tirages) - 1, 1)
-        ctrl = [tr, tr * tr] + [1.0 if t["jour"] == j else 0.0
-                                for j in jours[1:]]
-        lignes.append((x + ctrl + [1.0], math.log(tot)))
-    if len(lignes) < 150:
-        return None
-    p = len(lignes[0][0])
-    # Normal equations : (XᵀX + λI)β = Xᵀy   (λ=0 sur les contrôles/intercept)
-    XtX = [[0.0] * p for _ in range(p)]
-    Xty = [0.0] * p
-    for x, y in lignes:
-        for a in range(p):
-            if x[a] == 0.0:
+    n, k = cfg["n_max"], cfg["pick"]
+    bmax, bp = cfg["bonus_max"], cfg["bonus_pick"]
+    acc: dict[int, tuple[float, float, float]] = {}
+    for m in range(k + 1):
+        for b in range(bp + 1):
+            r = rang_gagne(cfg, m, b)
+            if r is None:
                 continue
-            Xty[a] += x[a] * y
-            for b in range(a, p):
-                XtX[a][b] += x[a] * x[b]
-    for a in range(p):
-        for b in range(a):
-            XtX[a][b] = XtX[b][a]
-    for a in range(cfg["n_max"]):
-        XtX[a][a] += lam
+            cas = (math.comb(k, m) * math.comb(n - k, k - m)
+                   * math.comb(bp, b) * math.comb(bmax - bp, bp - b))
+            sm, sb, sc = acc.get(r, (0.0, 0.0, 0.0))
+            acc[r] = (sm + m * cas, sb + b * cas, sc + cas)
+    return {r: (sm / sc, sb / sc) for r, (sm, sb, sc) in acc.items()}
+
+
+def rangs_denses(cfg, tirages, w_min: int = 30, part: float = 0.99):
+    """Rangs peuplés d'au moins `w_min` gagnants dans ≥ `part` des tirages.
+
+    Un rang seulement parfois disponible introduirait une SÉLECTION sur la
+    variable expliquée : on ne garderait que les tirages où ce rang est bien
+    garni, c'est-à-dire les tirages populaires — exactement ce qu'on mesure.
+    Au Loto cela écarte les rangs 1 à 3 (0, 1 et 43 gagnants médians).
+    """
+    if not tirages:
+        return []
+    ok = []
+    for r in sorted(rangs_mb(cfg)):
+        n = sum(1 for t in tirages if (t["gagnants"].get(r) or 0) >= w_min)
+        if n >= part * len(tirages):
+            ok.append(r)
+    return ok
+
+
+def calibration_empirique(cfg, tirages, lam: float = 2.0, w_min: int = 30,
+                          phi: float = 0.03, rangs_forces=None,
+                          avec_paires: bool = True):
+    """Panel à effets fixes de tirage. Voir le commentaire de section.
+
+    `phi` : sur-dispersion résiduelle. Le poids d'une observation est
+    1/(1/W + phi²) — l'inverse de la variance de log(W), qui vaut 1/W sous
+    Poisson plus un terme de sur-dispersion. Sans lui, les rangs à 300 000
+    gagnants écraseraient tous les autres.
+
+    `rangs_forces` : restreint le panel à ces rangs. Sert au test de forme
+    fonctionnelle, qui compare l'échelle obtenue sur les rangs à faible m et
+    à fort m. N'a pas d'usage en production.
+    """
+    rangs = (list(rangs_forces) if rangs_forces
+             else rangs_denses(cfg, tirages, w_min))
+    if len(tirages) < MIN_TIRAGES_CALIBRATION or len(rangs) < 2:
+        return None
+    mb = rangs_mb(cfg)
+    paires = PAIRES_POPULARITE if avec_paires else ()
+    nb, bb, nf = cfg["n_max"], cfg["bonus_max"], len(paires)
+    idx_r = {r: i for i, r in enumerate(rangs)}
+    taille = nb + bb + nf + len(rangs) - 1
+    off_r = nb + bb + nf
+    c_pick2 = math.comb(cfg["pick"], 2)
+
+    XtX = [[0.0] * taille for _ in range(taille)]
+    Xty = [0.0] * taille
+    grappes, y2 = [], 0.0
+    n_lignes = 0
+
+    for t in tirages:
+        obs = []
+        for r in rangs:
+            w = t["gagnants"].get(r)
+            if w is None or w < w_min:
+                continue
+            obs.append((r, math.log(w), 1.0 / (1.0 / w + phi * phi)))
+        if len(obs) < 2:                 # il faut ≥2 rangs pour centrer
+            continue
+        sw = sum(o[2] for o in obs)
+        ybar = sum(o[1] * o[2] for o in obs) / sw
+        vf = [compter_paires(t["balls"], pr) for _, pr in paires]
+
+        brut = []
+        for r, y, w in obs:
+            m, b = mb[r]
+            col: dict[int, float] = {}
+            for j in t["balls"]:
+                col[j - 1] = col.get(j - 1, 0.0) + m / cfg["pick"]
+            for k in t["bonus"]:
+                col[nb + k - 1] = (col.get(nb + k - 1, 0.0)
+                                   + b / cfg["bonus_pick"])
+            pf = math.comb(int(round(m)), 2) / c_pick2 if m >= 2 else 0.0
+            if pf:
+                for i, v in enumerate(vf):
+                    if v:
+                        col[nb + bb + i] = v * pf
+            if idx_r[r] > 0:
+                col[off_r + idx_r[r] - 1] = 1.0
+            brut.append((col, y, w))
+
+        moy: dict[int, float] = {}
+        for col, _, w in brut:
+            for a, v in col.items():
+                moy[a] = moy.get(a, 0.0) + v * w / sw
+        lignes = []
+        for col, y, w in brut:
+            cc = {a: col.get(a, 0.0) - mv for a, mv in moy.items()
+                  if abs(col.get(a, 0.0) - mv) > 1e-14}
+            yy = y - ybar
+            lignes.append((cc, yy, w))
+            n_lignes += 1
+            y2 += w * yy * yy
+            items = list(cc.items())
+            for a, va in items:
+                Xty[a] += w * va * yy
+                for b_, vb in items:
+                    if b_ >= a:
+                        XtX[a][b_] += w * va * vb
+        grappes.append(lignes)
+
+    if len(grappes) < MIN_TIRAGES_CALIBRATION:
+        return None
+    for a in range(taille):
+        for b_ in range(a):
+            XtX[a][b_] = XtX[b_][a]
+
+    R = [row[:] for row in XtX]
+    for a in range(nb + bb + nf):
+        R[a][a] += lam
     try:
-        beta = _resoudre(XtX, Xty)
+        Rinv = _inverser(R)
     except ValueError:
         return None
-    # R²
-    ys = [y for _, y in lignes]
-    ybar = statistics.mean(ys)
-    sse = sum((y - sum(bi * xi for bi, xi in zip(beta, x, strict=True))) ** 2
-              for x, y in lignes)
-    sst = sum((y - ybar) ** 2 for y in ys) or 1.0
-    r2 = 1 - sse / sst
-    b_nums = beta[:cfg["n_max"]]
-    moy = statistics.mean(b_nums)
-    centres = {n: b_nums[n - 1] - moy for n in nums(cfg)}
-    ordre = sorted(nums(cfg), key=lambda n: -centres[n])
+    beta = [sum(Rinv[i][j] * Xty[j] for j in range(taille))
+            for i in range(taille)]
+
+    # --- SE clusterisées par tirage ---------------------------------------
+    # Les rangs d'un même tirage partagent le même choc de participation
+    # résiduel : les traiter comme indépendants diviserait les SE par ~2 et
+    # gonflerait tous les t d'autant.
+    pain = [[0.0] * taille for _ in range(taille)]
+    sse = 0.0
+    for lignes in grappes:
+        s: dict[int, float] = {}
+        for cc, yy, w in lignes:
+            e = yy - sum(beta[a] * v for a, v in cc.items())
+            sse += w * e * e
+            for a, v in cc.items():
+                s[a] = s.get(a, 0.0) + w * v * e
+        items = list(s.items())
+        for a, va in items:
+            for b_, vb in items:
+                pain[a][b_] += va * vb
+    nc = len(grappes)
+    corr = nc / max(nc - 1, 1)
+    tmp = [[corr * sum(Rinv[i][k] * pain[k][j] for k in range(taille))
+            for j in range(taille)] for i in range(taille)]
+    V = [[sum(tmp[i][k] * Rinv[k][j] for k in range(taille))
+          for j in range(taille)] for i in range(taille)]
+    se = [math.sqrt(max(V[i][i], 0.0)) for i in range(taille)]
+
+    # --- R² partiel : ce que gamma/delta/theta ajoutent aux seuls effets de
+    # rang. Le R² brut serait ~0,999 et ne dirait rien : l'écart entre le
+    # rang 4 (385 gagnants) et le rang 9 (368 857) écrase tout.
+    pr = len(rangs) - 1
+    sse_ref = y2
+    if pr > 0:
+        sub = [[XtX[off_r + i][off_r + j] for j in range(pr)]
+               for i in range(pr)]
+        sy = [Xty[off_r + i] for i in range(pr)]
+        try:
+            sinv = _inverser(sub)
+            br = [sum(sinv[i][j] * sy[j] for j in range(pr)) for i in range(pr)]
+            sse_ref = y2 - sum(br[i] * sy[i] for i in range(pr))
+        except ValueError:
+            pass
+    r2 = 1 - sse / sse_ref if sse_ref > 0 else 0.0
+
+    def centre_et_retrecit(vals, ses):
+        """Centrage (seuls les écarts relatifs ont un sens : Σx = pick est
+        constant, donc le niveau est absorbé par les effets de rang) puis
+        rétrécissement empirique de Bayes vers 0.
+
+        Le rétrécissement corrige le sur-ajustement : gamma est estimé avec
+        du bruit, l'employer brut sur un tirage futur sur-pondère les écarts.
+        Facteur = var_signal / (var_signal + se²), soit la part de la variance
+        observée qui n'est pas du bruit d'échantillonnage. Mesuré hors
+        échantillon : pente 0,97 (Loto) après rétrécissement.
+        """
+        moy_v = statistics.mean(vals)
+        c = [v - moy_v for v in vals]
+        var_obs = statistics.pvariance(c) if len(c) > 1 else 0.0
+        bruit = statistics.mean(s * s for s in ses)
+        var_signal = max(var_obs - bruit, 1e-9)
+        r = [v * var_signal / (var_signal + s * s)
+             for v, s in zip(c, ses, strict=True)]
+        # Le facteur de rétrécissement diffère d'un numéro à l'autre : il
+        # décentre donc légèrement. On recentre APRÈS, sans quoi pop_rel
+        # d'une grille moyenne ne vaudrait plus exactement 1.
+        moy_r = statistics.mean(r)
+        return [v - moy_r for v in r]
+
+    g = centre_et_retrecit(beta[:nb], se[:nb])
+    d = centre_et_retrecit(beta[nb:nb + bb], se[nb:nb + bb])
+    gamma = {n: g[n - 1] for n in nums(cfg)}
+    delta = {n: d[n - 1] for n in bonus_nums(cfg)}
+    theta = {nom: beta[nb + bb + i] for i, (nom, _) in enumerate(paires)}
+    se_theta = {nom: se[nb + bb + i] for i, (nom, _) in enumerate(paires)}
+    for nom, _ in PAIRES_POPULARITE:          # absentes = sans effet
+        theta.setdefault(nom, 0.0)
+        se_theta.setdefault(nom, float("inf"))
+    ordre = sorted(nums(cfg), key=lambda n: -gamma[n])
+    table_paires = _poids_par_paire(theta, cfg["n_max"])
+    log_norm_nums, log_norm_bonus = _log_normalisation(
+        cfg, gamma, table_paires, delta)
+    ts = [abs(gamma[n]) / se[n - 1] for n in nums(cfg) if se[n - 1] > 0]
     return {
-        "beta": centres, "r2": round(r2, 4), "n_tirages": len(lignes),
-        "top_surjoues": ordre[:6],       # β max = les plus joués en vrai
+        "gamma": gamma, "delta": delta, "theta": theta,
+        "table_paires": table_paires,
+        "log_norm_nums": log_norm_nums,
+        "log_norm": log_norm_nums + log_norm_bonus,
+        "se_gamma": {n: se[n - 1] for n in nums(cfg)},
+        "se_delta": {n: se[nb + n - 1] for n in bonus_nums(cfg)},
+        "se_theta": se_theta,
+        "r2": round(r2, 4),
+        "n_tirages": nc,
+        "n_lignes": n_lignes,
+        "rangs": rangs,
+        "t_median": round(statistics.median(ts), 2) if ts else 0.0,
+        "n_significatifs": sum(1 for v in ts if v > 1.96),
+        "top_surjoues": ordre[:6],
         "top_delaisses": ordre[-6:][::-1],
     }
 
 
 def scores_anti(cfg, calib) -> tuple[dict[int, float], str]:
-    """Score anti-partage final : 70% empirique (si calibré) + 30% heuristique."""
-    heur = normaliser({n: -_pop_heuristique(cfg, n) for n in nums(cfg)})
+    """Score anti-partage par numéro : l'opposé de la log-popularité mesurée.
+
+    v2.3 mélangeait 70 % d'empirique et 30 % d'heuristique. Le mélange est
+    supprimé : l'heuristique est un prior de littérature, mesurablement faux
+    là où il compte (cf. `_pop_bonus_heuristique`), et le rétrécissement
+    empirique de Bayes appliqué à gamma joue déjà le rôle de régularisation —
+    avec un dosage estimé, pas choisi.
+    """
     if not calib:
-        return heur, "heuristique (littérature)"
-    emp = normaliser({n: -calib["beta"][n] for n in nums(cfg)})
-    mix = {n: 0.7 * emp[n] + 0.3 * heur[n] for n in nums(cfg)}
-    return mix, f"empirique 70% (R²={calib['r2']}, n={calib['n_tirages']}) + heuristique 30%"
+        return (normaliser({n: -_pop_heuristique(cfg, n) for n in nums(cfg)}),
+                "heuristique (littérature) — historique trop court")
+    return (normaliser({n: -calib["gamma"][n] for n in nums(cfg)}),
+            f"panel à effets fixes (|t| médian {calib['t_median']}, "
+            f"{calib['n_significatifs']}/{cfg['n_max']} significatifs, "
+            f"n={calib['n_tirages']})")
 
 
-def pop_rel_grille(cfg, balls, calib) -> float:
-    """Multiplicateur de popularité relative d'une grille (pour l'EV).
-    exp(Σ β centrés) si calibré, sinon version heuristique log-centrée."""
-    if calib:
-        s = sum(calib["beta"][b] for b in balls)
-    else:
+def scores_anti_bonus(cfg, calib) -> dict[int, float]:
+    """Idem pour le n° Chance / les Étoiles.
+
+    La table codée en dur classait le n° Chance 1 parmi les plus joués ; la
+    mesure le place BON DERNIER (t = −59). On ne devine plus.
+    """
+    if not calib:
+        return normaliser({n: -_pop_bonus_heuristique(cfg, n)
+                           for n in bonus_nums(cfg)})
+    return normaliser({n: -calib["delta"][n] for n in bonus_nums(cfg)})
+
+
+def popularite_log(cfg, balls, calib, bonus=()) -> float:
+    """Log-popularité RELATIVE de la grille complète, à l'échelle du rang 1.
+
+    C'est Σ gamma sur les numéros + Σ theta sur les co-occurrences (+ delta
+    sur le bonus s'il est fourni). À m = pick, les deux facteurs
+    combinatoires valent 1 : le partage du JACKPOT se lit directement ici.
+    """
+    if not calib:
         logs = {n: math.log(_pop_heuristique(cfg, n)) for n in nums(cfg)}
         m = statistics.mean(logs.values())
-        s = sum(logs[b] - m for b in balls)
-    return max(0.25, min(4.0, math.exp(s)))
+        return sum(logs[b] - m for b in balls)
+    s = sum(calib["gamma"][b] for b in balls)
+    s += somme_paires(balls, calib["table_paires"])
+    for k in bonus:
+        s += calib["delta"].get(k, 0.0)
+    # Ramène la grille MOYENNE à un multiplicateur de 1 (cf.
+    # `_log_normalisation`). Sans bonus fourni, on ne retranche que la part
+    # « numéros » : retirer aussi la part bonus fausserait le niveau.
+    s -= calib["log_norm"] if bonus else calib["log_norm_nums"]
+    return s
 
 
-def popularite_grille_penalite(balls) -> float:
-    """Pénalités de motifs humains au niveau grille."""
-    p = 0.0
-    petits = sum(1 for b in balls if b <= 31)
-    if petits >= 4:
-        p += 1.5
-    elif petits == 3:
-        p += 0.5
-    b = sorted(balls)
-    if len({b[k] - b[k - 1] for k in range(1, len(b))}) == 1:
-        p += 2.0
-    if all(x <= 15 for x in b):
-        p += 1.0
-    return p
+def pop_rel_grille(cfg, balls, calib, bonus=()) -> float:
+    """Multiplicateur de partage de la grille, borné pour l'EV.
+
+    ATTENTION au sens : ce nombre multiplie le nombre ATTENDU de co-gagnants
+    au jackpot (cf. `ev_grille`). La v2.3 y injectait des coefficients estimés
+    sur le total des gagnants, dominé par les petits rangs : ils valaient
+    ~0,17 fois l'élasticité du rang 1 et sous-corrigeaient le partage d'autant.
+    """
+    return max(0.05, min(20.0, math.exp(popularite_log(cfg, balls, calib,
+                                                       bonus))))
 
 
 # ==============================================================================
 # 5. SCORES BONUS (Chance / Étoiles)
 # ==============================================================================
 
-def bonus_scores(cfg, tirages):
+def bonus_scores(cfg, tirages, calib=None):
     valides = [t for t in tirages if len(t["bonus"]) == cfg["bonus_pick"]]
     freq, dernier = Counter(), dict.fromkeys(bonus_nums(cfg), -1)
     ewma = dict.fromkeys(bonus_nums(cfg), 0.0)
@@ -965,8 +1324,7 @@ def bonus_scores(cfg, tirages):
         "frequence": normaliser({n: float(freq.get(n, 0)) for n in bonus_nums(cfg)}),
         "retard": normaliser({n: float(n_t - 1 - dernier[n]) for n in bonus_nums(cfg)}),
         "ewma": normaliser(ewma),
-        "anti": normaliser({n: -_pop_bonus_heuristique(cfg, n)
-                            for n in bonus_nums(cfg)}),
+        "anti": scores_anti_bonus(cfg, calib),
     }
 
 
@@ -999,7 +1357,10 @@ def calculer_scores(cfg, tirages, weekday_prochain, calib):
     return couches, folklore, anti, anti_mode
 
 
-def score_final(cfg, folklore, anti, mode, poids_anti=0.5):
+POIDS_ANTI = 0.5          # part de l'anti-partage en mode hybride
+
+
+def score_final(cfg, folklore, anti, mode, poids_anti=POIDS_ANTI):
     if mode == "pronostic":
         return dict(folklore)
     if mode == "anti":
@@ -1038,12 +1399,42 @@ def bonus_delta(cfg, balls, dist_d: Counter) -> float:
     return 100.0 * sum(dist_d.get(d, 0) / total for d in deltas) / len(deltas)
 
 
+def echelle_paires(cfg, calib, mode: str) -> float:
+    """Convertit une log-popularité de grille en points de score de grille.
+
+    Le score d'une grille est la MOYENNE des scores normalisés de ses numéros.
+    `normaliser` étale les gamma sur [0, 100], donc une variation de 1 en
+    Σ gamma déplace cette moyenne de 100/(étendue × pick) points. Les
+    co-occurrences vivent dans la même unité (des log-popularités) : c'est
+    donc le facteur de conversion exact, et non un poids à choisir.
+
+    La v2.3 utilisait un « 6.0 » arbitraire devant des pénalités elles-mêmes
+    arbitraires. Ici les deux bouts sont mesurés.
+    """
+    if not calib or mode == "pronostic":
+        return 0.0
+    vals = list(calib["gamma"].values())
+    etendue = max(vals) - min(vals)
+    if etendue <= 0:
+        return 0.0
+    poids_mode = 1.0 if mode == "anti" else POIDS_ANTI
+    return poids_mode * 100.0 / (etendue * cfg["pick"])
+
+
+def penalite_paires(cfg, balls, calib, echelle: float) -> float:
+    """Points de score à retrancher pour les co-occurrences de la grille."""
+    if not echelle or not calib:
+        return 0.0
+    return echelle * somme_paires(balls, calib["table_paires"])
+
+
 def generer_grilles(cfg, scores, sb, tirages, mode, n_grilles, rng, calib,
                     iters: int = 30000):
     cts = contraintes_historiques(tirages)
     dist_d = distribution_deltas(cfg, tirages)
     univers = list(nums(cfg))
     poids = [max(scores[n], 1.0) ** 2 for n in univers]
+    ech = echelle_paires(cfg, calib, mode)
     vues, best = set(), []
     for _ in range(iters):
         pick, garde = set(), 0
@@ -1059,7 +1450,7 @@ def generer_grilles(cfg, scores, sb, tirages, mode, n_grilles, rng, calib,
         g = statistics.mean(scores[b] for b in balls)
         g += 0.15 * bonus_delta(cfg, balls, dist_d)
         if mode in ("anti", "hybride"):
-            g -= 6.0 * popularite_grille_penalite(balls)
+            g -= penalite_paires(cfg, balls, calib, ech)
         best.append((g, balls))
     best.sort(reverse=True)
 
@@ -1393,7 +1784,7 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
             prochaine_calib = i + 25
         t = tirages[i]
         _, folk, anti, _ = calculer_scores(cfg, passe, t["jour"], calib)
-        sb = bonus_scores(cfg, passe)
+        sb = bonus_scores(cfg, passe, calib)
         for mode in res:
             fin = score_final(cfg, folk, anti, mode)
             grilles = generer_grilles(cfg, fin, sb, passe, mode, 1,
@@ -1606,6 +1997,10 @@ def afficher(cfg, ctx):
         c = ctx["calib"]
         p(f"   Sur-joués (mesuré) : {c['top_surjoues']}  ← à éviter")
         p(f"   Délaissés (mesuré) : {c['top_delaisses']}  ← or pur")
+        p(f"   Rangs exploités : {c['rangs']} sur {c['n_tirages']} tirages "
+          f"({c['n_lignes']} observations)")
+        p(f"   Co-occurrences  : " + "  ".join(
+            f"{nom}={c['theta'][nom]:+.3f}" for nom, _ in PAIRES_POPULARITE))
 
     sbm = score_bonus_mode(ctx["sb"], ctx["mode"])
     tb = sorted(bonus_nums(cfg), key=lambda n: -sbm[n])
@@ -1794,7 +2189,17 @@ def export_web(chemin, cfg, ctx, args):
             "mode": ctx["anti_mode"],
             "top_surjoues": calib["top_surjoues"],
             "top_delaisses": calib["top_delaisses"],
-            "beta": {str(n): round(calib["beta"][n], 4) for n in nums(cfg)},
+            # `beta` : nom conservé pour la page. Contenu v2.4 = gamma, la
+            # log-popularité À L'ÉCHELLE DU RANG 1. Les beta v2.3, estimés sur
+            # le total des gagnants, en valaient ~0,17 fois.
+            "beta": {str(n): round(calib["gamma"][n], 4) for n in nums(cfg)},
+            "delta": {str(n): round(calib["delta"][n], 4)
+                      for n in bonus_nums(cfg)},
+            "theta": {nom: round(calib["theta"][nom], 5)
+                      for nom, _ in PAIRES_POPULARITE},
+            "t_median": calib["t_median"],
+            "n_significatifs": calib["n_significatifs"],
+            "rangs_utilises": calib["rangs"],
         }),
         "systeme": ctx["systeme"],
         "historique": ctx.get("histo"),
@@ -1856,7 +2261,7 @@ def main():
     couches, folklore, anti, anti_mode = calculer_scores(
         cfg, tirages, date_tirage.weekday(), calib)
     final = score_final(cfg, folklore, anti, args.mode)
-    sb = bonus_scores(cfg, tirages)
+    sb = bonus_scores(cfg, tirages, calib)
     grilles = generer_grilles(cfg, final, sb, tirages, args.mode,
                               args.grilles, rng, calib)
 

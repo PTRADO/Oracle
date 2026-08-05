@@ -40,17 +40,27 @@ jobs:
         run: |
           python - <<'PY'
           import ast, sys, pathlib
+
+          # Les modules du moteur ont le droit de s'importer entre eux : ils
+          # sont vérifiés ici au même titre. Tout le reste doit être stdlib.
+          MOTEUR = ["oracle.py", "recherche.py"]
+          LOCAUX = {p.stem for p in pathlib.Path(".").glob("*.py")}
           STDLIB = set(sys.stdlib_module_names)
-          arbre = ast.parse(pathlib.Path("oracle.py").read_text(encoding="utf-8"))
-          externes = set()
-          for n in ast.walk(arbre):
-              if isinstance(n, ast.Import):
-                  externes |= {a.name.split(".")[0] for a in n.names}
-              elif isinstance(n, ast.ImportFrom) and n.level == 0 and n.module:
-                  externes.add(n.module.split(".")[0])
-          hors = sorted(externes - STDLIB)
-          if hors:
-              print(f"✗ oracle.py importe hors stdlib : {hors}")
-              raise SystemExit(1)
-          print(f"✔ {len(externes)} imports, tous stdlib")
+
+          faute = False
+          for nom in MOTEUR:
+              arbre = ast.parse(pathlib.Path(nom).read_text(encoding="utf-8"))
+              importes = set()
+              for n in ast.walk(arbre):
+                  if isinstance(n, ast.Import):
+                      importes |= {a.name.split(".")[0] for a in n.names}
+                  elif isinstance(n, ast.ImportFrom) and n.level == 0 and n.module:
+                      importes.add(n.module.split(".")[0])
+              hors = sorted(importes - STDLIB - LOCAUX)
+              if hors:
+                  print(f"✗ {nom} importe hors stdlib : {hors}")
+                  faute = True
+              else:
+                  print(f"✔ {nom} — {len(importes)} imports, tous stdlib ou locaux")
+          raise SystemExit(1 if faute else 0)
           PY

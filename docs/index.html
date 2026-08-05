@@ -420,7 +420,7 @@ function rendrePourquoi(){
 }
 
 function rendreMarche(){
-  const v = D().verdicts, bt = v.backtest, rc = v.recherche, c2 = v.chi2;
+  const v = D().verdicts, bt = v.backtest, rc = v.recherche, c2 = v.chi2, tj = v.trj;
   let h = `<p>La réponse honnête est <strong>non</strong>, et c'est mesuré à chaque
     mise à jour plutôt qu'affirmé.</p>`;
 
@@ -461,6 +461,26 @@ function rendreMarche(){
       test du χ² à <strong>${c2.chi2}</strong> pour un seuil d'alerte de ${c2.seuil_5pct}.
       ${c2.biais_detecte ? `<span class="c-ambre">Au-dessus du seuil — à surveiller.</span>`
         : `Les boules sont équilibrées. Aucun défaut exploitable.`}</p>`;
+  }
+  if(tj){
+    const prix = D().meta.prix;
+    h += `<h3>«&nbsp;50&nbsp;% reversés aux joueurs&nbsp;»&nbsp;: vrai pour le jeu, faux pour toi</h3>
+      <p>Recomposé sur <strong>${tj.n_tirages}</strong> tirages, à partir des rapports
+      et des nombres de gagnants publiés par la FDJ&nbsp;:</p>
+      <ul>
+        <li>retour total du jeu&nbsp;: <strong>${(tj.trj_total*100).toFixed(1)}&nbsp;%</strong>
+            — c'est bien le chiffre annoncé&nbsp;;</li>
+        <li>dont <strong>${(tj.part_jackpot*100).toFixed(1)}&nbsp;%</strong> de la cagnotte
+            partent dans le seul rang&nbsp;1&nbsp;;</li>
+        <li>retour <strong>hors jackpot</strong>&nbsp;:
+            <strong class="c-ambre">${(tj.trj_hors_jackpot*100).toFixed(1)}&nbsp;%</strong>,
+            soit ${(prix*tj.trj_hors_jackpot).toFixed(2)}&nbsp;€ rendus par tranche de
+            ${prix.toFixed(2)}&nbsp;€.</li>
+      </ul>
+      <p>La moitié du «&nbsp;50&nbsp;%&nbsp;» dort dans un jackpot qu'un joueur d'un
+      ticket par tirage ne touchera jamais. Ce que tu récupères vraiment, c'est la
+      dernière ligne — et c'est pour ça que les gains paraissent toujours plus
+      maigres que promis.</p>`;
   }
   h += `<p><strong>Alors pourquoi ce site&nbsp;?</strong> Pour la seule chose qui
     résiste à la mesure : éviter les numéros que tout le monde joue, et savoir

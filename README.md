@@ -1,19 +1,22 @@
-# 🎱 ORACLE v2.2 MAX — Loto + EuroMillions
+# 🎱 ORACLE v2.3 — Loto + EuroMillions
 
-Pronostiqueur auto-hébergé : 8 techniques folklore documentées + les 3 leviers
-réels (anti-partage **calibré sur les vraies données de gagnants FDJ**, EV
-jackpot, surveillance χ²), systèmes réducteurs à garantie vérifiée, mini-app
-web glassmorphism, mise à jour automatique quotidienne. Zéro dépendance.
+Une grille par tirage, et le coût réel affiché sans fard.
 
-**Depuis la v2.2, le moteur tourne sur les données réelles FDJ**, en
-concaténant toutes les époques d'archives compatibles avec la formule
-actuelle du jeu : 1473 tirages Loto (depuis mars 2017) et 1029 EuroMillions
-(depuis septembre 2016).
+Le moteur tourne sur les données réelles FDJ, en concaténant toutes les
+époques d'archives compatibles avec la formule actuelle du jeu : 1473 tirages
+Loto (depuis mars 2017) et 1029 EuroMillions (depuis septembre 2016). Zéro
+dépendance, stdlib pure.
+
+La page ne propose **qu'une seule grille** — celle qui évite les numéros les
+plus joués en France. Tout le reste (pourquoi ces numéros, est-ce que ça
+marche, plusieurs tickets, provenance des données) vit dans des sections
+repliées.
 
 ## Structure
 
 ```
 oracle.py                         # moteur bi-jeux (Python stdlib)
+recherche.py                      # recherche de formule + modèle nul
 docs/index.html                   # la mini-app (1 fichier, vanilla)
 docs/loto.json                    # pronostics Loto (généré)
 docs/euromillions.json            # pronostics EuroMillions (généré)
@@ -62,15 +65,16 @@ se voit ; elle ne s'absorbe pas en silence.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pytest ruff
-.venv/bin/python -m pytest tests/ -q     # 81 tests, hors ligne
+.venv/bin/python -m pytest tests/ -q     # 106 tests, hors ligne
 .venv/bin/ruff check .
 ```
 
 Les tests s'appuient sur des **extraits réels** d'archives FDJ (une par époque
 de format, octets d'origine préservés pour éprouver aussi le décodage utf-8 /
 latin-1). Ils couvrent le parser, le contrôle d'intégrité, la table des rangs
-officiels et le contrat JSON — garde-fous produit compris : présence du
-backtest, EV négative, grand livre non masqué.
+officiels, le chercheur de formule et le contrat JSON — garde-fous produit
+compris : présence du backtest, EV négative, grand livre non masqué, et
+absence de conclusion à un signal.
 
 ## Déploiement auto-hébergé (10 minutes)
 
@@ -119,6 +123,7 @@ vers −(1−TRJ) ≈ −46 %, et il est là pour ça.
 --save-csv data/x.csv        (avec --zip/--csv seulement)
 --export-web docs/x.json     --seed N           --no-backtest
 --simulation [N]             (rétro-simulation € sur N tirages, déf. 150)
+--recherche [BUDGET]         (recherche de formule + 12 témoins, déf. 400)
 --aujourdhui AAAA-MM-JJ      (force la date de référence — tests/rejeu)
 ```
 
@@ -130,6 +135,42 @@ vers −(1−TRJ) ≈ −46 %, et il est là pour ça.
 - **Pas réel** : tout pouvoir prédictif. P(jackpot) = 1/19 068 840 (Loto) et
   1/139 838 160 (EuroMillions) pour toute grille. Le backtest walk-forward
   tourne à chaque mise à jour pour le prouver.
+
+### On a cherché LA formule. Voici ce que ça donne.
+
+`recherche.py` explore 400 combinaisons de 14 indicateurs (fréquences sur 3
+fenêtres, retards bruts et relatifs, moyennes mobiles à 3 demi-vies,
+momentum, Markov, paires, jour, voisins, tendance), puis affine par ascension
+de coordonnées depuis les 5 meilleurs points.
+
+Le résultat n'a de valeur que grâce à trois garde-fous :
+
+1. **Validation hors échantillon** — cherché sur les 70 % les plus anciens,
+   jugé sur les 30 % restants, jamais vus.
+2. **Témoin par permutation** — la recherche entière est relancée 12 fois sur
+   les mêmes tirages dans le désordre. Toute structure est détruite ; ce qui
+   reste mesure ce que la recherche fabrique toute seule.
+3. **Validation du chercheur** — sur une urne truquée, il doit retrouver le
+   biais. Il double effectivement le score hors échantillon (test
+   `test_chercheur_retrouve_un_signal_plante`). Sans cette preuve, un
+   résultat négatif ne vaudrait rien.
+
+| bons numéros / tirage | Loto | EuroMillions |
+|---|---|---|
+| Meilleure formule, sur le passé connu | 0,6168 | 0,6077 |
+| **La même, sur l'inconnu** | **0,5165** | **0,5395** |
+| Témoin (données mélangées), sur l'inconnu | 0,5104 | 0,5023 |
+| Meilleur témoin | 0,5660 | 0,5636 |
+| Pur hasard | 0,5102 | 0,5000 |
+| p empirique | 0,46 | 0,15 |
+
+Lecture : la formule gagne ~20 % sur les données qu'elle a vues, puis retombe
+sur le hasard dès qu'on la confronte à l'inconnu. Le témoin fait exactement
+pareil. Sur EuroMillions, **le meilleur témoin sur du bruit pur (0,5636) bat
+même le résultat réel (0,5395)**.
+
+Chercher 60 fois plus fort ne change rien : l'illusion d'entraînement monte
+(+0,085 → +0,105), le gain réel reste collé à zéro (−0,029 · +0,011 · −0,001).
 
 ### Ce que les données réelles ont dit (04/08/2026)
 

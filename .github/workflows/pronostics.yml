@@ -42,14 +42,16 @@ jobs:
           python3 oracle.py --jeu loto \
             --mirror "$MIRROR" \
             --export-web docs/loto.json \
-            --systeme 9 --grilles 4 --seed 0
+            --systeme 9 --grilles 4 --seed 0 \
+            --simulation 100 --recherche 400
 
       - name: EuroMillions
         run: |
           python3 oracle.py --jeu euromillions \
             --mirror "$MIRROR" \
             --export-web docs/euromillions.json \
-            --grilles 4 --seed 0
+            --grilles 4 --seed 0 \
+            --simulation 100 --recherche 400
 
       - name: Échouer si une alerte critique est remontée
         run: |

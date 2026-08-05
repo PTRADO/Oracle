@@ -39,7 +39,7 @@ def test_meta_complet(export):
                 "prochain_tirage", "prochain_jour", "n_tirages",
                 "periode_debut", "periode_fin", "genere_le"):
         assert cle in m, cle
-    assert m["version"] == "2.2"
+    assert m["version"] == "2.3"
     assert m["source"] == "fdj", "export encore basé sur des données de démo"
 
 
@@ -146,3 +146,46 @@ def test_le_grand_livre_n_est_pas_masque(export):
     assert "historique" in export
     h = export["historique"]
     assert h is not None and "cumul" in h and "en_attente" in h
+
+
+# ---- v2.3 : la recherche de formule et l'historique jouable ----------------
+
+def test_la_recherche_de_formule_est_exportee(export):
+    """La page en fait sa section « Est-ce que ça marche ? » : sans elle,
+    l'argument central du produit disparaît de l'écran."""
+    rc = export["verdicts"]["recherche"]
+    assert rc, "recherche absente — relancer avec --recherche"
+    for cle in ("theorique", "reel", "nul", "z_vs_nul", "p_empirique",
+                "verdict", "budget_par_recherche", "n_tirages_evalues"):
+        assert cle in rc, cle
+    assert rc["budget_par_recherche"] >= 100
+    assert rc["nul"]["n_essais"] >= 5, "trop peu de témoins pour conclure"
+
+
+def test_la_recherche_ne_conclut_pas_a_un_signal(export):
+    """Garde-fou n°2 sur le résultat publié : tant qu'aucun signal n'est
+    établi, la page ne doit pas laisser croire le contraire."""
+    rc = export["verdicts"]["recherche"]
+    assert rc["p_empirique"] > 0.05, (
+        "p ≤ 0,05 : à vérifier manuellement (intégrité des données, autre "
+        "période) AVANT de publier quoi que ce soit")
+    assert "Aucun signal" in rc["verdict"]
+
+
+def test_la_formule_s_effondre_hors_echantillon(export):
+    """Le fait pédagogique central : la formule brille sur ce qu'elle a vu,
+    puis retombe. Si ce n'était plus vrai, il faudrait le regarder de près."""
+    r = export["verdicts"]["recherche"]["reel"]
+    assert r["score_entrainement"] > r["score_validation"]
+
+
+def test_l_historique_jouable_est_exporte(export):
+    """La section « si tu avais joué » a besoin de ces champs."""
+    sim = export["simulation"]
+    assert sim, "simulation absente — relancer avec --simulation"
+    assert sim["n_tirages"] >= 50
+    a = sim["modes"]["anti"]
+    for cle in ("mise", "gain", "n_gains", "meilleur_gain", "roi_pct"):
+        assert cle in a, cle
+    assert a["mise"] > a["gain"], "un ROI positif sur 100 tirages doit alerter"
+    assert 0 <= a["n_gains"] <= sim["n_tirages"]

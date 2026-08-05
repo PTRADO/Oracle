@@ -1,6 +1,6 @@
 {
  "meta": {
-  "version": "2.2",
+  "version": "2.3",
   "source": "fdj",
   "jeu": "euromillions",
   "nom": "EUROMILLIONS",
@@ -9,7 +9,7 @@
   "bonus_max": 12,
   "n_max": 50,
   "prix": 2.5,
-  "genere_le": "2026-08-05T09:57:10",
+  "genere_le": "2026-08-05T13:25:04",
   "n_tirages": 1029,
   "periode_debut": "2016-09-27",
   "periode_fin": "2026-08-04",
@@ -1049,7 +1049,49 @@
    "2026-08-07"
   ]
  },
- "simulation": null,
+ "simulation": {
+  "n_tirages": 100,
+  "note": "1 grille/mode = top-scores (simplifié)",
+  "prix": 2.5,
+  "modes": {
+   "hybride": {
+    "mise": 250.0,
+    "gain": 21.4,
+    "roi_pct": -91.4,
+    "n_gains": 5,
+    "meilleur_gain": 4.8,
+    "meilleur_date": "2026-04-28",
+    "rangs": {
+     "13": 5
+    }
+   },
+   "pronostic": {
+    "mise": 250.0,
+    "gain": 46.2,
+    "roi_pct": -81.5,
+    "n_gains": 11,
+    "meilleur_gain": 5.8,
+    "meilleur_date": "2025-10-28",
+    "rangs": {
+     "12": 2,
+     "13": 9
+    }
+   },
+   "anti": {
+    "mise": 250.0,
+    "gain": 47.2,
+    "roi_pct": -81.1,
+    "n_gains": 6,
+    "meilleur_gain": 20.1,
+    "meilleur_date": "2026-06-26",
+    "rangs": {
+     "8": 1,
+     "12": 2,
+     "13": 3
+    }
+   }
+  }
+ },
  "verdicts": {
   "backtest": {
    "n_tests": 969,
@@ -1073,6 +1115,41 @@
     17,
     23
    ]
+  },
+  "recherche": {
+   "n_tirages_evalues": 969,
+   "theorique": 0.5,
+   "reel": {
+    "score_entrainement": 0.6077,
+    "score_validation": 0.5395,
+    "n_entrainement": 678,
+    "n_validation": 291,
+    "poids": {
+     "freq_tout": 0.609,
+     "freq_50": 0.693,
+     "freq_250": 0.247,
+     "retard_rel": 0.352,
+     "ewma_10": -0.386,
+     "ewma_100": -0.469,
+     "momentum_20": 0.141,
+     "markov": -1.051,
+     "paires": 0.164,
+     "jour": 0.068,
+     "voisins": -0.203
+    }
+   },
+   "nul": {
+    "n_essais": 12,
+    "score_validation_moyen": 0.5023,
+    "score_validation_max": 0.5636,
+    "ecart_type": 0.0351,
+    "entrainement_moyen": 0.5949,
+    "au_moins_aussi_bien": 1
+   },
+   "budget_par_recherche": 400,
+   "z_vs_nul": 1.06,
+   "p_empirique": 0.154,
+   "verdict": "Aucun signal. La meilleure formule perd +0.068 bon numéro entre entraînement et validation, et 15% des recherches menées sur des données sans structure ont fait aussi bien. L'écart d'entraînement est le produit de la recherche elle-même, pas d'une régularité des tirages. Espérance du hasard : 0.5000."
   }
  }
 }

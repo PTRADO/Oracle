@@ -101,7 +101,7 @@ from datetime import date, datetime, timedelta
 # `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
 # futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
 
-VERSION = "2.2"          # bump obligatoire à tout changement du contrat JSON
+VERSION = "2.3"          # bump obligatoire à tout changement du contrat JSON
 
 FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
            "v3/documentations/")
@@ -1252,7 +1252,8 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
     fen = deque()
     bonus_freq = Counter()
     calib, prochaine_calib = None, debut
-    res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter()}
+    res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter(),
+               "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None}
            for m in ("hybride", "pronostic", "anti")}
     # préchauffe
     for i in range(debut):
@@ -1301,6 +1302,10 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
             res[mode]["gain"] += r["gain"]
             if r["rang"]:
                 res[mode]["rangs"][r["rang"]] += 1
+                res[mode]["n_gains"] += 1
+                if r["gain"] > res[mode]["meilleur_gain"]:
+                    res[mode]["meilleur_gain"] = r["gain"]
+                    res[mode]["meilleur_date"] = t["date"].isoformat()
         # maj incrémentale
         for n in N:
             ewma[n] *= decay
@@ -1314,10 +1319,14 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
         bonus_freq.update(t["bonus"])
     n_sim = len(tirages) - debut
     return {"n_tirages": n_sim, "note": "1 grille/mode = top-scores (simplifié)",
+            "prix": cfg["prix"],
             "modes": {m: {"mise": round(v["mise"], 2),
                           "gain": round(v["gain"], 2),
                           "roi_pct": round(100 * (v["gain"] - v["mise"])
                                            / v["mise"], 1) if v["mise"] else 0,
+                          "n_gains": v["n_gains"],
+                          "meilleur_gain": round(v["meilleur_gain"], 2),
+                          "meilleur_date": v["meilleur_date"],
                           "rangs": dict(sorted(v["rangs"].items()))}
                       for m, v in res.items()}}
 
@@ -1523,6 +1532,23 @@ def afficher(cfg, ctx):
           + ("effet de partage RÉEL dans les données."
              if pp["r"] > 0.05 else "faible sur cet échantillon."))
 
+    rc = ctx.get("recherche")
+    if rc:
+        r, nul = rc["reel"], rc["nul"]
+        p("\n▶ RECHERCHE DE FORMULE — le méga-algo, et son témoin")
+        p(f"   {rc['budget_par_recherche']} formules essayées sur "
+          f"{rc['n_tirages_evalues']} tirages. Hasard = {rc['theorique']:.4f} "
+          "bon numéro/tirage.")
+        p(f"   Vraies données : entraînement {r['score_entrainement']:.4f} → "
+          f"VALIDATION {r['score_validation']:.4f}")
+        p(f"   Témoin permuté : entraînement {nul['entrainement_moyen']:.4f} → "
+          f"VALIDATION {nul['score_validation_moyen']:.4f} "
+          f"(σ {nul['ecart_type']:.4f})")
+        p(f"   Écart réel vs témoin : z = {rc['z_vs_nul']:+.2f} "
+          f"· p empirique = {rc['p_empirique']:.3f} "
+          f"({nul['au_moins_aussi_bien']}/{nul['n_essais']} témoins aussi bons)")
+        p(f"   {rc['verdict']}")
+
     c2 = ctx["chi2"]
     p(f"\n▶ BIAIS PHYSIQUE (χ²) : {c2['chi2']} / seuil {c2['seuil_5pct']} — "
       + ("⚠ AU-DESSUS, suspects " + str(c2["top_suspects"])
@@ -1631,7 +1657,8 @@ def export_web(chemin, cfg, ctx, args):
         "simulation": ctx.get("sim"),
         "verdicts": {"backtest": ctx["bt"],
                      "effet_anniversaire": ctx["pop"],
-                     "chi2": ctx["chi2"]},
+                     "chi2": ctx["chi2"],
+                     "recherche": ctx.get("recherche")},
     }
     os.makedirs(os.path.dirname(os.path.abspath(chemin)), exist_ok=True)
     with open(chemin, "w", encoding="utf-8") as f:
@@ -1667,6 +1694,10 @@ def main():
                     help="Force la date du jour (tests / rejeu)")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--no-backtest", action="store_true")
+    ap.add_argument("--recherche", type=int, nargs="?", const=400,
+                    default=None, metavar="BUDGET",
+                    help="Recherche exhaustive d'une formule prédictive, "
+                         "validée hors échantillon contre un témoin permuté")
     args = ap.parse_args()
 
     cfg = JEUX[args.jeu]
@@ -1717,6 +1748,16 @@ def main():
            "grilles": grilles, "jackpot": jackpot, "ev_p": ev_p,
            "systeme": systeme, "bt": bt, "pop": pop, "chi2": chi2,
            "alertes": alertes, "sources": sources}
+
+    if args.recherche:
+        import recherche as _rech
+        # 12 témoins : compromis entre temps de cron et p-valeur exploitable
+        # (le plancher atteignable est 1/13 ≈ 0,077).
+        print(f"\n   🔬 Recherche de formule ({args.recherche} candidates "
+              f"+ 12 témoins permutés)… plusieurs minutes.")
+        ctx["recherche"] = _rech.etude_complete(
+            cfg, tirages, random.Random(args.seed or 0),
+            budget=args.recherche, n_nuls=12)
 
     ctx["histo"] = maj_historique(cfg, ctx, args)
     ctx["sim"] = (retro_simulation(cfg, tirages, args.simulation)

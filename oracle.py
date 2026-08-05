@@ -430,9 +430,24 @@ def parser_csv(cfg, texte: str, tolerant: bool = False) -> list[dict]:
         m = re.search(r"rang\s*_?(\d+)", h)
         return int(m.group(1)) if m else None
 
+    # Colonnes à écarter avant toute chose.
+    #  · "second", "my_million", "etoile+" : jeux annexes. Le CSV EuroMillions
+    #    porte une SECONDE famille de rangs 1-13, celle d'Étoile+, dont les
+    #    gagnants n'ont aucun rapport avec ceux du tirage principal.
+    #  · "en_europe" : chaque rang existe en version française ET européenne.
+    #    Le moteur raisonne en gagnants FRANÇAIS (c'est ce que `p_any_win` et
+    #    `n_est` supposent). Jusqu'ici seul l'ORDRE des colonnes — France
+    #    d'abord — évitait de lire l'Europe : une propriété du fichier FDJ, pas
+    #    du moteur. Vérifié en permutant les colonnes : le total des gagnants
+    #    était multiplié par 6,1, donc n_est par 6,1 et le TRJ divisé d'autant,
+    #    sans que rien ne plante. Cf. test_parser.py.
+    def a_ignorer(h: str) -> bool:
+        return ("second" in h or "my_million" in h or "etoile+" in h
+                or "en_europe" in h)
+
     cols_gagnants, cols_rapports = {}, {}
     for i, h in enumerate(header):
-        if "second" in h or "my_million" in h or "etoile+" in h:
+        if a_ignorer(h):
             continue
         r = rang_de(h)
         if r is None:

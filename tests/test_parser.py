@@ -144,3 +144,76 @@ def test_mode_tolerant_rend_une_liste_vide():
 def test_csv_vide_ou_sans_ligne():
     assert parser_csv(JEUX["loto"], "") == []
     assert parser_csv(JEUX["loto"], "\n\n  \n") == []
+
+
+# ---------------------------------------------------------------------------
+# Colonnes pièges du CSV EuroMillions (ajouté par la chasse aux bugs, 08/2026)
+# ---------------------------------------------------------------------------
+
+def _permuter_france_europe(texte: str) -> str:
+    """Rend le même CSV avec les colonnes _en_france et _en_europe échangées,
+    entêtes ET données. Simule un réordonnancement par la FDJ."""
+    lignes = [ligne for ligne in texte.splitlines() if ligne.strip()]
+    entete = lignes[0].split(";")
+    paires = [i for i, c in enumerate(entete)
+              if c.endswith("_en_france") and i + 1 < len(entete)
+              and entete[i + 1].endswith("_en_europe")]
+    assert paires, "fixture sans colonnes france/europe — test sans objet"
+
+    def permute(champs):
+        out = list(champs)
+        for i in paires:
+            out[i], out[i + 1] = out[i + 1], out[i]
+        return out
+
+    return "\n".join(";".join(permute(ligne.split(";"))) for ligne in lignes)
+
+
+def test_les_gagnants_europeens_ne_sont_jamais_lus_pour_les_francais():
+    """Le moteur compte des gagnants FRANÇAIS : `p_any_win` et `n_est` en
+    dépendent, donc le TRJ et toute l'EV.
+
+    Or le CSV EuroMillions publie chaque rang DEUX fois, en France et en
+    Europe. Jusqu'en v2.4, seul l'ORDRE des colonnes — la France d'abord —
+    empêchait de lire l'Europe : une propriété du fichier FDJ, pas du moteur.
+    Mesuré en permutant les colonnes : le total des gagnants était multiplié
+    par 6,1. Rien n'aurait planté ; n_est aurait sextuplé et le TRJ affiché
+    serait passé de 37 % à 6 %.
+    """
+    cfg = JEUX["euromillions"]
+    texte = fixture_texte("euromillions_202002")
+    normal = parser_csv(cfg, texte)
+    permute = parser_csv(cfg, _permuter_france_europe(texte))
+    assert normal and len(normal) == len(permute)
+    for a, b in zip(normal, permute, strict=True):
+        assert a["gagnants"] == b["gagnants"], (
+            f"{a['date']} : la lecture dépend de l'ordre des colonnes "
+            f"france/europe — {a['gagnants']} contre {b['gagnants']}")
+
+
+def test_le_jeu_annexe_etoile_plus_n_est_jamais_confondu_avec_le_tirage():
+    """Le CSV EuroMillions contient une SECONDE famille de rangs 1 à 13,
+    celle du jeu annexe « Étoile+ ». Ses gagnants n'ont rien à voir avec ceux
+    du tirage principal : les confondre donne un ratio rang6/rang7 de 0,27 au
+    lieu de 0,98 — l'ordre de grandeur qui a fait croire, un temps, que la
+    table des rangs était inversée.
+
+    La distinction tient au « + » de « Etoile+ ». Toute normalisation d'entête
+    qui écraserait la ponctuation le ferait disparaître.
+    """
+    cfg = JEUX["euromillions"]
+    texte = fixture_texte("euromillions_202002")
+    entete = texte.splitlines()[0].split(";")
+    annexes = [c for c in entete if "etoile+" in c.lower()]
+    assert annexes, "fixture sans colonnes Étoile+ — test sans objet"
+
+    tirages = parser_csv(cfg, texte)
+    # rang 6 (3+2) et rang 7 (4+0) sont presque équiprobables : leur ratio
+    # doit rester proche de 1. Lire Étoile+ le ferait chuter vers 0,27.
+    ratios = [t["gagnants"][6] / t["gagnants"][7] for t in tirages
+              if t["gagnants"].get(6) and t["gagnants"].get(7)]
+    assert ratios
+    moyen = sum(ratios) / len(ratios)
+    assert 0.7 < moyen < 1.4, (
+        f"ratio rang6/rang7 = {moyen:.2f} — le parseur lit probablement les "
+        f"colonnes du jeu annexe Étoile+")

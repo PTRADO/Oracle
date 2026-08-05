@@ -1318,66 +1318,56 @@ def maj_historique(cfg, ctx, args) -> dict:
 # 8ter. RÉTRO-SIMULATION EN EUROS (--simulation N)
 # ==============================================================================
 
-def retro_simulation(cfg, tirages, n_derniers: int = 150):
-    """Rejoue les N derniers tirages : à chaque tirage, une grille par mode
-    (simplifiée : top-5 du score, bonus déterministe), réglée aux rapports
-    réels du tirage. Le compteur en euros du 'si on avait joué les annonces'.
-    Simplification assumée : 1 grille/mode = top-scores (pas les 30 000
-    itérations complètes) — largement suffisant pour mesurer le ROI réel."""
-    N = list(nums(cfg))
+def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
+                     iters: int = 30000):
+    """Rejoue les N derniers tirages en jouant LES GRILLES QUI AURAIENT ÉTÉ
+    PUBLIÉES, réglées aux rapports réels du tirage.
+
+    Fidélité exacte au pipeline de publication (v2.4)
+    ------------------------------------------------
+    Une version antérieure jouait un raccourci — le top-5 des scores, bonus
+    déterministe — en affirmant que c'était « largement suffisant pour mesurer
+    le ROI réel ». L'audit a montré que c'était faux : ces grilles diffèrent
+    des grilles publiées dans 92 à 100 % des cas, et les ROI divergent jusqu'à
+    23 points dans les deux sens. Ce n'était pas un biais, mais un chiffre qui
+    ne mesurait pas ce qu'il prétendait mesurer.
+
+    On refait donc exactement ce que fait la publication : `calculer_scores`,
+    `score_final`, puis `generer_grilles` avec ses 30 000 itérations et ses
+    contraintes de forme. Coût mesuré : ~110 s pour 100 tirages et 3 modes —
+    négligeable dans le cron, et c'est le prix d'un chiffre qui dit vrai.
+
+    Reste une part d'aléa assumée : `generer_grilles` est une recherche
+    stochastique, deux exécutions ne rendent pas la même grille. La graine est
+    donc fixée, comme en publication, pour que le résultat soit reproductible.
+
+    `iters` reste réglable pour les tests : ils exercent ainsi le VRAI
+    pipeline (contraintes de forme comprises) sans payer les 30 000 tirages
+    aléatoires de la publication.
+    """
     debut = max(60, len(tirages) - n_derniers)
-    freq, dernier = Counter(), dict.fromkeys(N, -1)
-    ewma = dict.fromkeys(N, 0.0)
-    decay = 0.5 ** (1 / 30)
-    fen = deque()
-    bonus_freq = Counter()
     calib, prochaine_calib = None, debut
     res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter(),
                "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None,
                "gains": []}
            for m in ("hybride", "pronostic", "anti")}
-    # préchauffe
-    for i in range(debut):
-        t = tirages[i]
-        for n in N:
-            ewma[n] *= decay
-        for b in t["balls"]:
-            freq[b] += 1
-            dernier[b] = i
-            ewma[b] += 1.0
-        fen.append(t["balls"])
-        if len(fen) > 20:
-            fen.popleft()
-        bonus_freq.update(t["bonus"])
+
     for i in range(debut, len(tirages)):
+        passe = tirages[:i]                       # strictement le passé
         if i >= prochaine_calib:
-            calib = calibration_empirique(cfg, tirages[:i])
+            calib = calibration_empirique(cfg, passe)
             prochaine_calib = i + 25
-        f_n = normaliser({n: float(freq.get(n, 0)) for n in N})
-        r_n = normaliser({n: float(i - 1 - dernier[n]) if dernier[n] >= 0
-                          else float(i) for n in N})
-        e_n = normaliser(dict(ewma))
-        cf = Counter()
-        for past in fen:
-            cf.update(past)
-        att = len(fen) * cfg["pick"] / cfg["n_max"]
-        m_n = normaliser({n: cf.get(n, 0) - att for n in N})
-        folk = {n: (f_n[n] + r_n[n] + e_n[n] + m_n[n]) / 4 for n in N}
-        anti, _ = scores_anti(cfg, calib)
         t = tirages[i]
+        _, folk, anti, _ = calculer_scores(cfg, passe, t["jour"], calib)
+        sb = bonus_scores(cfg, passe)
         for mode in res:
-            sc = score_final(cfg, folk, anti, mode)
-            grille = sorted(sorted(N, key=lambda x: -sc[x])[:cfg["pick"]])
-            if mode == "pronostic":
-                tb = sorted(bonus_nums(cfg), key=lambda x: -bonus_freq.get(x, 0))
-            elif mode == "anti":
-                tb = sorted(bonus_nums(cfg),
-                            key=lambda x: _pop_bonus_heuristique(cfg, x))
-            else:
-                tb = sorted(bonus_nums(cfg),
-                            key=lambda x: (-bonus_freq.get(x, 0)
-                                           + 8 * _pop_bonus_heuristique(cfg, x)))
-            bons_b = tb[:cfg["bonus_pick"]]
+            fin = score_final(cfg, folk, anti, mode)
+            grilles = generer_grilles(cfg, fin, sb, passe, mode, 1,
+                                      random.Random(seed), calib, iters=iters)
+            if not grilles:
+                continue
+            grille = list(grilles[0]["numeros"])
+            bons_b = list(grilles[0]["bonus"])
             r = regler_grille(cfg, {"numeros": grille, "bonus": bons_b}, t)
             res[mode]["mise"] += prix_du_tirage(cfg, t["date"])
             res[mode]["gain"] += r["gain"]
@@ -1400,19 +1390,10 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150):
                 if r["gain"] > res[mode]["meilleur_gain"]:
                     res[mode]["meilleur_gain"] = r["gain"]
                     res[mode]["meilleur_date"] = t["date"].isoformat()
-        # maj incrémentale
-        for n in N:
-            ewma[n] *= decay
-        for b in t["balls"]:
-            freq[b] += 1
-            dernier[b] = i
-            ewma[b] += 1.0
-        fen.append(t["balls"])
-        if len(fen) > 20:
-            fen.popleft()
-        bonus_freq.update(t["bonus"])
+
     n_sim = len(tirages) - debut
-    return {"n_tirages": n_sim, "note": "1 grille/mode = top-scores (simplifié)",
+    return {"n_tirages": n_sim,
+            "note": "grilles réellement générées, réglées aux rapports FDJ",
             "prix": cfg["prix"],
             "modes": {m: {"mise": round(v["mise"], 2),
                           "gain": round(v["gain"], 2),
@@ -1891,7 +1872,8 @@ def main():
             budget=args.recherche, n_nuls=12)
 
     ctx["histo"] = maj_historique(cfg, ctx, args)
-    ctx["sim"] = (retro_simulation(cfg, tirages, args.simulation)
+    ctx["sim"] = (retro_simulation(cfg, tirages, args.simulation,
+                                   seed=args.seed or 0)
                   if args.simulation else None)
 
     afficher(cfg, ctx)

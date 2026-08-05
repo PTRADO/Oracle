@@ -216,3 +216,29 @@ def test_chaque_gain_est_tracable_a_un_tirage_reel(export):
     assert abs(total - a["gain"]) < 0.02, "le détail ne recompose pas le total"
     if gains:
         assert gains[0]["gain"] == a["meilleur_gain"], "gains non triés"
+
+
+def test_la_simulation_joue_les_grilles_vraiment_publiees(export):
+    """v2.4 — la rétro-simulation jouait un raccourci (top-5 des scores) tout
+    en affirmant mesurer le ROI réel. L'audit a montré que ces grilles
+    diffèrent des grilles publiées dans 92 à 100 % des cas. Elle rejoue
+    désormais le pipeline de publication.
+
+    Preuve dans l'export : les grilles simulées respectent les contraintes de
+    forme de `generer_grilles` (parité, dizaines, pas de suite de 3), que le
+    top-5 des scores ne respectait pas.
+    """
+    sim = export["simulation"]
+    assert "top-5" not in sim["note"] and "simplifié" not in sim["note"]
+    gains = sim["modes"]["anti"]["gains"]
+    if not gains:
+        pytest.skip("aucun gain sur la période")
+    for g in gains:
+        b = sorted(g["grille"])
+        pairs = sum(1 for x in b if x % 2 == 0)
+        assert pairs in (2, 3), f"{b} : parité hors contrainte"
+        assert len({(x - 1) // 10 for x in b}) >= 3, f"{b} : moins de 3 dizaines"
+        suite = 1
+        for k in range(1, len(b)):
+            suite = suite + 1 if b[k] == b[k - 1] + 1 else 1
+            assert suite < 3, f"{b} : 3 numéros consécutifs"

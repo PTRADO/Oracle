@@ -41,8 +41,12 @@ def test_la_mise_simulee_utilise_le_prix_de_l_epoque():
     somme des prix RÉELS, pas le tarif courant × nombre de tirages."""
     cfg = JEUX["loto"]
     tirages = tirages_des_archives("loto")
-    n = len(tirages)
-    sim = retro_simulation(cfg, tirages, n)
+    # fenêtre courte MAIS à cheval sur le 04/11/2019 : c'est la seule
+    # propriété dont le test a besoin, et le pipeline complet est lent.
+    bascule = next(i for i, x in enumerate(tirages)
+                   if x["date"] >= date(2019, 11, 4))
+    tirages = tirages[:bascule + 10]
+    sim = retro_simulation(cfg, tirages, 20, iters=400)
     joues = tirages[-sim["n_tirages"]:]
     attendu = round(sum(prix_du_tirage(cfg, t["date"]) for t in joues), 2)
     forfait = round(cfg["prix"] * len(joues), 2)
@@ -57,7 +61,7 @@ def test_la_mise_simulee_utilise_le_prix_de_l_epoque():
 def test_le_detail_recompose_le_total_au_centime(cfg):
     """Sans cette égalité, le total « récupéré » reste à croire sur parole."""
     tirages = tirages_des_archives(cfg["nom"].lower())
-    sim = retro_simulation(cfg, tirages, 120)
+    sim = retro_simulation(cfg, tirages, 25, iters=400)
     dates_reelles = {t["date"].isoformat() for t in tirages}
     for mode, v in sim["modes"].items():
         somme = round(sum(g["gain"] for g in v["gains"]), 2)

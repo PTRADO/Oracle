@@ -1124,8 +1124,13 @@ def rang_gagne(cfg, m: int, b: int) -> int | None:
             return 9
         return None
     # EUROMILLIONS (13 rangs, ordre officiel des gains)
+    #   L'ordre suit le MONTANT décroissant, pas la rareté. Piège classique :
+    #   4+0 est un peu PLUS probable que 3+2 mais nettement MOINS payé
+    #   (46,50 € contre 69,30 € de rapport médian sur les tirages FDJ), donc
+    #   3+2 = rang 6 et 4+0 = rang 7. Les intervertir ne plante rien : ça paie
+    #   silencieusement un 4+0 au tarif d'un 3+2 (+49 %) et l'inverse (−33 %).
     table = {(5, 2): 1, (5, 1): 2, (5, 0): 3, (4, 2): 4, (4, 1): 5,
-             (4, 0): 6, (3, 2): 7, (2, 2): 8, (3, 1): 9, (3, 0): 10,
+             (3, 2): 6, (4, 0): 7, (2, 2): 8, (3, 1): 9, (3, 0): 10,
              (1, 2): 11, (2, 1): 12, (2, 0): 13}
     return table.get((m, b))
 

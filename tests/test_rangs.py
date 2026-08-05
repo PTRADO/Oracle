@@ -14,13 +14,32 @@ indépendantes :
 from __future__ import annotations
 
 import math
+import statistics
+from pathlib import Path
 
 import pytest
 
-from oracle import JEUX, rang_gagne, regler_grille
+from oracle import JEUX, _texte_archive, parser_csv, rang_gagne, regler_grille
 
 TOUS = [JEUX["loto"], JEUX["euromillions"]]
 IDS = ["loto", "euromillions"]
+
+DATA = Path(__file__).resolve().parent.parent / "data"
+
+
+def tirages_des_archives(cle: str) -> list[dict]:
+    """Tous les tirages réels des archives FDJ versionnées dans `data/`,
+    dédoublonnés par date. Hors ligne : rien n'est téléchargé."""
+    cfg = JEUX[cle]
+    par_date: dict = {}
+    for arc in cfg["archives"]:
+        chemin = DATA / f"{arc['label']}.zip"
+        if not chemin.exists():
+            continue
+        for t in parser_csv(cfg, _texte_archive(chemin.read_bytes()),
+                            tolerant=True):
+            par_date.setdefault(t["date"], t)
+    return [par_date[d] for d in sorted(par_date)]
 
 
 def proba_par_rang(cfg) -> dict[int, float]:
@@ -59,10 +78,10 @@ def test_rangs_ordonnes_du_plus_rare_au_plus_frequent(cfg):
     """Rang 1 = le plus improbable, rang N = le plus courant.
 
     Tolérance de 5 % : la FDJ ordonne ses rangs par MONTANT de gain, pas
-    strictement par probabilité. À l'EuroMillions, 4+0 (rang 6) est ainsi
-    2 % plus probable que 3+2 (rang 7) — inversion officielle, vérifiée
-    ci-dessous. Au-delà de cette marge, une inversion signalerait une vraie
-    erreur de table.
+    strictement par probabilité. À l'EuroMillions, 3+2 (rang 6) est ainsi
+    2 % MOINS probable que 4+0 (rang 7) tout en étant mieux payé — c'est le
+    montant qui fait l'ordre, pas la rareté. Au-delà de cette marge, une
+    inversion signalerait une vraie erreur de table.
     """
     p = proba_par_rang(cfg)
     probas = [p[r] for r in sorted(p)]
@@ -70,14 +89,72 @@ def test_rangs_ordonnes_du_plus_rare_au_plus_frequent(cfg):
         assert precedent <= suivant * 1.05, "inversion de rangs trop large"
 
 
-def test_inversion_officielle_euromillions_rangs_6_et_7():
-    """Verrouille l'anomalie ci-dessus pour qu'elle reste un choix documenté
-    et non une régression silencieuse."""
-    p = proba_par_rang(JEUX["euromillions"])
-    assert rang_gagne(JEUX["euromillions"], 4, 0) == 6
-    assert rang_gagne(JEUX["euromillions"], 3, 2) == 7
-    assert p[6] > p[7]                       # 4+0 un peu plus probable que 3+2
-    assert p[6] / p[7] == pytest.approx(1.023, abs=0.01)
+def test_euromillions_rang_6_est_3plus2_et_rang_7_est_4plus0():
+    """L'ordre officiel EuroMillions suit le MONTANT décroissant : 3+2 est
+    mieux payé que 4+0, donc 3+2 = rang 6 et 4+0 = rang 7.
+
+    Le piège : 4+0 est un peu PLUS probable que 3+2. Raisonner sur la rareté
+    au lieu du montant intervertit les deux rangs — une erreur invisible
+    (rien ne plante) qui paie un 4+0 au tarif d'un 3+2. Le rapport réel des
+    tirages FDJ tranche : cf. test_ordre_des_rangs_conforme_aux_rapports_fdj.
+    """
+    em = JEUX["euromillions"]
+    assert rang_gagne(em, 3, 2) == 6
+    assert rang_gagne(em, 4, 0) == 7
+    p = proba_par_rang(em)
+    assert p[6] < p[7]                       # 3+2 un peu plus rare que 4+0
+    assert p[7] / p[6] == pytest.approx(1.023, abs=0.01)
+
+
+@pytest.mark.parametrize("cle", ["loto", "euromillions"], ids=IDS)
+def test_ordre_des_rangs_conforme_aux_rapports_fdj(cle):
+    """L'ancrage EXTERNE de la table : les rapports réellement publiés.
+
+    La FDJ classe ses rangs par montant décroissant. Donc le rapport médian
+    du rang k doit être supérieur à celui du rang k+1, sur les vrais tirages.
+    Aucune hypothèse du moteur n'entre ici : seulement le CSV FDJ. Si
+    `rang_gagne` intervertit deux rangs, la table du moteur cesse de décrire
+    l'échelle de gains qu'elle prétend décrire — et ce test le voit.
+
+    Lit les archives `data/*.zip` versionnées avec le dépôt (le test reste
+    donc hors ligne) : les fixtures ne comptent que 6 tirages, trop peu pour
+    départager deux rangs voisins.
+    """
+    cfg = JEUX[cle]
+    tirages = tirages_des_archives(cle)
+    assert len(tirages) > 200, "archives trop courtes pour être concluantes"
+
+    n_rangs = 9 if cfg["bonus_pick"] == 1 else 13
+    medians = {}
+    for rang in range(1, n_rangs + 1):
+        vals = [t["rapports"][rang] for t in tirages
+                if t["rapports"].get(rang)]
+        if vals:
+            medians[rang] = statistics.median(vals)
+
+    for rang in sorted(medians):
+        suivant = rang + 1
+        if suivant not in medians:
+            continue
+        assert medians[rang] > medians[suivant], (
+            f"rang {rang} ({medians[rang]:.2f} €) devrait payer plus que "
+            f"le rang {suivant} ({medians[suivant]:.2f} €) — table erronée")
+
+
+def test_euromillions_3plus2_est_mieux_paye_que_4plus0():
+    """Le cas précis qui distingue la bonne table de la mauvaise, tranché
+    par les rapports FDJ réels et non par un raisonnement sur la rareté."""
+    cfg = JEUX["euromillions"]
+    tirages = tirages_des_archives("euromillions")
+    rang_3p2 = rang_gagne(cfg, 3, 2)
+    rang_4p0 = rang_gagne(cfg, 4, 0)
+    med = {r: statistics.median([t["rapports"][r] for t in tirages
+                                 if t["rapports"].get(r)])
+           for r in (rang_3p2, rang_4p0)}
+    assert med[rang_3p2] > med[rang_4p0], (
+        f"3+2 doit être mieux payé que 4+0 : le moteur les place aux rangs "
+        f"{rang_3p2} et {rang_4p0}, payés {med[rang_3p2]:.2f} € et "
+        f"{med[rang_4p0]:.2f} €")
 
 
 @pytest.mark.parametrize("cfg", TOUS, ids=IDS)

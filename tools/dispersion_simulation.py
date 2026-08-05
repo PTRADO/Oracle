@@ -23,6 +23,8 @@ RACINE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RACINE))
 sys.path.insert(0, str(RACINE / "tests"))
 
+from test_rangs import tirages_des_archives  # noqa: E402
+
 from oracle import (  # noqa: E402
     JEUX,
     bonus_scores,
@@ -33,7 +35,6 @@ from oracle import (  # noqa: E402
     regler_grille,
     score_final,
 )
-from test_rangs import tirages_des_archives  # noqa: E402
 
 
 def une_simulation(cfg, tirages, debut, seed, iters, cache):
@@ -87,10 +88,10 @@ def main() -> int:
                 print(f"  mise totale : {mise:.2f} €")
         gains.sort()
 
-        def pct(p):
-            return gains[min(int(p * len(gains)), len(gains) - 1)]
+        def pct(p, g=gains):
+            return g[min(int(p * len(g)), len(g) - 1)]
 
-        print(f"\n  A. DISPERSION SELON LA GRAINE (stratégie identique)")
+        print("\n  A. DISPERSION SELON LA GRAINE (stratégie identique)")
         print(f"     min {gains[0]:.2f} €   p10 {pct(.10):.2f} €   "
               f"médiane {statistics.median(gains):.2f} €   "
               f"p90 {pct(.90):.2f} €   max {gains[-1]:.2f} €")
@@ -98,8 +99,8 @@ def main() -> int:
               f"(écart-type {statistics.pstdev(gains):.2f} €)")
         print(f"     rapport max/médiane : "
               f"×{gains[-1]/max(statistics.median(gains), 1e-9):.1f}")
-        print(f"\n  → afficher un nombre seul revient à publier un tirage au "
-              f"sort dans cet intervalle.")
+        print("\n  → afficher un nombre seul revient à publier un tirage au "
+              "sort dans cet intervalle.")
         print(f"  → INTERVALLE HONNÊTE À AFFICHER : "
               f"{pct(.10):.0f} – {pct(.90):.0f} € (80 % des graines), "
               f"médiane {statistics.median(gains):.0f} €.")

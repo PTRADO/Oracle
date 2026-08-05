@@ -40,13 +40,14 @@ RACINE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RACINE))
 sys.path.insert(0, str(RACINE / "tests"))
 
+from test_rangs import tirages_des_archives  # noqa: E402
+
 from oracle import (  # noqa: E402
     JEUX,
     calibration_empirique,
     popularite_log,
     rangs_mb,
 )
-from test_rangs import tirages_des_archives  # noqa: E402
 
 
 def poisson_irls(y, x, offset, tours=60):

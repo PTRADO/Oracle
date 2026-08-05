@@ -10,6 +10,7 @@ moteur n'est lu que pour comparer ses constantes aux nôtres.
 """
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import math
@@ -110,11 +111,9 @@ def _ligne_vers_tirage(ligne: dict) -> dict | None:
         if mg and v and v.strip().replace(" ", "").isdigit():
             gagnants[int(mg.group(1))] = int(v.strip().replace(" ", ""))
         if mr and v:
-            try:
+            with contextlib.suppress(ValueError):
                 rapports[int(mr.group(1))] = float(
                     v.replace(",", ".").replace(" ", ""))
-            except ValueError:
-                pass
     return {"date": quand, "balls": tuple(sorted(boules)),
             "bonus": tuple(sorted(bonus)), "gagnants": gagnants,
             "rapports": rapports}
@@ -248,7 +247,7 @@ def bug4_6(loto: list[dict]) -> None:
              f"| surfacturation évitée : "
              f"{len(avant) * 0.20:.2f} € par grille jouée à chaque tirage")
 
-    from oracle import prix_du_tirage, JEUX
+    from oracle import JEUX, prix_du_tirage
     cfg = JEUX["loto"]
     ok = (prix_du_tirage(cfg, date(2019, 11, 3)) == 2.00
           and prix_du_tirage(cfg, date(2019, 11, 4)) == 2.20

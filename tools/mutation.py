@@ -68,9 +68,25 @@ MUTATIONS: list[tuple[str, str, str, str]] = [
      '[("2019-11-05", 2.20), ("1900-01-01", 2.00)]'),
 
     # ---- fuite du futur ---------------------------------------------------
-    ("backtest_fuite_du_futur", "oracle.py",
+    ("retro_simulation_fuite_du_futur", "oracle.py",
      'passe = tirages[:i]                       # strictement le passé',
      'passe = tirages[:i + 1]                   # MUTATION'),
+    # Le backtest walk-forward absorbe le tirage APRÈS l'avoir prédit. Inverser
+    # les deux lui fait voir le tirage sur lequel il parie : le « modèle » se
+    # mettrait alors à battre le hasard, et le garde-fou n°1 du produit — « le
+    # folklore ne prédit rien » — s'inverserait silencieusement.
+    ("backtest_absorbe_avant_de_predire", "oracle.py",
+     "        for n in N:\n"
+     "            ewma[n] *= decay\n"
+     "        for b in t[\"balls\"]:\n"
+     "            freq[b] += 1\n"
+     "            dernier[b] = i\n"
+     "            ewma[b] += 1.0\n"
+     "        fen.append(t[\"balls\"])\n"
+     "        if len(fen) > fen_mom:\n"
+     "            fen.popleft()\n"
+     "    theo =",
+     "    theo ="),
 
     # ---- anti-partage (v2.4) ---------------------------------------------
     ("anti_partage_signe_inverse", "oracle.py",
@@ -104,6 +120,20 @@ MUTATIONS: list[tuple[str, str, str, str]] = [
     ("reglement_rate_le_dernier_bon_numero", "oracle.py",
      "    bons = sorted(set(grille[\"numeros\"]) & set(tirage[\"balls\"]))",
      "    bons = sorted(set(grille[\"numeros\"]) & set(tirage[\"balls\"][:-1]))"),
+
+    # ---- les correctifs de la chasse d'août 2026 --------------------------
+    # Si l'une de ces trois survit, le test écrit avec le correctif ne sait
+    # pas rougir, et le correctif n'est pas protégé.
+    ("parser_relit_les_gagnants_europeens", "oracle.py",
+     'or "en_europe" in h)',
+     ')'),
+    ("normaliser_sans_bornage", "oracle.py",
+     "    return {k: min(100.0, max(0.0, 100.0 * (v - lo) / ecart))\n"
+     "            for k, v in scores.items()}",
+     "    return {k: 100.0 * (v - lo) / ecart for k, v in scores.items()}"),
+    ("pop_rel_sans_normalisation", "oracle.py",
+     '    s -= calib["log_norm"] if bonus else calib["log_norm_nums"]',
+     "    s -= 0.0"),
 
     # ---- recherche de formule --------------------------------------------
     ("recherche_sans_separation_entrainement_validation", "recherche.py",

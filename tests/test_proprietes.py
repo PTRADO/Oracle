@@ -25,7 +25,6 @@ from test_rangs import tirages_des_archives
 
 from oracle import (
     JEUX,
-    bonus_nums,
     calibration_empirique,
     contraintes_historiques,
     decomposition_trj,

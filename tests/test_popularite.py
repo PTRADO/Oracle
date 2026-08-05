@@ -26,9 +26,9 @@ from conftest import RACINE  # noqa: F401
 from test_rangs import tirages_des_archives
 
 from oracle import (
+    JEUX,
     MIN_TIRAGES_CALIBRATION,
     PAIRES_POPULARITE,
-    JEUX,
     bonus_nums,
     calibration_empirique,
     compter_paires,

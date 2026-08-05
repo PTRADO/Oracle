@@ -17,6 +17,8 @@ RACINE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RACINE))
 sys.path.insert(0, str(RACINE / "tests"))
 
+from test_rangs import tirages_des_archives  # noqa: E402
+
 from oracle import (  # noqa: E402
     JEUX,
     calibration_empirique,
@@ -24,8 +26,6 @@ from oracle import (  # noqa: E402
     popularite_log,
     rangs_mb,
 )
-from test_rangs import tirages_des_archives  # noqa: E402
-
 
 # ===========================================================================
 # 4.3 — n_est et l'hypothèse d'uniformité
@@ -83,7 +83,7 @@ def zone_43(cle: str) -> None:
 
     # charges théoriques, pondérées par la part réelle de gagnants
     mb = rangs_mb(cfg)
-    parts = {r: 0.0 for r in mb}
+    parts = dict.fromkeys(mb, 0.0)
     for t in tir:
         for r, w in t["gagnants"].items():
             if r in parts:

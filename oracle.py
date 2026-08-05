@@ -1744,7 +1744,7 @@ def maj_historique(cfg, ctx, args) -> dict:
 # ==============================================================================
 
 def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
-                     iters: int = 30000):
+                     iters: int = 30000, retour_grilles: bool = False):
     """Rejoue les N derniers tirages en jouant LES GRILLES QUI AURAIENT ÉTÉ
     PUBLIÉES, réglées aux rapports réels du tirage.
 
@@ -1769,12 +1769,19 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
     `iters` reste réglable pour les tests : ils exercent ainsi le VRAI
     pipeline (contraintes de forme comprises) sans payer les 30 000 tirages
     aléatoires de la publication.
+
+    `retour_grilles` ajoute la liste des grilles jouées, tirage par tirage.
+    Hors export (le contrat JSON n'en veut pas), mais c'est ce qui rend
+    vérifiable la propriété la plus importante de cette fonction : la grille
+    jouée au tirage i ne doit dépendre QUE des tirages antérieurs. Sans ce
+    point d'observation, une fuite du futur d'un seul cran est indétectable
+    de l'extérieur — et une fuite gonfle le ROI affiché.
     """
     debut = max(60, len(tirages) - n_derniers)
     calib, prochaine_calib = None, debut
     res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter(),
                "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None,
-               "gains": []}
+               "gains": [], "grilles_jouees": []}
            for m in ("hybride", "pronostic", "anti")}
 
     for i in range(debut, len(tirages)):
@@ -1793,6 +1800,10 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                 continue
             grille = list(grilles[0]["numeros"])
             bons_b = list(grilles[0]["bonus"])
+            if retour_grilles:
+                res[mode]["grilles_jouees"].append(
+                    {"date": t["date"].isoformat(), "numeros": grille,
+                     "bonus": bons_b})
             r = regler_grille(cfg, {"numeros": grille, "bonus": bons_b}, t)
             res[mode]["mise"] += prix_du_tirage(cfg, t["date"])
             res[mode]["gain"] += r["gain"]
@@ -1828,7 +1839,11 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                           "gains": sorted(v["gains"], key=lambda g: -g["gain"]),
                           "meilleur_gain": round(v["meilleur_gain"], 2),
                           "meilleur_date": v["meilleur_date"],
-                          "rangs": dict(sorted(v["rangs"].items()))}
+                          "rangs": dict(sorted(v["rangs"].items())),
+                          # Absent de l'export tant que retour_grilles est
+                          # faux : le contrat JSON n'en veut pas.
+                          **({"grilles_jouees": v["grilles_jouees"]}
+                             if retour_grilles else {})}
                       for m, v in res.items()}}
 
 
@@ -1999,7 +2014,7 @@ def afficher(cfg, ctx):
         p(f"   Délaissés (mesuré) : {c['top_delaisses']}  ← or pur")
         p(f"   Rangs exploités : {c['rangs']} sur {c['n_tirages']} tirages "
           f"({c['n_lignes']} observations)")
-        p(f"   Co-occurrences  : " + "  ".join(
+        p("   Co-occurrences  : " + "  ".join(
             f"{nom}={c['theta'][nom]:+.3f}" for nom, _ in PAIRES_POPULARITE))
 
     sbm = score_bonus_mode(ctx["sb"], ctx["mode"])

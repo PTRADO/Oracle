@@ -1,6 +1,6 @@
 {
  "meta": {
-  "version": "2.5",
+  "version": "2.6",
   "source": "fdj",
   "jeu": "loto",
   "nom": "LOTO",
@@ -9,7 +9,7 @@
   "bonus_max": 10,
   "n_max": 49,
   "prix": 2.2,
-  "genere_le": "2026-08-05T23:22:24",
+  "genere_le": "2026-08-06T02:03:54",
   "n_tirages": 1474,
   "periode_debut": "2017-03-06",
   "periode_fin": "2026-08-05",
@@ -2544,6 +2544,107 @@
   "effet_anniversaire": {
    "n": 1474,
    "r": 0.189
+  },
+  "frequences": {
+   "n_tirages": 1474,
+   "attendu_par_numero": 150.4,
+   "plus_sortis": [
+    {
+     "n": 31,
+     "sorties": 175
+    },
+    {
+     "n": 13,
+     "sorties": 170
+    },
+    {
+     "n": 30,
+     "sorties": 170
+    },
+    {
+     "n": 15,
+     "sorties": 169
+    },
+    {
+     "n": 6,
+     "sorties": 168
+    },
+    {
+     "n": 41,
+     "sorties": 162
+    }
+   ],
+   "moins_sortis": [
+    {
+     "n": 33,
+     "sorties": 131
+    },
+    {
+     "n": 43,
+     "sorties": 132
+    },
+    {
+     "n": 14,
+     "sorties": 134
+    },
+    {
+     "n": 11,
+     "sorties": 134
+    },
+    {
+     "n": 39,
+     "sorties": 135
+    },
+    {
+     "n": 2,
+     "sorties": 136
+    }
+   ],
+   "paires_frequentes": [
+    {
+     "a": 6,
+     "b": 15,
+     "sorties": 23
+    },
+    {
+     "a": 17,
+     "b": 30,
+     "sorties": 23
+    },
+    {
+     "a": 3,
+     "b": 13,
+     "sorties": 23
+    },
+    {
+     "a": 7,
+     "b": 11,
+     "sorties": 23
+    },
+    {
+     "a": 31,
+     "b": 36,
+     "sorties": 22
+    },
+    {
+     "a": 7,
+     "b": 31,
+     "sorties": 22
+    }
+   ],
+   "attendu_par_paire": 12.5,
+   "record_hasard_min": 166,
+   "record_hasard_max": 200,
+   "record_paire_hasard_min": 23,
+   "record_paire_hasard_max": 37,
+   "epreuve": {
+    "n_tirages": 500,
+    "mise": 1100.0,
+    "gain_numeros_chauds": 232.0,
+    "gain_hasard_median": 225.4,
+    "gain_hasard_min": 152.6,
+    "gain_hasard_max": 726.8
+   }
   },
   "chi2": {
    "chi2": 35.3,

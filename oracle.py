@@ -101,7 +101,7 @@ from datetime import date, datetime, timedelta
 # `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
 # futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
 
-VERSION = "2.5"          # bump obligatoire à tout changement du contrat JSON
+VERSION = "2.6"          # bump obligatoire à tout changement du contrat JSON
 
 FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
            "v3/documentations/")
@@ -1947,6 +1947,110 @@ def backtest(cfg, tirages, rng, depart: int = 60, fen_mom: int = 20):
             "theorique": theo}
 
 
+def numeros_les_plus_sortis(cfg, tirages, n_sim: int = 600, top: int = 6,
+                            derniers: int = 500):
+    """Le tableau que tout le monde veut voir — avec sa référence honnête.
+
+    « Quels numéros sortent le plus ? » est LA question qu'on pose à un site de
+    loto, et aucun n'y répond correctement. Le classement seul ne veut rien
+    dire : sur 49 numéros, il y en a forcément un en tête. La seule lecture qui
+    a du sens est de comparer le record observé à ce qu'une machine SANS
+    DÉFAUT produit sur le même nombre de tirages.
+
+    On rend donc trois choses ensemble, et jamais l'une sans les autres :
+      · le classement (numéros et paires) ;
+      · la plage qu'une machine parfaite produit, par simulation ;
+      · ce que rapporte VRAIMENT le fait de jouer ces numéros, en euros,
+        rejoué tirage par tirage sur le seul passé, contre un témoin au hasard.
+
+    C'est la troisième qui répond à la question. Les deux premières servent à
+    ne pas se tromper sur la deuxième.
+    """
+    n_max, pick = cfg["n_max"], cfg["pick"]
+    n_t = len(tirages)
+    if n_t < 200:
+        return None
+
+    freq = Counter()
+    paires = Counter()
+    for t in tirages:
+        b = sorted(t["balls"])
+        freq.update(b)
+        for i in range(len(b)):
+            for j in range(i + 1, len(b)):
+                paires[(b[i], b[j])] += 1
+
+    # Référence : ce qu'une machine parfaite produit. Graine fixe pour que
+    # l'export reste reproductible d'une exécution à l'autre.
+    rng = random.Random(0x10770)
+    univers = list(nums(cfg))
+    rec_num, rec_paire = [], []
+    for k in range(n_sim):
+        c, cp = Counter(), Counter()
+        for _ in range(n_t):
+            b = sorted(rng.sample(univers, pick))
+            c.update(b)
+            if k < n_sim // 4:
+                for i in range(len(b)):
+                    for j in range(i + 1, len(b)):
+                        cp[(b[i], b[j])] += 1
+        rec_num.append(max(c.values()))
+        if cp:
+            rec_paire.append(max(cp.values()))
+
+    # Et si on les jouait ? Walk-forward strict, rapports FDJ réels.
+    debut = max(200, n_t - derniers)
+
+    def rejouer(choisir, graine=0):
+        r = random.Random(graine)
+        mise = gain = 0.0
+        for i in range(debut, n_t):
+            grille = choisir(tirages[:i], r)
+            t = tirages[i]
+            rang = rang_gagne(cfg, len(set(grille) & set(t["balls"])), 0)
+            mise += prix_du_tirage(cfg, t["date"])
+            if rang is not None:
+                gain += t["rapports"].get(rang, 0.0) or 0.0
+        return round(mise, 2), round(gain, 2)
+
+    def chauds(passe, _r):
+        c = Counter()
+        for t in passe:
+            c.update(t["balls"])
+        return [n for n, _ in c.most_common(pick)]
+
+    def hasard(_passe, r):
+        return r.sample(univers, pick)
+
+    mise, gain_chauds = rejouer(chauds)
+    gains_hasard = [rejouer(hasard, graine=g)[1] for g in range(12)]
+
+    ordre = freq.most_common()
+    return {
+        "n_tirages": n_t,
+        "attendu_par_numero": round(n_t * pick / n_max, 1),
+        "plus_sortis": [{"n": n, "sorties": v} for n, v in ordre[:top]],
+        "moins_sortis": [{"n": n, "sorties": v} for n, v in ordre[-top:][::-1]],
+        "paires_frequentes": [{"a": a, "b": b, "sorties": v}
+                              for (a, b), v in paires.most_common(top)],
+        "attendu_par_paire": round(
+            n_t * (pick * (pick - 1) // 2) / (n_max * (n_max - 1) // 2), 1),
+        # la référence honnête
+        "record_hasard_min": min(rec_num), "record_hasard_max": max(rec_num),
+        "record_paire_hasard_min": min(rec_paire) if rec_paire else None,
+        "record_paire_hasard_max": max(rec_paire) if rec_paire else None,
+        # l'épreuve des faits
+        "epreuve": {
+            "n_tirages": n_t - debut,
+            "mise": mise,
+            "gain_numeros_chauds": gain_chauds,
+            "gain_hasard_median": round(statistics.median(gains_hasard), 2),
+            "gain_hasard_min": round(min(gains_hasard), 2),
+            "gain_hasard_max": round(max(gains_hasard), 2),
+        },
+    }
+
+
 def test_popularite(tirages):
     """Corrélation (#numéros ≤31 tirés) ↔ log(gagnants). r>0 = effet
     anniversaire prouvé sur les données → anti-partage justifié."""
@@ -2282,6 +2386,7 @@ def export_web(chemin, cfg, ctx, args):
         "simulation": ctx.get("sim"),
         "verdicts": {"backtest": ctx["bt"],
                      "effet_anniversaire": ctx["pop"],
+                     "frequences": ctx.get("freq_tab"),
                      "chi2": ctx["chi2"],
                      "trj": ctx.get("trj"),
                      "recherche": ctx.get("recherche")},
@@ -2386,6 +2491,7 @@ def main():
             cfg, tirages, random.Random(args.seed or 0),
             budget=args.recherche, n_nuls=12)
 
+    ctx["freq_tab"] = numeros_les_plus_sortis(cfg, tirages)
     ctx["histo"] = maj_historique(cfg, ctx, args)
     # 12 graines suffisent pour un intervalle honnête : ce qu'on veut dire au
     # lecteur, c'est « ce nombre aurait pu être très différent », pas un

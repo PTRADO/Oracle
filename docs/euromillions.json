@@ -1,6 +1,6 @@
 {
  "meta": {
-  "version": "2.5",
+  "version": "2.6",
   "source": "fdj",
   "jeu": "euromillions",
   "nom": "EUROMILLIONS",
@@ -9,7 +9,7 @@
   "bonus_max": 12,
   "n_max": 50,
   "prix": 2.5,
-  "genere_le": "2026-08-05T23:57:36",
+  "genere_le": "2026-08-06T02:14:19",
   "n_tirages": 1029,
   "periode_debut": "2016-09-27",
   "periode_fin": "2026-08-04",
@@ -1848,6 +1848,107 @@
   "effet_anniversaire": {
    "n": 1029,
    "r": 0.245
+  },
+  "frequences": {
+   "n_tirages": 1029,
+   "attendu_par_numero": 102.9,
+   "plus_sortis": [
+    {
+     "n": 42,
+     "sorties": 123
+    },
+    {
+     "n": 17,
+     "sorties": 119
+    },
+    {
+     "n": 23,
+     "sorties": 117
+    },
+    {
+     "n": 29,
+     "sorties": 117
+    },
+    {
+     "n": 44,
+     "sorties": 116
+    },
+    {
+     "n": 20,
+     "sorties": 116
+    }
+   ],
+   "moins_sortis": [
+    {
+     "n": 22,
+     "sorties": 72
+    },
+    {
+     "n": 40,
+     "sorties": 85
+    },
+    {
+     "n": 43,
+     "sorties": 88
+    },
+    {
+     "n": 18,
+     "sorties": 89
+    },
+    {
+     "n": 1,
+     "sorties": 89
+    },
+    {
+     "n": 36,
+     "sorties": 93
+    }
+   ],
+   "paires_frequentes": [
+    {
+     "a": 23,
+     "b": 32,
+     "sorties": 19
+    },
+    {
+     "a": 17,
+     "b": 28,
+     "sorties": 18
+    },
+    {
+     "a": 2,
+     "b": 19,
+     "sorties": 18
+    },
+    {
+     "a": 6,
+     "b": 9,
+     "sorties": 17
+    },
+    {
+     "a": 17,
+     "b": 44,
+     "sorties": 17
+    },
+    {
+     "a": 7,
+     "b": 34,
+     "sorties": 17
+    }
+   ],
+   "attendu_par_paire": 8.4,
+   "record_hasard_min": 115,
+   "record_hasard_max": 143,
+   "record_paire_hasard_min": 17,
+   "record_paire_hasard_max": 25,
+   "epreuve": {
+    "n_tirages": 500,
+    "mise": 1250.0,
+    "gain_numeros_chauds": 154.5,
+    "gain_hasard_median": 160.25,
+    "gain_hasard_min": 123.6,
+    "gain_hasard_max": 213.5
+   }
   },
   "chi2": {
    "chi2": 46.61,

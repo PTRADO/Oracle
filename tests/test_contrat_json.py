@@ -46,7 +46,9 @@ def test_meta_complet(export):
     # multiplicateurs de partage faux d'un facteur 5.
     # 2.5 : le seuil des dizaines passe de 3 à 2 dans `grille_valide` (les
     # grilles publiées changent) et la simulation expose `dispersion_anti`.
-    assert m["version"] == "2.5"
+    # 2.6 : la page gagne la section « les numéros qui sortent le plus »,
+    # alimentée par verdicts.frequences.
+    assert m["version"] == "2.6"
     assert m["source"] == "fdj", "export encore basé sur des données de démo"
 
 
@@ -223,6 +225,35 @@ def test_la_formule_s_effondre_hors_echantillon(export):
     puis retombe. Si ce n'était plus vrai, il faudrait le regarder de près."""
     r = export["verdicts"]["recherche"]["reel"]
     assert r["score_entrainement"] > r["score_validation"]
+
+
+def test_le_tableau_des_frequences_est_exporte(export):
+    """v2.6 — « quels numéros sortent le plus ? » est LA question qu'on pose à
+    un site de loto. La page doit y répondre, mais jamais sans sa référence :
+    un classement seul induit en erreur, puisqu'il y a forcément un premier.
+
+    On exige donc les trois éléments ensemble. Publier le classement sans la
+    plage du hasard, ou sans l'épreuve en euros, serait exactement ce que font
+    les sites de « numéros chauds ».
+    """
+    f = export["verdicts"]["frequences"]
+    assert f, "tableau des fréquences absent"
+    assert len(f["plus_sortis"]) >= 5 and len(f["moins_sortis"]) >= 5
+    assert f["paires_frequentes"], "paires absentes"
+
+    # la référence honnête
+    assert f["record_hasard_min"] < f["record_hasard_max"]
+    assert f["plus_sortis"][0]["sorties"] <= f["record_hasard_max"], (
+        "le numéro le plus sorti dépasse ce qu'une machine parfaite produit — "
+        "à vérifier sérieusement avant de publier")
+
+    # l'épreuve des faits, sans laquelle le tableau est trompeur
+    e = f["epreuve"]
+    assert e["n_tirages"] >= 100 and e["mise"] > 0
+    assert e["gain_hasard_min"] <= e["gain_hasard_median"] <= e["gain_hasard_max"]
+    assert e["gain_numeros_chauds"] < e["mise"], (
+        "jouer les numéros chauds serait rentable — invraisemblable, "
+        "vérifier les données avant de publier ça")
 
 
 def test_la_simulation_expose_sa_dispersion(export):

@@ -221,6 +221,11 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
   </details>
 
   <details class="verre">
+    <summary>Les numéros qui sortent le plus</summary>
+    <div class="corps" id="d-freq"></div>
+  </details>
+
+  <details class="verre">
     <summary>Combien coûte le jeu&nbsp;?</summary>
     <div class="corps" id="d-cout"></div>
   </details>
@@ -483,6 +488,74 @@ function rendrePourquoi(){
   $("d-numeros").innerHTML = h;
 }
 
+function rendreFrequences(){
+  const f = D().verdicts.frequences, box = $("d-freq");
+  if(!f){ box.innerHTML = "<p>Pas assez de tirages pour ce tableau.</p>"; return; }
+  const puce = (n, cls) => `<span class="puce ${cls}">${n}</span>`;
+  const e = f.epreuve;
+  const ecart = e.gain_numeros_chauds - e.gain_hasard_median;
+
+  box.innerHTML = `
+    <p>Sur ${f.n_tirages} tirages, chaque numéro devrait sortir
+    <strong>${f.attendu_par_numero}</strong> fois. Voici ceux qui s'en écartent
+    le plus.</p>
+
+    <h3>Ceux qui sortent le plus</h3>
+    <div class="puces">` +
+      f.plus_sortis.map(x => puce(`${x.n}`, "sur")).join("") + `</div>
+    <p style="margin-top:-4px">` +
+      f.plus_sortis.map(x => `n°${x.n} : ${x.sorties}×`).join(" &nbsp;·&nbsp; ") +
+    `</p>
+
+    <h3>Ceux qui sortent le moins</h3>
+    <div class="puces">` +
+      f.moins_sortis.map(x => puce(`${x.n}`, "del")).join("") + `</div>
+    <p style="margin-top:-4px">` +
+      f.moins_sortis.map(x => `n°${x.n} : ${x.sorties}×`).join(" &nbsp;·&nbsp; ") +
+    `</p>
+
+    <h3>Les paires qui sortent le plus ensemble</h3>
+    <p>` + f.paires_frequentes.map(x =>
+        `<strong>${x.a}+${x.b}</strong> (${x.sorties}×)`).join(" &nbsp;·&nbsp; ") +
+    `<br><span style="opacity:.7">chaque paire devrait sortir
+    ${f.attendu_par_paire} fois</span></p>
+
+    <h3>Avant d'en tirer une conclusion</h3>
+    <p>Une machine <strong>sans le moindre défaut</strong>, sur ces mêmes
+    ${f.n_tirages} tirages, produit un numéro record entre
+    <strong>${f.record_hasard_min}</strong> et
+    <strong>${f.record_hasard_max}</strong> sorties.
+    Le n°${f.plus_sortis[0].n} en a ${f.plus_sortis[0].sorties} :
+    ${f.plus_sortis[0].sorties <= f.record_hasard_max
+      ? "il est dans la plage normale."
+      : "il en sort."}</p>
+    ${f.record_paire_hasard_max ? `<p>Pour les paires, la même machine
+      parfaite en produit une entre ${f.record_paire_hasard_min} et
+      ${f.record_paire_hasard_max} sorties. Sur des milliers de paires
+      possibles, la plus forte est <em>forcément</em> très au-dessus de la
+      moyenne — même sans aucun défaut.</p>` : ""}
+
+    <h3>Et si on les jouait&nbsp;?</h3>
+    <p>Une grille par tirage sur les ${e.n_tirages} derniers tirages, réglée
+    aux rapports FDJ réels. À chaque fois on choisit d'après le passé
+    uniquement.</p>
+    <div class="defile"><table>
+      <tr><th>ce qu'on joue</th><th>misé</th><th>gagné</th></tr>
+      <tr><td>les ${f.plus_sortis.length > 5 ? 5 : f.plus_sortis.length}
+        numéros qui sortent le plus</td>
+        <td>${eur(e.mise)}</td><td><b>${eur(e.gain_numeros_chauds)}</b></td></tr>
+      <tr><td>des numéros au hasard</td>
+        <td>${eur(e.mise)}</td><td><b>${eur(e.gain_hasard_median)}</b></td></tr>
+    </table></div>
+    <p><strong>Écart : ${ecart >= 0 ? "+" : ""}${eur(ecart)}</strong>
+    sur ${e.n_tirages} tirages, soit ${eur(ecart / e.n_tirages)} par tirage.
+    Jouer les numéros les plus sortis ne rapporte pas plus que jouer au
+    hasard.</p>
+    <p style="opacity:.75;font-size:.92em">Le hasard a été rejoué 12 fois pour
+    ne pas dépendre d'un coup de chance : il rapporte entre
+    ${eur(e.gain_hasard_min)} et ${eur(e.gain_hasard_max)}.</p>`;
+}
+
 function rendreMarche(){
   const v = D().verdicts, bt = v.backtest, rc = v.recherche, c2 = v.chi2, tj = v.trj;
   let h = `<p>La réponse honnête est <strong>non</strong>, et c'est mesuré à chaque
@@ -613,7 +686,7 @@ function rendreDonnees(){
 
 function rendreTout(){
   rendreAlertes(); rendreGrille(); rendreTickets(); rendreHistorique(); rendreCout();
-  rendrePourquoi(); rendreMarche(); rendreDonnees();
+  rendrePourquoi(); rendreFrequences(); rendreMarche(); rendreDonnees();
   const m = D().meta;
   $("proba-txt").textContent = "1 chance sur " + m.proba_jackpot.toLocaleString("fr-FR");
   $("pied-meta").textContent =

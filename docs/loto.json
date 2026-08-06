@@ -1,6 +1,6 @@
 {
  "meta": {
-  "version": "2.6",
+  "version": "2.8",
   "source": "fdj",
   "jeu": "loto",
   "nom": "LOTO",
@@ -9,14 +9,14 @@
   "bonus_max": 10,
   "n_max": 49,
   "prix": 2.2,
-  "genere_le": "2026-08-06T12:35:35",
+  "genere_le": "2026-08-06T21:33:30",
   "n_tirages": 1474,
   "periode_debut": "2017-03-06",
   "periode_fin": "2026-08-05",
   "prochain_tirage": "2026-08-08",
   "prochain_jour": "samedi",
   "proba_jackpot": 19068840,
-  "jackpot": 8000000.0,
+  "jackpot": 7000000.0,
   "page_jeu": "https://www.fdj.fr/jeux-de-tirage/loto",
   "alertes": [
    {
@@ -177,7 +177,20 @@
       2
      ],
      "score": 68.4,
-     "pop_rel": 0.265
+     "pop_rel": 0.265,
+     "pop_comp": [
+      -1.152,
+      -0.1764,
+      10.451
+     ],
+     "vs_dernier": {
+      "bons": [
+       24
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -191,7 +204,18 @@
       1
      ],
      "score": 68.3,
-     "pop_rel": 0.274
+     "pop_rel": 0.274,
+     "pop_comp": [
+      -1.1692,
+      -0.1252,
+      10.3487
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -205,7 +229,18 @@
       10
      ],
      "score": 67.7,
-     "pop_rel": 0.276
+     "pop_rel": 0.276,
+     "pop_comp": [
+      -1.161,
+      -0.1252,
+      11.3802
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -219,7 +254,18 @@
       2
      ],
      "score": 66.8,
-     "pop_rel": 0.248
+     "pop_rel": 0.248,
+     "pop_comp": [
+      -1.27,
+      -0.1252,
+      11.3802
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     }
    ]
   },
@@ -351,7 +397,20 @@
       3
      ],
      "score": 69.2,
-     "pop_rel": 1.635
+     "pop_rel": 1.635,
+     "pop_comp": [
+      0.0035,
+      0.488,
+      6.647
+     ],
+     "vs_dernier": {
+      "bons": [
+       24
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -365,7 +424,18 @@
       2
      ],
      "score": 69.0,
-     "pop_rel": 1.19
+     "pop_rel": 1.19,
+     "pop_comp": [
+      -0.0492,
+      0.223,
+      7.1771
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -379,7 +449,18 @@
       7
      ],
      "score": 68.8,
-     "pop_rel": 0.733
+     "pop_rel": 0.733,
+     "pop_comp": [
+      -0.4765,
+      0.1664,
+      8.528
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -393,7 +474,18 @@
       3
      ],
      "score": 68.8,
-     "pop_rel": 1.705
+     "pop_rel": 1.705,
+     "pop_comp": [
+      -0.0055,
+      0.5392,
+      7.5762
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     }
    ]
   },
@@ -525,7 +617,18 @@
       1
      ],
      "score": 79.8,
-     "pop_rel": 0.214
+     "pop_rel": 0.214,
+     "pop_comp": [
+      -1.533,
+      -0.01,
+      11.3559
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -539,7 +642,18 @@
       10
      ],
      "score": 79.1,
-     "pop_rel": 0.219
+     "pop_rel": 0.219,
+     "pop_comp": [
+      -1.5108,
+      -0.01,
+      11.3559
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -553,7 +667,18 @@
       2
      ],
      "score": 78.5,
-     "pop_rel": 0.225
+     "pop_rel": 0.225,
+     "pop_comp": [
+      -1.4836,
+      -0.01,
+      12.6013
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     },
     {
      "numeros": [
@@ -567,7 +692,18 @@
       1
      ],
      "score": 78.1,
-     "pop_rel": 0.227
+     "pop_rel": 0.227,
+     "pop_comp": [
+      -1.4723,
+      -0.01,
+      12.3874
+     ],
+     "vs_dernier": {
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
     }
    ]
   }
@@ -1064,7 +1200,18 @@
     "bonus": [
      2
     ],
-    "pop_rel": 0.177
+    "pop_rel": 0.177,
+    "pop_comp": [
+     -1.8688,
+     0.1353,
+     12.3029
+    ],
+    "vs_dernier": {
+     "bons": [],
+     "bonus_ok": [],
+     "rang": null,
+     "gain": 0.0
+    }
    },
    {
     "numeros": [
@@ -1077,7 +1224,20 @@
     "bonus": [
      1
     ],
-    "pop_rel": 0.409
+    "pop_rel": 0.409,
+    "pop_comp": [
+     -1.7642,
+     0.8699,
+     10.9871
+    ],
+    "vs_dernier": {
+     "bons": [
+      38
+     ],
+     "bonus_ok": [],
+     "rang": null,
+     "gain": 0.0
+    }
    }
   ],
   "cout": 4.4
@@ -1683,6 +1843,2818 @@
       "gain": 2.2
      }
     ],
+    "tirages": [
+     {
+      "date": "2026-08-05",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       12,
+       22,
+       24,
+       33,
+       38
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-08-03",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       25,
+       37,
+       41,
+       42
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [
+       10
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-08-01",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       6,
+       8,
+       30,
+       37
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-29",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       15,
+       27,
+       34,
+       40,
+       41
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-27",
+      "grille": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       6,
+       7,
+       8,
+       16,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-25",
+      "grille": [
+       16,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       22,
+       29,
+       30,
+       36,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-22",
+      "grille": [
+       24,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       4,
+       9,
+       10,
+       13,
+       23
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-20",
+      "grille": [
+       29,
+       31,
+       32,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       13,
+       15,
+       20,
+       24,
+       45
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-18",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       10,
+       11,
+       24,
+       27,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-15",
+      "grille": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       1,
+       9,
+       13,
+       21,
+       37
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-13",
+      "grille": [
+       16,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       18,
+       26,
+       29,
+       45
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-11",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       3,
+       16,
+       34,
+       35,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-08",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       7,
+       16,
+       18,
+       28,
+       35
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-06",
+      "grille": [
+       15,
+       30,
+       31,
+       39,
+       40
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       16,
+       29,
+       31,
+       36,
+       46
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-04",
+      "grille": [
+       15,
+       30,
+       31,
+       39,
+       40
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       15,
+       31,
+       41,
+       48,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       15,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 5.3
+     },
+     {
+      "date": "2026-07-01",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       8,
+       9,
+       10,
+       25,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-29",
+      "grille": [
+       15,
+       30,
+       31,
+       40,
+       41
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       1,
+       13,
+       27,
+       32,
+       41
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       41
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-27",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       18,
+       21,
+       24,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.7
+     },
+     {
+      "date": "2026-06-24",
+      "grille": [
+       3,
+       30,
+       31,
+       40,
+       41
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       8,
+       26,
+       29,
+       32,
+       38
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-22",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       7,
+       13,
+       30,
+       31,
+       47
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       30,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 3.6
+     },
+     {
+      "date": "2026-06-20",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       16,
+       31,
+       37,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-17",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       1,
+       15,
+       32,
+       37,
+       39
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-15",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       23,
+       25,
+       29,
+       46,
+       49
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-13",
+      "grille": [
+       25,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       11,
+       27,
+       28,
+       39,
+       41
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-10",
+      "grille": [
+       25,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       2,
+       12,
+       14,
+       38,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-08",
+      "grille": [
+       15,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       24,
+       39,
+       41,
+       43,
+       48
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-06",
+      "grille": [
+       25,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       13,
+       19,
+       24,
+       32,
+       43
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-03",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       4,
+       16,
+       17,
+       18,
+       30
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-01",
+      "grille": [
+       15,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       19,
+       26,
+       30,
+       33
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-30",
+      "grille": [
+       25,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       3,
+       10,
+       31,
+       34,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31,
+       34
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.5
+     },
+     {
+      "date": "2026-05-27",
+      "grille": [
+       15,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       3,
+       4,
+       15,
+       17,
+       41
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       15
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-25",
+      "grille": [
+       2,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       19,
+       22,
+       27,
+       31,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-23",
+      "grille": [
+       3,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       20,
+       21,
+       23,
+       36,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-20",
+      "grille": [
+       23,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       8,
+       15,
+       28,
+       30,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-18",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       14,
+       32,
+       33,
+       36,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-16",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       1,
+       12,
+       30,
+       32,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-13",
+      "grille": [
+       25,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       17,
+       35,
+       38,
+       41,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-11",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       17,
+       18,
+       30,
+       34,
+       39
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-09",
+      "grille": [
+       3,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       16,
+       21,
+       25,
+       26,
+       31
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-06",
+      "grille": [
+       25,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       7,
+       18,
+       27,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-04",
+      "grille": [
+       3,
+       30,
+       31,
+       46,
+       47
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       4,
+       8,
+       15,
+       18,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       46
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-02",
+      "grille": [
+       3,
+       30,
+       31,
+       47,
+       48
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       10,
+       17,
+       19,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-29",
+      "grille": [
+       22,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       3,
+       30,
+       31,
+       37
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       30,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.7
+     },
+     {
+      "date": "2026-04-27",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       6,
+       15,
+       23,
+       27,
+       43
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-25",
+      "grille": [
+       24,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       9,
+       17,
+       22,
+       25,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-22",
+      "grille": [
+       23,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       30,
+       37,
+       38,
+       40,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-20",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       12,
+       21,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-18",
+      "grille": [
+       3,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       5,
+       22,
+       23,
+       24,
+       25
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-15",
+      "grille": [
+       24,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       21,
+       44,
+       47,
+       48
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-13",
+      "grille": [
+       3,
+       30,
+       31,
+       40,
+       41
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       4,
+       10,
+       16,
+       18,
+       22
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-11",
+      "grille": [
+       24,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       7,
+       39,
+       41,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-08",
+      "grille": [
+       3,
+       30,
+       31,
+       40,
+       41
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       13,
+       16,
+       23,
+       26,
+       46
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-04-06",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       19,
+       23,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       3
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-04",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       6,
+       7,
+       21,
+       36
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       6,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 3.9
+     },
+     {
+      "date": "2026-04-01",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       23,
+       34,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-30",
+      "grille": [
+       5,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       10,
+       28,
+       29,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-28",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       17,
+       28,
+       30,
+       38,
+       45
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-25",
+      "grille": [
+       4,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       28,
+       30,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-23",
+      "grille": [
+       24,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       9,
+       30,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-21",
+      "grille": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       19,
+       24,
+       33,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-18",
+      "grille": [
+       22,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       13,
+       18,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-16",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       14,
+       25,
+       31,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-14",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       22,
+       23,
+       25,
+       46
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-11",
+      "grille": [
+       24,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       12,
+       14,
+       16,
+       18
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-09",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       12,
+       16,
+       24,
+       35
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-07",
+      "grille": [
+       25,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       10,
+       11,
+       21,
+       22
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-04",
+      "grille": [
+       25,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       14,
+       16,
+       40,
+       46,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-02",
+      "grille": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       20,
+       34,
+       37,
+       40
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-28",
+      "grille": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       18,
+       24,
+       31,
+       40,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-25",
+      "grille": [
+       15,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       9,
+       22,
+       26,
+       30
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-23",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       15,
+       20,
+       29,
+       41,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-21",
+      "grille": [
+       25,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       14,
+       17,
+       32,
+       44
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-18",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       16,
+       22,
+       25,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-16",
+      "grille": [
+       6,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       17,
+       21,
+       29,
+       35
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-14",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       14,
+       17,
+       27,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-11",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       32,
+       36,
+       44,
+       47
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-09",
+      "grille": [
+       24,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       22,
+       23,
+       25,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-07",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       9,
+       20,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-04",
+      "grille": [
+       5,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       11,
+       12,
+       24,
+       37
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-02",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       11,
+       12,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-31",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       4,
+       14,
+       21,
+       24
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-28",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       10,
+       11,
+       30,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-26",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       25,
+       28,
+       32,
+       36
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       32,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.6
+     },
+     {
+      "date": "2026-01-24",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       18,
+       30,
+       33,
+       39
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-21",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       25,
+       27,
+       29,
+       40,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-19",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       12,
+       13,
+       16,
+       24,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-17",
+      "grille": [
+       26,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       12,
+       26,
+       34,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-14",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       5,
+       23,
+       28,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-12",
+      "grille": [
+       26,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       13,
+       24,
+       32,
+       39
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-10",
+      "grille": [
+       3,
+       30,
+       31,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       7,
+       16,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.5
+     },
+     {
+      "date": "2026-01-07",
+      "grille": [
+       16,
+       31,
+       32,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       17,
+       30,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-05",
+      "grille": [
+       16,
+       31,
+       32,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       13,
+       23,
+       30,
+       31
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-03",
+      "grille": [
+       26,
+       31,
+       32,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       29,
+       30,
+       31,
+       40
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-31",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       6,
+       15,
+       19,
+       39,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       6
+      ],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-29",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       21,
+       33,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       17,
+       41,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-24",
+      "grille": [
+       26,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       9,
+       33,
+       42,
+       45
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-22",
+      "grille": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       20,
+       40,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       28,
+       37,
+       42,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-17",
+      "grille": [
+       26,
+       30,
+       31,
+       34,
+       35
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       14,
+       20,
+       30,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
+    ],
     "meilleur_gain": 5.3,
     "meilleur_date": "2026-07-04",
     "rangs": {
@@ -2075,6 +5047,2826 @@
       ],
       "rang": 9,
       "gain": 2.2
+     }
+    ],
+    "tirages": [
+     {
+      "date": "2026-08-05",
+      "grille": [
+       13,
+       16,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       3
+      ],
+      "sortis": [
+       12,
+       22,
+       24,
+       33,
+       38
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-08-03",
+      "grille": [
+       13,
+       15,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       3
+      ],
+      "sortis": [
+       5,
+       25,
+       37,
+       41,
+       42
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-08-01",
+      "grille": [
+       13,
+       15,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       6,
+       8,
+       30,
+       37
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-29",
+      "grille": [
+       13,
+       15,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       15,
+       27,
+       34,
+       40,
+       41
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [
+       15
+      ],
+      "bonus_ok": [
+       9
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-07-27",
+      "grille": [
+       13,
+       15,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       6,
+       7,
+       8,
+       16,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       16
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-25",
+      "grille": [
+       13,
+       15,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       22,
+       29,
+       30,
+       36,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-22",
+      "grille": [
+       13,
+       24,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       4,
+       9,
+       10,
+       13,
+       23
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       13
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-20",
+      "grille": [
+       13,
+       30,
+       31,
+       38,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       13,
+       15,
+       20,
+       24,
+       45
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       13
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-18",
+      "grille": [
+       13,
+       16,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       10,
+       11,
+       24,
+       27,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-15",
+      "grille": [
+       13,
+       16,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       1,
+       9,
+       13,
+       21,
+       37
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       13
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-13",
+      "grille": [
+       13,
+       15,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       5,
+       18,
+       26,
+       29,
+       45
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-11",
+      "grille": [
+       6,
+       13,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       3,
+       16,
+       34,
+       35,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-08",
+      "grille": [
+       6,
+       13,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       7,
+       16,
+       18,
+       28,
+       35
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-06",
+      "grille": [
+       6,
+       15,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       16,
+       29,
+       31,
+       36,
+       46
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-04",
+      "grille": [
+       6,
+       13,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       15,
+       31,
+       41,
+       48,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       31,
+       41
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 5.3
+     },
+     {
+      "date": "2026-07-01",
+      "grille": [
+       6,
+       13,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       8,
+       9,
+       10,
+       25,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-29",
+      "grille": [
+       15,
+       24,
+       30,
+       31,
+       41
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       1,
+       13,
+       27,
+       32,
+       41
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       41
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-27",
+      "grille": [
+       6,
+       13,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       18,
+       21,
+       24,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-24",
+      "grille": [
+       3,
+       15,
+       30,
+       31,
+       38
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       8,
+       26,
+       29,
+       32,
+       38
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       38
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-22",
+      "grille": [
+       6,
+       13,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       7,
+       13,
+       30,
+       31,
+       47
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       13,
+       30,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 6,
+      "gain": 15.6
+     },
+     {
+      "date": "2026-06-20",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       5,
+       16,
+       31,
+       37,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-17",
+      "grille": [
+       3,
+       17,
+       18,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       1,
+       15,
+       32,
+       37,
+       39
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-15",
+      "grille": [
+       3,
+       17,
+       30,
+       31,
+       38
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       23,
+       25,
+       29,
+       46,
+       49
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-13",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       11,
+       27,
+       28,
+       39,
+       41
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-10",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       2,
+       12,
+       14,
+       38,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-08",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       24,
+       39,
+       41,
+       43,
+       48
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-06",
+      "grille": [
+       15,
+       17,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       13,
+       19,
+       24,
+       32,
+       43
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-03",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       4,
+       16,
+       17,
+       18,
+       30
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       17,
+       30
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.1
+     },
+     {
+      "date": "2026-06-01",
+      "grille": [
+       3,
+       15,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       5,
+       19,
+       26,
+       30,
+       33
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-30",
+      "grille": [
+       15,
+       17,
+       30,
+       31,
+       38
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       3,
+       10,
+       31,
+       34,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-27",
+      "grille": [
+       13,
+       17,
+       30,
+       31,
+       38
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       3,
+       4,
+       15,
+       17,
+       41
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       17
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-25",
+      "grille": [
+       10,
+       13,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       19,
+       22,
+       27,
+       31,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-23",
+      "grille": [
+       6,
+       13,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       20,
+       21,
+       23,
+       36,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-20",
+      "grille": [
+       13,
+       16,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       8,
+       15,
+       28,
+       30,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-18",
+      "grille": [
+       6,
+       13,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       14,
+       32,
+       33,
+       36,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-16",
+      "grille": [
+       10,
+       13,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       1,
+       12,
+       30,
+       32,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-13",
+      "grille": [
+       6,
+       15,
+       17,
+       30,
+       31
+      ],
+      "bonus": [
+       10
+      ],
+      "sortis": [
+       17,
+       35,
+       38,
+       41,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       17
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-11",
+      "grille": [
+       3,
+       10,
+       13,
+       30,
+       47
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       17,
+       18,
+       30,
+       34,
+       39
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [
+       9
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-05-09",
+      "grille": [
+       3,
+       10,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       16,
+       21,
+       25,
+       26,
+       31
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-06",
+      "grille": [
+       3,
+       10,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       7,
+       18,
+       27,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-04",
+      "grille": [
+       3,
+       6,
+       13,
+       30,
+       47
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       4,
+       8,
+       15,
+       18,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [
+       2
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-05-02",
+      "grille": [
+       3,
+       13,
+       28,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       10,
+       17,
+       19,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-29",
+      "grille": [
+       3,
+       22,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       3,
+       30,
+       31,
+       37
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       3,
+       30,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 6,
+      "gain": 26.4
+     },
+     {
+      "date": "2026-04-27",
+      "grille": [
+       5,
+       10,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       6,
+       15,
+       23,
+       27,
+       43
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-25",
+      "grille": [
+       5,
+       10,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       9,
+       17,
+       22,
+       25,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-22",
+      "grille": [
+       3,
+       10,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       30,
+       37,
+       38,
+       40,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-20",
+      "grille": [
+       5,
+       10,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       2,
+       12,
+       21,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-18",
+      "grille": [
+       3,
+       10,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       5,
+       22,
+       23,
+       24,
+       25
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-15",
+      "grille": [
+       10,
+       13,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       2,
+       21,
+       44,
+       47,
+       48
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-13",
+      "grille": [
+       3,
+       10,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       4,
+       10,
+       16,
+       18,
+       22
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       10
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-11",
+      "grille": [
+       9,
+       13,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       7,
+       39,
+       41,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [
+       9
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-04-08",
+      "grille": [
+       3,
+       24,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       13,
+       16,
+       23,
+       26,
+       46
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-06",
+      "grille": [
+       13,
+       22,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       3,
+       19,
+       23,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-04",
+      "grille": [
+       3,
+       9,
+       24,
+       30,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       5,
+       6,
+       7,
+       21,
+       36
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-01",
+      "grille": [
+       6,
+       9,
+       30,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       3,
+       23,
+       34,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-30",
+      "grille": [
+       9,
+       10,
+       15,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       8,
+       10,
+       28,
+       29,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       10
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-28",
+      "grille": [
+       9,
+       13,
+       24,
+       31,
+       42
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       17,
+       28,
+       30,
+       38,
+       45
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-25",
+      "grille": [
+       3,
+       9,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       19,
+       28,
+       30,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-23",
+      "grille": [
+       5,
+       9,
+       22,
+       24,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       3,
+       9,
+       30,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       9
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-21",
+      "grille": [
+       6,
+       7,
+       24,
+       25,
+       31
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       3,
+       19,
+       24,
+       33,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [
+       24
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-18",
+      "grille": [
+       9,
+       16,
+       22,
+       31,
+       36
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       8,
+       13,
+       18,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-16",
+      "grille": [
+       7,
+       9,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       14,
+       25,
+       31,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-14",
+      "grille": [
+       6,
+       9,
+       24,
+       29,
+       31
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       22,
+       23,
+       25,
+       46
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-11",
+      "grille": [
+       9,
+       16,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       12,
+       14,
+       16,
+       18
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       16
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-09",
+      "grille": [
+       6,
+       9,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       12,
+       16,
+       24,
+       35
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-07",
+      "grille": [
+       9,
+       13,
+       24,
+       25,
+       30
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       10,
+       11,
+       21,
+       22
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [
+       9
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-04",
+      "grille": [
+       9,
+       24,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       14,
+       16,
+       40,
+       46,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-02",
+      "grille": [
+       9,
+       12,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       20,
+       34,
+       37,
+       40
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-28",
+      "grille": [
+       9,
+       13,
+       29,
+       30,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       18,
+       24,
+       31,
+       40,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [
+       2
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-02-25",
+      "grille": [
+       7,
+       13,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       8,
+       9,
+       22,
+       26,
+       30
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-23",
+      "grille": [
+       7,
+       9,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       15,
+       20,
+       29,
+       41,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-21",
+      "grille": [
+       7,
+       13,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       4,
+       14,
+       17,
+       32,
+       44
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-18",
+      "grille": [
+       9,
+       13,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       4,
+       16,
+       22,
+       25,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-16",
+      "grille": [
+       9,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       8,
+       17,
+       21,
+       29,
+       35
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-14",
+      "grille": [
+       5,
+       13,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       9,
+       14,
+       17,
+       27,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-11",
+      "grille": [
+       3,
+       13,
+       24,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       3,
+       32,
+       36,
+       44,
+       47
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       3
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-09",
+      "grille": [
+       5,
+       12,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       22,
+       23,
+       25,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-07",
+      "grille": [
+       7,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       9,
+       20,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-04",
+      "grille": [
+       7,
+       13,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       1,
+       11,
+       12,
+       24,
+       37
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-02",
+      "grille": [
+       5,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       7,
+       11,
+       12,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-31",
+      "grille": [
+       5,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       1,
+       4,
+       14,
+       21,
+       24
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-28",
+      "grille": [
+       6,
+       13,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       7,
+       10,
+       11,
+       30,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-26",
+      "grille": [
+       5,
+       6,
+       13,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       9,
+       25,
+       28,
+       32,
+       36
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-24",
+      "grille": [
+       5,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       10,
+       18,
+       30,
+       33,
+       39
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [
+       8
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-01-21",
+      "grille": [
+       5,
+       13,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       8
+      ],
+      "sortis": [
+       25,
+       27,
+       29,
+       40,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-19",
+      "grille": [
+       5,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       12,
+       13,
+       16,
+       24,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       13
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-17",
+      "grille": [
+       13,
+       30,
+       31,
+       42,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       12,
+       26,
+       34,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       42
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-14",
+      "grille": [
+       5,
+       13,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       4,
+       5,
+       23,
+       28,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       5,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 3.7
+     },
+     {
+      "date": "2026-01-12",
+      "grille": [
+       6,
+       9,
+       13,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       2,
+       13,
+       24,
+       32,
+       39
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       13
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-10",
+      "grille": [
+       6,
+       13,
+       30,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       1,
+       7,
+       16,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-07",
+      "grille": [
+       13,
+       15,
+       16,
+       30,
+       31
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       5,
+       17,
+       30,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       30
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-05",
+      "grille": [
+       13,
+       15,
+       26,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       5,
+       13,
+       23,
+       30,
+       31
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       13,
+       31
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 3.6
+     },
+     {
+      "date": "2026-01-03",
+      "grille": [
+       6,
+       13,
+       15,
+       31,
+       42
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       9,
+       29,
+       30,
+       31,
+       40
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [
+       2
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-31",
+      "grille": [
+       3,
+       6,
+       26,
+       31,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       6,
+       15,
+       19,
+       39,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       6
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-29",
+      "grille": [
+       6,
+       13,
+       26,
+       31,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       10,
+       21,
+       33,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-27",
+      "grille": [
+       6,
+       13,
+       31,
+       38,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       16,
+       17,
+       41,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-24",
+      "grille": [
+       6,
+       13,
+       26,
+       31,
+       45
+      ],
+      "bonus": [
+       2
+      ],
+      "sortis": [
+       5,
+       9,
+       33,
+       42,
+       45
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       45
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-22",
+      "grille": [
+       6,
+       13,
+       28,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       16,
+       20,
+       40,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [
+       9
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-20",
+      "grille": [
+       6,
+       13,
+       26,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       16,
+       28,
+       37,
+       42,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-17",
+      "grille": [
+       3,
+       6,
+       26,
+       31,
+       45
+      ],
+      "bonus": [
+       9
+      ],
+      "sortis": [
+       2,
+       14,
+       20,
+       30,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
      }
     ],
     "meilleur_gain": 26.4,
@@ -2523,6 +8315,2823 @@
       "gain": 2.2
      }
     ],
+    "tirages": [
+     {
+      "date": "2026-08-05",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       12,
+       22,
+       24,
+       33,
+       38
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-08-03",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       25,
+       37,
+       41,
+       42
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-08-01",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       6,
+       8,
+       30,
+       37
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-29",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       15,
+       27,
+       34,
+       40,
+       41
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       6,
+       7,
+       8,
+       16,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-25",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       22,
+       29,
+       30,
+       36,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-22",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       9,
+       10,
+       13,
+       23
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       13,
+       15,
+       20,
+       24,
+       45
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-18",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       11,
+       24,
+       27,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-15",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       9,
+       13,
+       21,
+       37
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-13",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       18,
+       26,
+       29,
+       45
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-11",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       16,
+       34,
+       35,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-08",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       16,
+       18,
+       28,
+       35
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-06",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       29,
+       31,
+       36,
+       46
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       31,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.7
+     },
+     {
+      "date": "2026-07-04",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       15,
+       31,
+       41,
+       48,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-07-01",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       9,
+       10,
+       25,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-29",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       13,
+       27,
+       32,
+       41
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       18,
+       21,
+       24,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.7
+     },
+     {
+      "date": "2026-06-24",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       26,
+       29,
+       32,
+       38
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       26,
+       32
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.2
+     },
+     {
+      "date": "2026-06-22",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       13,
+       30,
+       31,
+       47
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       16,
+       31,
+       37,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-17",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       15,
+       32,
+       37,
+       39
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-06-15",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       23,
+       25,
+       29,
+       46,
+       49
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-06-13",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       11,
+       27,
+       28,
+       39,
+       41
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-10",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       12,
+       14,
+       38,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-08",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       24,
+       39,
+       41,
+       43,
+       48
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-06",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       13,
+       19,
+       24,
+       32,
+       43
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-06-03",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       16,
+       17,
+       18,
+       30
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-06-01",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       19,
+       26,
+       30,
+       33
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-30",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       10,
+       31,
+       34,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       4,
+       15,
+       17,
+       41
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-25",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       22,
+       27,
+       31,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-23",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       20,
+       21,
+       23,
+       36,
+       38
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       15,
+       28,
+       30,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-18",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       14,
+       32,
+       33,
+       36,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       32,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 5.3
+     },
+     {
+      "date": "2026-05-16",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       12,
+       30,
+       32,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-13",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       17,
+       35,
+       38,
+       41,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-11",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       17,
+       18,
+       30,
+       34,
+       39
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-09",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       21,
+       25,
+       26,
+       31
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       26,
+       31
+      ],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 7,
+      "gain": 13.9
+     },
+     {
+      "date": "2026-05-06",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       18,
+       27,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-04",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       8,
+       15,
+       18,
+       46
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-05-02",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       17,
+       19,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-29",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       3,
+       30,
+       31,
+       37
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       6,
+       15,
+       23,
+       27,
+       43
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-25",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       17,
+       22,
+       25,
+       49
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-22",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       30,
+       37,
+       38,
+       40,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-04-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       12,
+       21,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-18",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       22,
+       23,
+       24,
+       25
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-15",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       21,
+       44,
+       47,
+       48
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-13",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       10,
+       16,
+       18,
+       22
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-11",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       39,
+       41,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-08",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       13,
+       16,
+       23,
+       26,
+       46
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2026-04-06",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       19,
+       23,
+       29,
+       33
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-04",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       6,
+       7,
+       21,
+       36
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-04-01",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       23,
+       34,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-30",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       10,
+       28,
+       29,
+       47
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-28",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       17,
+       28,
+       30,
+       38,
+       45
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-25",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       28,
+       30,
+       35,
+       48
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-23",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       9,
+       30,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-21",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       19,
+       24,
+       33,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-18",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       13,
+       18,
+       45,
+       48
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-16",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       14,
+       25,
+       31,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-14",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       22,
+       23,
+       25,
+       46
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-11",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       12,
+       14,
+       16,
+       18
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-09",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       12,
+       16,
+       24,
+       35
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-07",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       10,
+       11,
+       21,
+       22
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-04",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       14,
+       16,
+       40,
+       46,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-03-02",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       19,
+       20,
+       34,
+       37,
+       40
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-28",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       18,
+       24,
+       31,
+       40,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-25",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       9,
+       22,
+       26,
+       30
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-23",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       15,
+       20,
+       29,
+       41,
+       47
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-21",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       14,
+       17,
+       32,
+       44
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-18",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       16,
+       22,
+       25,
+       36
+      ],
+      "bonus_sortis": [
+       7
+      ],
+      "bons": [
+       36
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-16",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       8,
+       17,
+       21,
+       29,
+       35
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-14",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       14,
+       17,
+       27,
+       33
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-11",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       3,
+       32,
+       36,
+       44,
+       47
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [
+       32,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 5.7
+     },
+     {
+      "date": "2026-02-09",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       22,
+       23,
+       25,
+       38,
+       42
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-07",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       9,
+       20,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-04",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       11,
+       12,
+       24,
+       37
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-02-02",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       11,
+       12,
+       29,
+       41
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-31",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       4,
+       14,
+       21,
+       24
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-28",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       7,
+       10,
+       11,
+       30,
+       42
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-26",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       25,
+       28,
+       32,
+       36
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [
+       32,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.6
+     },
+     {
+      "date": "2026-01-24",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       18,
+       30,
+       33,
+       39
+      ],
+      "bonus_sortis": [
+       8
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-21",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       25,
+       27,
+       29,
+       40,
+       45
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-19",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       12,
+       13,
+       16,
+       24,
+       34
+      ],
+      "bonus_sortis": [
+       4
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-17",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       12,
+       26,
+       34,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       26
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-14",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       4,
+       5,
+       23,
+       28,
+       31
+      ],
+      "bonus_sortis": [
+       5
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-12",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       13,
+       24,
+       32,
+       39
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       32
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-10",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       1,
+       7,
+       16,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.5
+     },
+     {
+      "date": "2026-01-07",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       17,
+       30,
+       35,
+       36
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [
+       35,
+       36
+      ],
+      "bonus_ok": [],
+      "rang": 8,
+      "gain": 4.7
+     },
+     {
+      "date": "2026-01-05",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       13,
+       23,
+       30,
+       31
+      ],
+      "bonus_sortis": [
+       6
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2026-01-03",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       9,
+       29,
+       30,
+       31,
+       40
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [
+       31
+      ],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-31",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       6,
+       15,
+       19,
+       39,
+       43
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-29",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       10,
+       21,
+       33,
+       43,
+       47
+      ],
+      "bonus_sortis": [
+       3
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-27",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       17,
+       41,
+       42,
+       49
+      ],
+      "bonus_sortis": [
+       10
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-24",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       5,
+       9,
+       33,
+       42,
+       45
+      ],
+      "bonus_sortis": [
+       1
+      ],
+      "bons": [],
+      "bonus_ok": [
+       1
+      ],
+      "rang": 9,
+      "gain": 2.2
+     },
+     {
+      "date": "2025-12-22",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       20,
+       40,
+       41,
+       49
+      ],
+      "bonus_sortis": [
+       9
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-20",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       16,
+       28,
+       37,
+       42,
+       47
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     },
+     {
+      "date": "2025-12-17",
+      "grille": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "sortis": [
+       2,
+       14,
+       20,
+       30,
+       49
+      ],
+      "bonus_sortis": [
+       2
+      ],
+      "bons": [],
+      "bonus_ok": [],
+      "rang": null,
+      "gain": 0.0
+     }
+    ],
     "meilleur_gain": 13.9,
     "meilleur_date": "2026-05-09",
     "rangs": {
@@ -2532,6 +11141,152 @@
     }
    }
   }
+ },
+ "elasticite": {
+  "n_tirages": 1474,
+  "rang_affluence": 9,
+  "references": [
+   -0.5721,
+   0.4643,
+   10.2814
+  ],
+  "domaine_observe": {
+   "plancher": -0.8881,
+   "plafond": 1.3068
+  },
+  "placebo": {
+   "n_essais": 6,
+   "n_coefficients": 48,
+   "n_significatifs": 4,
+   "t_max": 2.55,
+   "methode": "combinaisons permutées entre tirages"
+  },
+  "rangs": {
+   "1": {
+    "m": 5.0,
+    "b": 1.0,
+    "beta": 0.0038,
+    "charge_marginale": 1.0,
+    "charge_paires": 1.0,
+    "charge_paires_croisees": 0.0,
+    "se": 0.0376,
+    "t": 0.1,
+    "n_obs": 1474,
+    "depuis_tirage": 0,
+    "part_ev": 0.0,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "2": {
+    "m": 5.0,
+    "b": 0.0,
+    "beta": -0.6016,
+    "charge_marginale": 1.0,
+    "charge_paires": 1.0,
+    "charge_paires_croisees": 0.0,
+    "se": 0.0361,
+    "t": -16.65,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.049,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "3": {
+    "m": 4.0,
+    "b": 1.0,
+    "beta": -1.0343,
+    "charge_marginale": 0.7773,
+    "charge_paires": 0.6,
+    "charge_paires_croisees": 0.0182,
+    "se": 0.0455,
+    "t": -22.73,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.0284,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "4": {
+    "m": 4.0,
+    "b": 0.0,
+    "beta": -0.6655,
+    "charge_marginale": 0.7773,
+    "charge_paires": 0.6,
+    "charge_paires_croisees": 0.0182,
+    "se": 0.0098,
+    "t": -67.73,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.0547,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "5": {
+    "m": 3.0,
+    "b": 1.0,
+    "beta": -0.4676,
+    "charge_marginale": 0.5545,
+    "charge_paires": 0.2989,
+    "charge_paires_croisees": 0.0262,
+    "se": 0.0131,
+    "t": -35.62,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.0327,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "6": {
+    "m": 3.0,
+    "b": 0.0,
+    "beta": -0.4647,
+    "charge_marginale": 0.5545,
+    "charge_paires": 0.2989,
+    "charge_paires_croisees": 0.0262,
+    "se": 0.0054,
+    "t": -86.79,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.1174,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "7": {
+    "m": 2.0,
+    "b": 1.0,
+    "beta": -0.2716,
+    "charge_marginale": 0.3318,
+    "charge_paires": 0.0968,
+    "charge_paires_croisees": 0.0241,
+    "se": 0.0128,
+    "t": -21.2,
+    "n_obs": 1057,
+    "depuis_tirage": 417,
+    "part_ev": 0.0911,
+    "prix_fixe": false,
+    "placebo": false
+   },
+   "8": {
+    "m": 2.0,
+    "b": 0.0,
+    "beta": -0.264,
+    "charge_marginale": 0.3318,
+    "charge_paires": 0.0968,
+    "charge_paires_croisees": 0.0241,
+    "se": 0.0045,
+    "t": -58.92,
+    "n_obs": 1056,
+    "depuis_tirage": 418,
+    "part_ev": 0.3585,
+    "prix_fixe": false,
+    "placebo": false
+   }
+  },
+  "rangs_a_prix_fixe": {
+   "9": 0.2682
+  },
+  "note": "beta = élasticité du rapport à la log-popularité de la combinaison sortie, tirée au sort par la FDJ ; estimée sur le seul régime pari-mutuel de chaque rang"
  },
  "verdicts": {
   "backtest": {
@@ -2664,6 +11419,182 @@
    "trj_total": 0.5119,
    "trj_hors_jackpot": 0.3607,
    "part_jackpot": 0.2954
+  },
+  "valeur_modes": {
+   "hybride": {
+    "gain_euro": 0.1046,
+    "gain_pct_mise": 4.76,
+    "gain_pct_mise_extrapole": 7.05,
+    "pop_rel_moyen": 0.266
+   },
+   "pronostic": {
+    "gain_euro": -0.0286,
+    "gain_pct_mise": -1.3,
+    "gain_pct_mise_extrapole": -1.3,
+    "pop_rel_moyen": 1.316
+   },
+   "anti": {
+    "gain_euro": 0.1088,
+    "gain_pct_mise": 4.94,
+    "gain_pct_mise_extrapole": 8.82,
+    "pop_rel_moyen": 0.221
+   }
+  },
+  "partage": {
+   "n_tirages": 600,
+   "depart": "2022-10-08",
+   "rang_placebo": 9,
+   "n_repetitions": 12,
+   "strategies": {
+    "anti": {
+     "rangs": {
+      "6": {
+       "n_tirages": 5,
+       "rapport_moyen": 25.82,
+       "rapport_reference": 20.8,
+       "ecart_pct": 27.12,
+       "t": 2.23,
+       "placebo": false
+      },
+      "8": {
+       "n_tirages": 47,
+       "rapport_moyen": 4.83,
+       "rapport_reference": 4.4,
+       "ecart_pct": 9.95,
+       "t": 4.55,
+       "placebo": false
+      }
+     },
+     "bonus_neutre": false,
+     "n_grilles": 600,
+     "mise": 1320.0,
+     "gain": 526.2,
+     "roi_pct": -60.1,
+     "surcote_pct": 14.47
+    },
+    "anti_boules": {
+     "rangs": {
+      "6": {
+       "n_tirages": 5,
+       "rapport_moyen": 25.82,
+       "rapport_reference": 20.8,
+       "ecart_pct": 27.12,
+       "t": 2.23,
+       "placebo": false
+      },
+      "7": {
+       "n_tirages": 33,
+       "rapport_moyen": 11.12,
+       "rapport_reference": 10.4,
+       "ecart_pct": 6.48,
+       "t": 1.37,
+       "placebo": false
+      },
+      "8": {
+       "n_tirages": 50,
+       "rapport_moyen": 4.85,
+       "rapport_reference": 4.4,
+       "ecart_pct": 10.37,
+       "t": 4.9,
+       "placebo": false
+      }
+     },
+     "bonus_neutre": true,
+     "n_grilles": 7200,
+     "mise": 15840.0,
+     "gain": 6423.1,
+     "roi_pct": -59.5,
+     "surcote_pct": 10.62
+    },
+    "hasard": {
+     "rangs": {
+      "6": {
+       "n_tirages": 42,
+       "rapport_moyen": 20.67,
+       "rapport_reference": 20.8,
+       "ecart_pct": -0.43,
+       "t": -0.12,
+       "placebo": false
+      },
+      "7": {
+       "n_tirages": 41,
+       "rapport_moyen": 9.92,
+       "rapport_reference": 10.4,
+       "ecart_pct": -3.6,
+       "t": -0.9,
+       "placebo": false
+      },
+      "8": {
+       "n_tirages": 312,
+       "rapport_moyen": 4.38,
+       "rapport_reference": 4.4,
+       "ecart_pct": -0.29,
+       "t": -0.49,
+       "placebo": false
+      }
+     },
+     "bonus_neutre": true,
+     "n_grilles": 7200,
+     "mise": 15840.0,
+     "gain": 4782.1,
+     "roi_pct": -69.8,
+     "surcote_pct": -1.16
+    },
+    "anniversaire": {
+     "rangs": {
+      "6": {
+       "n_tirages": 39,
+       "rapport_moyen": 17.1,
+       "rapport_reference": 20.8,
+       "ecart_pct": -17.77,
+       "t": -5.24,
+       "placebo": false
+      },
+      "7": {
+       "n_tirages": 54,
+       "rapport_moyen": 9.75,
+       "rapport_reference": 10.4,
+       "ecart_pct": -5.83,
+       "t": -1.71,
+       "placebo": false
+      },
+      "8": {
+       "n_tirages": 312,
+       "rapport_moyen": 4.17,
+       "rapport_reference": 4.4,
+       "ecart_pct": -5.02,
+       "t": -8.83,
+       "placebo": false
+      }
+     },
+     "bonus_neutre": true,
+     "n_grilles": 7200,
+     "mise": 15840.0,
+     "gain": 5152.1,
+     "roi_pct": -67.5,
+     "surcote_pct": -9.19
+    },
+    "populaire": {
+     "rangs": {
+      "8": {
+       "n_tirages": 43,
+       "rapport_moyen": 3.74,
+       "rapport_reference": 4.4,
+       "ecart_pct": -14.41,
+       "t": -7.12,
+       "placebo": false
+      }
+     },
+     "bonus_neutre": false,
+     "n_grilles": 600,
+     "mise": 1320.0,
+     "gain": 330.1,
+     "roi_pct": -75.0,
+     "surcote_pct": -14.94
+    }
+   },
+   "levier_bonus_pct": 3.85,
+   "note": "rapport encaissé sachant le rang touché ; la probabilité de toucher ne dépend d'aucune stratégie"
   },
   "recherche": {
    "n_tirages_evalues": 1414,

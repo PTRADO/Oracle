@@ -9,6 +9,7 @@ backtest présent, l'EV honnête (négative), le grand livre non masqué.
 from __future__ import annotations
 
 import json
+import math
 
 import pytest
 from conftest import RACINE
@@ -48,7 +49,17 @@ def test_meta_complet(export):
     # grilles publiées changent) et la simulation expose `dispersion_anti`.
     # 2.6 : la page gagne la section « les numéros qui sortent le plus »,
     # alimentée par verdicts.frequences.
-    assert m["version"] == "2.6"
+    # 2.7 : la page montre l'historique COMPLET tirage par tirage
+    # (simulation.modes.*.tirages, perdants compris) et chaque grille affichée
+    # est réglée contre le dernier tirage réel (vs_dernier).
+    # 2.8 : le partage cesse d'être corrigé au seul rang 1. `elasticite`
+    # apparaît, les grilles gagnent `pop_comp` (les deux composantes de la
+    # popularité, qui ne portent pas la même charge vers un rang donné), et
+    # `verdicts.valeur_modes` chiffre ce que chaque mode vaut — le mode
+    # « pronostic » y sort NÉGATIF. Une page 2.7 lisant un export 2.8
+    # continuerait d'annoncer un levier ~3 fois trop faible, et présenterait
+    # « pronostic » comme un choix neutre.
+    assert m["version"] == "2.8"
     assert m["source"] == "fdj", "export encore basé sur des données de démo"
 
 
@@ -179,14 +190,146 @@ def test_chi2_et_effet_anniversaire_presents(export):
 
 def test_l_ev_reste_negative(export):
     """Garde-fou n°5 : l'EV affichée est honnête. On la recalcule ici comme
-    le fait la page, au jackpot exporté."""
+    le fait la page, au jackpot exporté.
+
+    v2.8 — les gains hors jackpot ne sont plus une constante : ils sont
+    multipliés par le facteur de partage de la grille. On le RECALCULE ici à
+    partir du seul JSON, exactement comme le moteur — ce qui vérifie du même
+    coup que l'export contient tout ce qu'il faut pour reproduire son propre
+    chiffre. Un majorant grossier passerait à côté des deux.
+    """
     e, m = export["ev_params"], export["meta"]
     jackpot = m["jackpot"] or 0
     p1 = 1 / e["p_jackpot_inv"]
+    el = export.get("elasticite")
     for g in export["modes"]["anti"]["grilles"]:
         partage = e["n_est"] * p1 * g["pop_rel"]
-        ev = (e["ev_fixe"] or 0) + p1 * jackpot / (1 + partage) - e["prix"]
+        ev = ((e["ev_fixe"] or 0) * facteur_depuis_export(el, g["pop_comp"])
+              + p1 * jackpot / (1 + partage) - e["prix"])
         assert ev < 0, "EV positive affichée — vérifier avant de publier"
+
+
+def facteur_depuis_export(el, pop_comp):
+    """Rejoue `facteur_partage` à partir du JSON seul.
+
+    Si cette fonction ne peut plus être écrite, c'est que l'export a cessé de
+    porter de quoi reproduire l'EV qu'il annonce — et la page se mettrait à
+    afficher un nombre qu'elle ne sait plus justifier.
+    """
+    if not el:
+        return 1.0
+    ecarts = [c - r for c, r in zip(pop_comp, el["references"], strict=True)]
+    total = ecarts[0] + ecarts[1]
+    dom = el["domaine_observe"]
+    borne = (dom["plancher"] if total < dom["plancher"]
+             else dom["plafond"] if total > dom["plafond"] else None)
+    if borne is not None and abs(total) > 1e-12:
+        k = borne / total
+        ecarts = [x * k for x in ecarts]
+    f = 0.0
+    for r in el["rangs"].values():
+        charges = (r["charge_marginale"], r["charge_paires"],
+                   r["charge_paires_croisees"])
+        dp = sum(c * x for c, x in zip(charges, ecarts, strict=True))
+        f += r["part_ev"] * math.exp(r["beta"] * dp)
+    # les rangs à prix fixe entrent avec un facteur de 1 : rien ne les bouge
+    return f + sum(el["rangs_a_prix_fixe"].values())
+
+
+# ---- v2.8 : le partage joue à tous les rangs -------------------------------
+
+def test_l_elasticite_est_exportee_avec_son_placebo(export):
+    """Le levier du produit est désormais chiffré rang par rang. La page doit
+    pouvoir l'afficher AVEC sa réfutation : sans le placebo publié à côté,
+    c'est une promesse, pas une mesure."""
+    el = export["elasticite"]
+    assert el, "élasticité absente de l'export"
+    for cle in ("n_tirages", "rang_affluence", "references",
+                "domaine_observe", "placebo", "rangs", "rangs_a_prix_fixe",
+                "note"):
+        assert cle in el, cle
+    assert len(el["references"]) == 3
+    assert el["n_tirages"] >= 200
+    assert el["rangs"], "aucun rang exploitable"
+    for r in el["rangs"].values():
+        for cle in ("m", "beta", "charge_marginale", "charge_paires",
+                    "charge_paires_croisees", "part_ev", "n_obs",
+                    "depuis_tirage", "prix_fixe"):
+            assert cle in r, cle
+        assert r["charge_marginale"] <= 1.0
+        assert r["charge_paires"] <= 1.0
+
+
+def test_le_placebo_publie_ne_conclut_a_rien(export):
+    """Garde-fou : la mesure rejouée sur des tirages MÉLANGÉS ne doit rien
+    trouver. C'est le seul contrôle de cette section qui puisse échouer — le
+    précédent (« le rang à prix fixe sort à zéro ») était une tautologie, son
+    rang ne prenant qu'une seule valeur sur tout l'historique."""
+    pl = export["elasticite"]["placebo"]
+    assert pl is not None
+    for cle in ("n_essais", "n_coefficients", "n_significatifs", "t_max",
+                "methode"):
+        assert cle in pl, cle
+    assert pl["n_coefficients"] >= 20
+    assert pl["n_significatifs"] / pl["n_coefficients"] < 0.20, (
+        f"{pl['n_significatifs']}/{pl['n_coefficients']} significatifs sur du "
+        "bruit : la méthode fabrique l'effet toute seule")
+    assert pl["t_max"] < 5.0
+
+
+def test_l_elasticite_est_estimee_sur_le_bon_regime_de_gains(export):
+    """Avant le 04/11/2019, les rangs du Loto payaient un montant FIXE — 417
+    tirages sans la moindre élasticité possible. Les inclure raboterait toutes
+    les pentes de 28 %. L'export doit montrer la fenêtre retenue par rang."""
+    el = export["elasticite"]
+    for r in el["rangs"].values():
+        assert r["depuis_tirage"] is not None
+        assert 0 <= r["depuis_tirage"] < el["n_tirages"]
+        assert r["n_obs"] <= el["n_tirages"] - r["depuis_tirage"]
+
+
+def test_les_grilles_portent_les_composantes_de_popularite(export):
+    """`pop_comp` = (marginal, paires internes, paires croisées). Elles ne se
+    transmettent pas de la même façon à un rang donné ; les fusionner
+    surestimerait le levier. La page a besoin des trois pour recalculer l'EV
+    comme le moteur — `facteur_partage` les zippe strictement avec ses charges
+    à trois termes."""
+    for mode in ("anti", "hybride", "pronostic"):
+        for g in export["modes"][mode]["grilles"]:
+            assert "pop_comp" in g, mode
+            assert len(g["pop_comp"]) == 3
+            assert all(isinstance(v, (int, float)) for v in g["pop_comp"])
+
+
+def test_le_mode_pronostic_est_chiffre_et_sort_negatif(export):
+    """Garde-fou v2.8, et le plus inconfortable : le produit doit publier ce
+    que coûte son propre mode « folklore ».
+
+    Le mode « pronostic » joue les numéros que tout le monde joue : il partage
+    davantage, donc il détruit de la valeur. Le taire reviendrait à vendre du
+    folklore sans son étiquette de prix.
+    """
+    vm = export["verdicts"]["valeur_modes"]
+    assert vm, "valeur_modes absente — le lecteur ne sait pas ce qu'il choisit"
+    for mode in ("anti", "hybride", "pronostic"):
+        assert mode in vm
+        for cle in ("gain_euro", "gain_pct_mise", "pop_rel_moyen"):
+            assert cle in vm[mode], cle
+    assert vm["anti"]["gain_pct_mise"] > 0
+    assert vm["hybride"]["gain_pct_mise"] > 0
+    assert vm["pronostic"]["gain_pct_mise"] < 0, (
+        "le mode pronostic est annoncé comme neutre ou gagnant : il joue "
+        "pourtant les numéros les plus partagés")
+    # `anti` et `hybride` sont proches par construction — « hybride » pèse déjà
+    # l'anti-partage à 70 %. Leur ORDRE peut donc s'inverser d'un dixième de
+    # point selon la graine du générateur de grilles, et l'exiger serait un
+    # test qui rougit sur du bruit. Ce qui doit tenir, c'est la structure :
+    # `anti` joue bien les grilles les moins populaires.
+    assert vm["anti"]["pop_rel_moyen"] <= vm["hybride"]["pop_rel_moyen"]
+    assert vm["anti"]["pop_rel_moyen"] < vm["pronostic"]["pop_rel_moyen"]
+    for mode in ("anti", "hybride"):
+        assert (vm[mode]["gain_pct_mise"]
+                > vm["pronostic"]["gain_pct_mise"] + 1.0)
 
 
 def test_le_grand_livre_n_est_pas_masque(export):
@@ -308,6 +451,53 @@ def test_chaque_gain_est_tracable_a_un_tirage_reel(export):
     assert abs(total - a["gain"]) < 0.02, "le détail ne recompose pas le total"
     if gains:
         assert gains[0]["gain"] == a["meilleur_gain"], "gains non triés"
+
+
+def test_l_historique_complet_est_exporte_tirage_par_tirage(export):
+    """v2.7 — la page ne montre plus seulement les gains : chaque tirage
+    rejoué a sa ligne, perdant compris, avec les vraies boules sorties.
+    Le total misé/gagné doit se recomposer depuis ce détail complet."""
+    sim = export["simulation"]
+    a = sim["modes"]["anti"]
+    cfg = JEUX[export["meta"]["jeu"]]
+    lignes = a["tirages"]
+    assert len(lignes) == sim["n_tirages"], (
+        "l'historique complet doit couvrir TOUS les tirages simulés")
+    assert lignes == sorted(lignes, key=lambda g: g["date"], reverse=True), (
+        "tirages non triés du plus récent au plus ancien")
+    total = 0.0
+    for g in lignes:
+        for cle in ("date", "grille", "bonus", "sortis", "bonus_sortis",
+                    "bons", "bonus_ok", "rang", "gain"):
+            assert cle in g, cle
+        assert len(g["sortis"]) == cfg["pick"]
+        assert len(g["bonus_sortis"]) == cfg["bonus_pick"]
+        assert set(g["bons"]) == set(g["grille"]) & set(g["sortis"])
+        if g["rang"] is None:
+            assert g["gain"] == 0, "un gain sans rang est impossible"
+        total += g["gain"]
+    assert abs(total - a["gain"]) < 0.02, (
+        "l'historique complet ne recompose pas le total gagné")
+    assert sum(1 for g in lignes if g["rang"]) == a["n_gains"]
+
+
+def test_chaque_grille_affichee_est_reglee_contre_le_dernier_tirage(export):
+    """v2.7 — la page affiche chaque grille avec son résultat contre les
+    vraies boules du dernier tirage FDJ : la grille du haut, les tickets
+    multiples et le système."""
+    dern = export["dernier_tirage"]
+    grilles = list(export["modes"]["anti"]["grilles"])
+    if export.get("systeme"):
+        grilles += export["systeme"]["grilles"]
+    for g in grilles:
+        v = g.get("vs_dernier")
+        assert v, "grille exportée sans règlement contre le dernier tirage"
+        for cle in ("bons", "bonus_ok", "rang", "gain"):
+            assert cle in v, cle
+        assert set(v["bons"]) == set(g["numeros"]) & set(dern["numeros"])
+        assert set(v["bonus_ok"]) == set(g["bonus"]) & set(dern["bonus"])
+        if v["rang"] is None:
+            assert v["gain"] == 0
 
 
 def test_la_simulation_joue_les_grilles_vraiment_publiees(export):

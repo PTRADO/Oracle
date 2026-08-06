@@ -1,4 +1,4 @@
-# 🎱 ORACLE v2.4 — Loto + EuroMillions
+# 🎱 ORACLE v2.8 — Loto + EuroMillions
 
 Une grille par tirage, et le coût réel affiché sans fard.
 
@@ -8,9 +8,11 @@ Loto (depuis mars 2017) et 1029 EuroMillions (depuis septembre 2016). Zéro
 dépendance, stdlib pure.
 
 La page ne propose **qu'une seule grille** — celle qui évite les numéros les
-plus joués en France. Tout le reste (pourquoi ces numéros, est-ce que ça
-marche, plusieurs tickets, provenance des données) vit dans des sections
-repliées.
+plus joués en France — et un regard sur l'historique : chaque tirage rejoué,
+avec les vraies boules FDJ sorties et le verdict du ticket (TAG « Perdant »
+ou gain brut en euros). Chaque grille affichée est aussi réglée contre le
+dernier tirage réel. Les explications de méthode vivent ici, dans le dépôt,
+pas sur la page.
 
 ## Structure
 
@@ -68,7 +70,7 @@ se voit ; elle ne s'absorbe pas en silence.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install pytest ruff
-.venv/bin/python -m pytest tests/ -q     # 106 tests, hors ligne
+.venv/bin/python -m pytest tests/ -q     # ~290 tests, hors ligne
 .venv/bin/ruff check .
 ```
 
@@ -127,13 +129,162 @@ vers −(1−TRJ) ≈ −46 %, et il est là pour ça.
 --export-web docs/x.json     --seed N           --no-backtest
 --simulation [N]             (rétro-simulation € sur N tirages, déf. 150)
 --recherche [BUDGET]         (recherche de formule + 12 témoins, déf. 400)
+--partage [N]                (backtest apparié du partage, 0 = tout l'historique)
 --aujourdhui AAAA-MM-JJ      (force la date de référence — tests/rejeu)
 ```
 
+## Le partage joue à tous les rangs (v2.8)
+
+Jusqu'en v2.7 le moteur ne corrigeait le partage qu'au **rang 1**. Erreur de
+cadrage, pas de calcul : dans un jeu de tirage français, *tous* les rangs sont
+pari-mutuels — une part fixe de la cagnotte divisée par le nombre de gagnants.
+Le produit annonçait donc son unique levier réel sous la seule forme
+invérifiable qui soit : un gain réalisable une fois tous les 122 000 ans.
+
+L'élasticité du rapport à la popularité de la combinaison sortie est mesurée
+rang par rang, sur les rapports FDJ réels, en contrôlant l'affluence par un
+rang insensible aux boules :
+
+| Loto — rang | m | β | t | part de l'EV |
+|---|---|---|---|---|
+| 2 · 5 numéros | 5 | −0,602 | −16,7 | 5,2 % |
+| 4 · 4 numéros | 4 | −0,666 | −67,7 | 5,8 % |
+| 6 · 3 numéros | 3 | −0,465 | −86,8 | 11,5 % |
+| 8 · 2 numéros | 2 | −0,264 | −58,9 | **36,6 %** |
+| 9 · Chance seule | 0,38 | *prix fixe* | — | 26,3 % |
+
+### Trois pièges, trouvés par audit adverse et corrigés
+
+**1. Le régime de gains.** Avant le 4 novembre 2019, les rangs 2 à 9 du Loto
+payaient un montant **fixe** : sur les 417 tirages antérieurs, chaque rang ne
+prend qu'*une seule valeur distincte*. Ces tirages ne peuvent porter aucune
+élasticité — les inclure ajoutait 28 % d'observations à pente nulle par
+construction, et rabotait toutes les pentes d'autant. `debut_pari_mutuel` les
+écarte, rang par rang, sans date codée en dur : il détecte une plage de 30
+rapports rigoureusement identiques, ce qu'aucun régime pari-mutuel ne produit.
+C'est le même piège que « facturer le passé au tarif d'aujourd'hui », déjà
+corrigé deux fois dans ce moteur.
+
+**2. β ne s'applique pas tel quel.** β répond à la popularité du *tirage
+sorti*, pas à celle de ta grille. Quand tu touches m bons numéros, la
+combinaison sortie contient m de tes numéros — et `pick − m` numéros tirés du
+**complémentaire** de ta grille, dont la popularité est l'*opposée* de la
+tienne (γ est centré sur l'univers). La charge exacte vaut donc
+
+```
+m/pick − (pick − m)/(n_max − pick)
+```
+
+et non `m/pick`. L'écart atteint un facteur 1,83 au rang à 1 bon numéro. Le
+piège avait tenu parce que le terme oublié **s'annule identiquement en
+m = pick** : le contrôle « à 5 bons numéros, la combinaison sortie est ta
+grille » ne pouvait rien détecter. Il est remplacé par une vérification
+Monte-Carlo à tous les m. Vérification du correctif : à m = 1, popularité
+moyenne mesurée −0,1076, formule exacte −0,1073, ancienne formule −0,1967.
+
+**3. Le placebo ne pouvait pas échouer.** Il prenait le rang à m ≈ 0 et
+vérifiait qu'il sortait à zéro. Au Loto ce rang paie 2,20 € — une seule valeur
+distincte sur 1474 tirages. Son β était nul par identité comptable : une
+tautologie publiée comme une réfutation. Le placebo est désormais une
+**permutation** : la mesure entière rejouée sur des tirages dont on a mélangé
+les combinaisons. Loto 4 coefficients significatifs sur 48 (8 %, contre 5 %
+attendus), |t| max 2,55 ; EuroMillions 0 sur 78, |t| max 1,95 — face à des
+|t| réels allant jusqu'à 87.
+
+### Ce que cette section prouve, et ce qu'elle ne prouve pas
+
+À dire avant les résultats. Au **Loto**, le rapport est l'inverse quasi exact
+du nombre de gagnants : régressés sur les mêmes variables, β_rapport / β_gagnants
+vaut 0,95 à 0,98. Or le nombre de gagnants est précisément ce que la
+calibration ajuste. Cette section ne fournit donc pas, au Loto, une
+confirmation *indépendante* : elle traduit la calibration en euros, rang par
+rang. C'est son objet — ce n'est pas une seconde preuve.
+
+À l'**EuroMillions** le ratio tombe à 0,68–0,82, et pour une raison connue :
+les gagnants publiés sont *français* alors que le rapport est fixé par le pool
+*européen*. Il y a là un contenu que la calibration ne peut pas voir.
+
+La preuve indépendante, elle, est le backtest — qui ne touche jamais à ce
+modèle.
+
+### Le backtest apparié
+
+`--partage` rejoue l'historique en walk-forward strict et mesure **le rapport
+encaissé sachant qu'un rang a été touché** — pas le ROI, dont ce dépôt a déjà
+montré qu'il est dominé par la chance. La probabilité de toucher ne dépend
+d'aucune stratégie ; le montant, si.
+
+| Stratégie | Loto (600 tirages) | EuroMillions (600) |
+|---|---|---|
+| **grille la moins jouée** | **+14,5 %** | **+9,4 %** |
+| les mêmes boules, bonus au hasard | +10,6 % | +2,1 % |
+| grille au hasard (témoin) | −1,2 % | +0,3 % |
+| 5 numéros ≤ 31 « anniversaire » | −9,2 % | −4,7 % |
+| grille la plus jouée | −14,9 % | −16,1 % |
+
+Une observation par **tirage**, pas par grille : deux grilles qui touchent le
+même rang le même soir encaissent le même rapport et n'apportent pas deux
+informations. Les rangs touchés moins de 5 fois sont exclus du tableau *et* du
+total — sans ce filtre, un rang touché deux fois portait 30 % du chiffre de
+tête, invisible.
+
+Au Loto, la grille délaissée touche un rang **11,6 fois par an**, contre une
+fois tous les 122 000 ans pour le jackpot. C'est toute la différence : le
+levier devient mesurable dans une vie humaine.
+
+Modèle prudent +13,9 % (Loto) et +10,9 % (Euro) ; mesure +14,5 % et +9,4 %.
+Les deux se rejoignent, et le chiffre publié reste le prudent.
+
+### Le n° Chance et les Étoiles sont un levier séparé
+
+Découvert en écrivant le placebo, et pas avant : le rang « 1 + 2 étoiles »
+bougeait de −40 % pour la stratégie « populaire », alors qu'il ne demande
+qu'*un* bon numéro. La cause n'était pas les boules mais les **étoiles**. Le
+backtest sépare donc les deux leviers — `anti_boules` joue les mêmes boules
+avec un bonus tiré au sort — et le placebo n'est vérifié que sur les stratégies
+à bonus neutre. Le bonus vaut à lui seul **+3,9 points** au Loto et
+**+7,3 points** à l'EuroMillions.
+
+### Ce que ça vaut, en euros
+
+**+4,94 %** de la mise au Loto, **+1,79 %** à l'EuroMillions. L'espérance passe
+de −51,0 % à −46,1 %.
+
+| Mode | partage | valeur mesurée |
+|---|---|---|
+| `anti` | ×0,22 | **+4,94 % de la mise** |
+| `hybride` | ×0,27 | +4,76 % |
+| `pronostic` | ×1,32 | **−1,30 %** |
+
+Le mode `pronostic` joue les numéros que tout le monde joue : il partage
+davantage, donc il **détruit** de la valeur. Il est conservé pour le fun, et
+son prix est désormais affiché — un produit qui propose un mode sans dire ce
+qu'il coûte n'est pas honnête. La page, elle, n'a jamais publié que l'`anti`.
+
+### Le cas où l'espérance devient positive — et pourquoi ce n'est pas un signal
+
+Elle reste négative à tout jackpot ordinaire. Mais l'honnêteté impose de dire
+ceci : au-delà d'environ **26 M€** de report au Loto, l'arithmétique donne une
+espérance *positive* pour une grille délaissée. Le moteur ne le cache pas — et
+ne le publie jamais nu. Toute EV positive sort accompagnée d'un avertissement,
+pour deux raisons qui la vident de sa portée pratique :
+
+1. `n_est` est la participation **médiane** des 160 derniers tirages. Or les
+   soirs de gros jackpot sont exactement ceux où la foule explose, donc où les
+   partageurs se multiplient. Le chiffre est un **majorant**, pas une
+   prévision — le corriger demanderait un historique des jackpots que ce dépôt
+   n'a pas.
+2. Même exacte, cette espérance reposerait à 100 % sur un événement à 1 sur
+   19 068 840. L'espérance monte ; le résultat le plus probable reste de tout
+   perdre.
+
+Aucun raffinement de ce moteur ne changera la première ligne : c'est un jeu.
+
 ## Ce qui est réel, ce qui ne l'est pas
 
-- **Réel** : la calibration anti-partage, l'EV en euros avec partage attendu,
-  les garanties combinatoires des systèmes, le test χ².
+- **Réel** : la calibration anti-partage, l'EV en euros avec partage attendu
+  **à tous les rangs** (v2.8), les garanties combinatoires des systèmes, le
+  test χ².
 
   La calibration mérite un mot, c'est le seul levier du produit. La FDJ publie
   les gagnants **rang par rang**. Tous les rangs d'un même tirage ont vu la
@@ -206,5 +357,10 @@ elles-mêmes**. En revanche l'effet de partage est bien là — les numéros
 sur-joués sont massivement des dates d'anniversaire (≤ 31), les délaissés des
 numéros hauts. C'est le seul levier que ce produit exploite, et il agit sur
 le **montant** d'un gain éventuel, jamais sur sa probabilité.
+
+Depuis la v2.8, ce montant est corrigé à **tous les rangs** et non au seul
+jackpot — ce qui rend le levier vérifiable une douzaine de fois par an au lieu
+d'une fois tous les 122 000 ans. `--partage` le mesure sans passer par le
+modèle, et `tests/test_elasticite.py` le réfuterait s'il n'était pas là.
 
 Jouer comporte des risques : 09 74 75 13 13 · joueurs-info-service.fr

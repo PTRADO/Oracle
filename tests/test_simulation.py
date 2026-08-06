@@ -72,3 +72,23 @@ def test_le_detail_recompose_le_total_au_centime(cfg):
         for g in v["gains"]:
             assert g["date"] in dates_reelles, (
                 f"{mode} : gain daté du {g['date']}, absent des tirages réels")
+
+
+@pytest.mark.parametrize("cfg", TOUS, ids=IDS)
+def test_l_historique_complet_couvre_chaque_tirage_simule(cfg):
+    """v2.7 — la page montre l'historique complet : chaque tirage rejoué a sa
+    ligne, perdant compris, et l'ensemble recompose mise et gains."""
+    tirages = tirages_des_archives(cfg["nom"].lower())
+    sim = retro_simulation(cfg, tirages, 25, iters=400)
+    for mode, v in sim["modes"].items():
+        lignes = v["tirages"]
+        assert len(lignes) == sim["n_tirages"], (
+            f"{mode} : {len(lignes)} lignes pour {sim['n_tirages']} tirages")
+        assert lignes == sorted(lignes, key=lambda g: g["date"], reverse=True)
+        assert round(sum(g["gain"] for g in lignes), 2) == pytest.approx(
+            v["gain"], abs=0.005)
+        assert sum(1 for g in lignes if g["rang"]) == v["n_gains"]
+        for g in lignes:
+            assert len(g["bonus_sortis"]) == cfg["bonus_pick"]
+            if g["rang"] is None:
+                assert g["gain"] == 0

@@ -101,7 +101,7 @@ from datetime import date, datetime, timedelta
 # `exclus` documente ce qu'on écarte volontairement : sans cette trace, un
 # futur lecteur croirait à un oubli et « réparerait » le bug en le créant.
 
-VERSION = "2.6"          # bump obligatoire à tout changement du contrat JSON
+VERSION = "2.8"          # bump obligatoire à tout changement du contrat JSON
 
 FDJ_DOC = ("https://www.sto.api.fdj.fr/anonymous/service-draw-info/"
            "v3/documentations/")
@@ -1481,9 +1481,14 @@ def generer_grilles(cfg, scores, sb, tirages, mode, n_grilles, rng, calib,
             bons = [tri_bonus[i % 3]]
         else:
             bons = sorted([tri_bonus[0], tri_bonus[1 + i % 3]])
+        comp = composantes_popularite(cfg, balls, calib)
         grilles.append({"numeros": list(balls), "bonus": bons,
                         "score": round(g, 1),
-                        "pop_rel": round(pop_rel_grille(cfg, balls, calib), 3)})
+                        "pop_rel": round(pop_rel_grille(cfg, balls, calib), 3),
+                        # v2.8 — les composantes séparément (marginal, paires
+                        # internes, paires croisées) : elles ne portent pas la
+                        # même charge vers un rang donné
+                        "pop_comp": [round(v, 4) for v in comp]})
     return grilles
 
 
@@ -1579,16 +1584,531 @@ def decomposition_trj(cfg, tirages):
     }
 
 
-def ev_grille(ev_p, jackpot: float, pop_rel: float) -> dict:
-    """EV(grille) = ev_fixe + p1·J / (1 + partageurs attendus) − prix,
-    partageurs attendus = N_est · p1 · pop_rel(grille)."""
+# ==============================================================================
+# 7bis. ÉLASTICITÉ DES RAPPORTS — le partage joue à TOUS LES RANGS
+# ==============================================================================
+#
+# Jusqu'en v2.7, le moteur ne corrigeait le partage qu'au RANG 1. Erreur de
+# cadrage, pas de calcul : dans un jeu de tirage français, TOUS les rangs sont
+# pari-mutuels — une part fixe de la cagnotte divisée par le nombre de
+# gagnants. Jouer des numéros délaissés augmente donc le rapport à chaque rang,
+# pas seulement au jackpot.
+#
+# L'écart est décisif pour qui joue :
+#   · au rang 1, le gain se réalise une fois tous les 122 000 ans ;
+#   · aux rangs courants, une douzaine de fois par an.
+# Le moteur annonçait donc son seul levier réel sous une forme invérifiable,
+# et sous-estimait sa valeur d'un facteur ~7.
+#
+# Ce qu'on mesure ici, rang par rang :
+#
+#     log(rapport_r) = a_r + beta_r · P + c_r · log(W_affluence)
+#
+#   · P = log-popularité de la combinaison SORTIE. C'est la FDJ qui la tire au
+#     sort : la variable explicative est randomisée, donc aucun facteur caché
+#     ne peut expliquer le résultat. Même argument que pour la calibration —
+#     une expérience randomisée dont la FDJ publie les résultats, pas une
+#     corrélation trouvée après coup.
+#   · W_affluence = gagnants d'un rang insensible aux boules (`rang_affluence`).
+#     Il absorbe le jackpot, la saison, la publicité — tout ce qui fait varier
+#     le nombre de joueurs sans rien devoir aux numéros sortis.
+#
+# CE QUE CETTE SECTION PROUVE, ET CE QU'ELLE NE PROUVE PAS
+# --------------------------------------------------------
+# À dire avant les résultats, parce qu'un audit hostile l'a établi et que le
+# taire reviendrait à vendre une preuve qu'on n'a pas.
+#
+# Au LOTO, le rapport est l'inverse quasi exact du nombre de gagnants :
+# régressés sur les mêmes variables, beta_rapport / beta_gagnants vaut 0,95 à
+# 0,98 sur le régime courant. Or le nombre de gagnants est PRÉCISÉMENT ce que
+# `calibration_empirique` ajuste, avec la charge m/pick imposée. Cette section
+# ne fournit donc pas, au Loto, une confirmation indépendante de la
+# calibration : elle la traduit en euros, rang par rang. C'est utile — c'est
+# même tout l'objet — mais ce n'est pas une seconde preuve.
+#
+# À l'EUROMILLIONS le ratio tombe à 0,68-0,82, et pour une raison connue : les
+# gagnants publiés sont FRANÇAIS alors que le rapport est fixé par le pool
+# EUROPÉEN. Il y a là un contenu que la calibration ne peut pas voir.
+#
+# La preuve indépendante, elle, est ailleurs : c'est `backtest_partage`, qui
+# règle de vraies grilles sur de vrais tirages sans jamais toucher à ce modèle.
+#
+# Une prédiction signée survit, et elle est réfutable : beta_r < 0, avec
+# |beta_r| CROISSANT selon le m du rang. Elle est cohérente avec la forme
+# imposée à la calibration, donc c'est un test d'ajustement, pas une découverte.
+# Le PLACEBO, lui, est une permutation (voir `placebo_permutation`) : la mesure
+# entière rejouée sur des combinaisons mélangées entre tirages. C'est le seul
+# contrôle de cette section qui puisse échouer.
+#
+# LE PIÈGE, ET POURQUOI beta NE S'APPLIQUE PAS TEL QUEL
+# -----------------------------------------------------
+# beta_r répond à la popularité de la combinaison SORTIE. Ce n'est pas la
+# popularité de TA grille, et confondre les deux surestime le levier d'un
+# facteur pick/m — au rang « 2 numéros » du Loto, un facteur 2,5.
+#
+# Quand ta grille touche le rang r, la combinaison sortie contient m de tes
+# numéros et (pick − m) numéros qui ne sont pas à toi. Sa popularité ne te doit
+# donc qu'une fraction de la tienne :
+#
+#     E[P_sorti | ta grille touche r] − E[P_sorti]
+#         = (m/pick) · (marginal de ta grille − moyenne)
+#         + (C(m,2)/C(pick,2)) · (co-occurrences de ta grille − moyenne)
+#
+# Les deux composantes ne portent PAS la même charge combinatoire — c'est la
+# décomposition que tools/zones_faibles.py établit déjà. D'où
+# `composantes_popularite`, et des charges séparées par rang.
+#
+# Le cas m = pick vérifie la formule : au rang « 5 numéros », la combinaison
+# sortie EST ta grille, les deux charges valent 1, et l'on retombe exactement
+# sur le traitement du jackpot. C'est le contrôle qui dit que l'atténuation
+# est la bonne.
+#
+# `backtest_partage` mesure ensuite le résultat SANS ce modèle, en réglant de
+# vraies grilles sur de vrais tirages. Si les deux ne concordent pas, c'est le
+# backtest qui a raison.
+
+MIN_TIRAGES_ELASTICITE = 200
+MIN_OBS_RANG_ELASTICITE = 60
+# En deçà, un rang du backtest apparié ne dit rien : il n'est ni publié dans le
+# tableau, ni compté dans la surcote globale. Le premier jet l'écartait du
+# tableau SANS l'écarter du total — un rang touché deux fois portait alors
+# 30 % du chiffre de tête, invisible.
+MIN_TIRAGES_RANG_PARTAGE = 5
+
+
+def _mco(colonnes, y):
+    """MCO avec constante. Rend (coefs hors constante, écarts-types)."""
+    p = len(colonnes) + 1
+    n = len(y)
+    if n <= p:
+        return None
+    X = [[1.0] + [c[i] for c in colonnes] for i in range(n)]
+    XtX = [[sum(X[i][a] * X[i][b] for i in range(n)) for b in range(p)]
+           for a in range(p)]
+    Xty = [sum(X[i][a] * y[i] for i in range(n)) for a in range(p)]
+    try:
+        inv = _inverser(XtX)
+    except ValueError:
+        return None
+    beta = [sum(inv[a][b] * Xty[b] for b in range(p)) for a in range(p)]
+    sse = sum((y[i] - sum(beta[a] * X[i][a] for a in range(p))) ** 2
+              for i in range(n))
+    s2 = sse / (n - p)
+    return ([beta[a] for a in range(1, p)],
+            [math.sqrt(max(s2 * inv[a][a], 0.0)) for a in range(1, p)])
+
+
+def rang_affluence(cfg, tirages):
+    """Rang témoin d'affluence : le rang dense au m effectif le plus faible.
+
+    Son nombre de gagnants suit la foule du soir, mais ne doit presque rien à
+    la popularité des boules sorties — c'est ce qui en fait un contrôle et non
+    un second traitement. Loto : rang 9 (« Chance seule », m = 0,38).
+    EuroMillions : rang 11 (« 1 + 2 étoiles », m = 1).
+
+    Le contrôle n'est pas parfaitement neutre (m > 0). Une version antérieure
+    de ce commentaire affirmait que son imperfection « tire beta vers zéro,
+    donc joue dans le sens prudent ». C'était faux en signe : le biais vaut
+    −lambda·eta où lambda est l'effet propre du témoin sur le rapport étudié et
+    eta son élasticité résiduelle à la popularité. Mesuré au Loto, les deux
+    sont négatifs, donc le biais AGRANDIT |beta| au lieu de le réduire. Son
+    amplitude reste petite — 0,5 % à 4 % de beta selon le rang, contre 2,2 %
+    à l'EuroMillions où le signe est bien celui qu'on croyait. On ne s'en sert
+    donc plus comme argument de prudence : on le chiffre et on passe.
+    """
+    denses = rangs_denses(cfg, tirages)
+    if not denses:
+        return None
+    mb = rangs_mb(cfg)
+    return min(denses, key=lambda r: (mb[r][0], r))
+
+
+def composantes_popularite(cfg, balls, calib):
+    """Décompose la popularité d'une grille en trois quantités qui ne se
+    propagent PAS de la même façon vers un rang donné :
+
+      · `marg`      : Σ gamma sur les numéros de la grille (normalisé) ;
+      · `pair_in`   : Σ theta sur les paires INTERNES à la grille ;
+      · `pair_cross`: Σ theta sur les paires grille × hors-grille.
+
+    Les mélanger donnerait une charge hybride ininterprétable — c'est la même
+    séparation que celle établie par tools/zones_faibles.py, poussée d'un cran
+    parce que le conditionnement « j'ai trouvé m numéros » fait intervenir le
+    complémentaire de la grille (cf. `charges_combinatoires`).
+    """
+    if not calib:
+        return (popularite_log(cfg, balls, calib), 0.0, 0.0)
+    table = calib["table_paires"]
+    pair_in = somme_paires(balls, table)
+    # Σ_{i ∈ G} Σ_{j ≠ i} theta_ij compte deux fois les paires internes
+    total_lignes = sum(sum(table[b]) for b in balls)
+    pair_cross = total_lignes - 2.0 * pair_in
+    return (popularite_log(cfg, balls, calib) - pair_in, pair_in, pair_cross)
+
+
+def charges_combinatoires(cfg, m: float) -> tuple[float, float, float]:
+    """Fraction de la popularité d'une grille que la combinaison sortie porte
+    encore quand on en a trouvé `m` numéros : (marginal, paires internes,
+    paires croisées).
+
+    LA DÉRIVATION, ET LE TERME QUI MANQUAIT
+    ---------------------------------------
+    Sachant |D ∩ G| = m, l'intersection est un m-sous-ensemble uniforme de la
+    grille G — d'où le facteur m/pick, évident. Mais le RESTE du tirage,
+    D \\ G, n'est pas tiré de la population entière : il est tiré du
+    COMPLÉMENTAIRE de G. Comme gamma est centré sur l'univers
+    (Σ_univers gamma = 0, vérifié à 2·10⁻¹⁶ près), la somme des gamma hors
+    grille vaut −Σ_G gamma, et ces (pick − m) numéros apportent donc un terme
+    NÉGATIF proportionnel à la popularité de la grille :
+
+        E[Σ_D gamma | m] = [ m/pick − (pick − m)/(n_max − pick) ] · Σ_G gamma
+
+    La v2.8 initiale n'écrivait que `m/pick`. L'erreur atteint un facteur 1,83
+    au rang à 1 bon numéro, et INVERSE le signe en dessous de m = 1. Contrôle
+    Monte-Carlo sur 300 000 tirages (grille anti du Loto, Σ gamma = −0,9837) :
+    à m = 1, mesuré −0,1076, formule ci-dessus −0,1073, ancienne formule
+    −0,1967.
+
+    Le piège, et pourquoi il a tenu : le terme oublié s'annule EXACTEMENT en
+    m = pick. Le « contrôle » qui vérifiait que les charges valent 1 quand la
+    combinaison sortie est la grille ne pouvait donc rien détecter. Il est
+    remplacé par une vérification Monte-Carlo à tous les m.
+
+    Les paires suivent la même logique, en trois blocs au lieu d'un : paires
+    internes à D ∩ G, paires internes à D \\ G, et paires croisées entre les
+    deux. Seul le premier était retenu. Comme la somme des theta sur TOUTES
+    les paires de l'univers est la même quelle que soit la grille, le bloc
+    « hors grille » se réécrit en fonction des deux autres et disparaît des
+    inconnues : il ne laisse qu'une soustraction sur leurs charges.
+    """
+    n, k = cfg["n_max"], cfg["pick"]
+    dehors = n - k
+    if dehors <= 1 or k <= 1:
+        return (m / k if k else 0.0, 1.0, 0.0)
+    marg = m / k - (k - m) / dehors
+    c_k2 = k * (k - 1) / 2
+    c_out2 = dehors * (dehors - 1) / 2
+    a = max(0.0, m * (m - 1) / 2) / c_k2                 # paires de D ∩ G
+    b = (m * (k - m)) / (k * dehors)                     # paires croisées
+    c = max(0.0, (k - m) * (k - m - 1) / 2) / c_out2     # paires de D \ G
+    return (marg, a - c, b - c)
+
+
+def debut_pari_mutuel(tirages, rang: int, run_min: int = 30) -> int:
+    """Index du premier tirage à partir duquel `rang` paie un montant VARIABLE.
+
+    LE PIÈGE QUE CETTE FONCTION DÉSAMORCE
+    -------------------------------------
+    Avant le 4 novembre 2019, les rangs 2 à 9 du Loto payaient un montant
+    FIXE. Mesuré sur les archives : sur les 417 tirages antérieurs, chacun de
+    ces rangs ne prend qu'UNE SEULE valeur distincte — 500 € au rang 4, 20 €
+    au rang 6, 5 € au rang 8. Aucun de ces tirages ne peut porter la moindre
+    élasticité : le rapport ne dépendait pas des gagnants.
+
+    Les garder dans l'estimation, c'est ajouter 28 % d'observations à pente
+    NULLE PAR CONSTRUCTION, donc raboter toutes les pentes de 28 %. C'est
+    exactement le piège que ce moteur a déjà corrigé deux fois sous une autre
+    forme — « le TRJ facturait le passé au tarif d'aujourd'hui ».
+
+    Détection sans date codée en dur, pour que le jour où la FDJ rebasculera
+    un rang en prix fixe le moteur s'en aperçoive seul : on remonte le temps
+    depuis le tirage le plus récent et l'on coupe dès qu'on rencontre `run_min`
+    tirages consécutifs au rapport rigoureusement identique. Aucun régime
+    pari-mutuel ne produit une telle plage ; un prix fixe ne produit que ça.
+
+    Rend `len(tirages)` si le rang est à prix fixe jusqu'au bout — auquel cas
+    il n'y a rien à estimer, et c'est un fait sur le jeu, pas un échec.
+    """
+    idx = [i for i, t in enumerate(tirages)
+           if t["rapports"].get(rang) and t["rapports"][rang] > 0]
+    if len(idx) < run_min:
+        return len(tirages)
+    course = 1
+    for pos in range(len(idx) - 1, 0, -1):
+        a, b = tirages[idx[pos]], tirages[idx[pos - 1]]
+        if a["rapports"][rang] == b["rapports"][rang]:
+            course += 1
+            if course >= run_min:
+                return idx[pos + run_min - 2] + 1
+        else:
+            course = 1
+    return 0
+
+
+def elasticite_rangs(cfg, tirages, calib):
+    """Mesure beta_r pour chaque rang, plus le domaine de validité du modèle.
+
+    Rend aussi `parts` : la fraction des gains hors jackpot que chaque rang
+    apporte réellement, reconstruite depuis les gagnants et les rapports FDJ.
+    C'est elle qui pondère les beta quand on corrige l'EV — un rang au beta
+    spectaculaire mais qui ne pèse rien ne doit pas tirer le résultat.
+
+    Les rangs sans estimation exploitable gardent beta = 0 (neutre) tout en
+    conservant leur part : au Loto, le rang 9 paie 2,20 € depuis toujours et
+    représente 26 % des gains hors jackpot. Cette part-là n'est améliorable par
+    aucune stratégie, et la diluer dans le facteur est exactement ce qu'il faut
+    faire.
+
+    Chaque rang est estimé sur SON régime pari-mutuel seulement — voir
+    `debut_pari_mutuel`. Les rangs n'ont pas tous basculé au même moment, d'où
+    une fenêtre par rang plutôt qu'une date commune.
+    """
+    if not calib or len(tirages) < MIN_TIRAGES_ELASTICITE:
+        return None
+    ra = rang_affluence(cfg, tirages)
+    if ra is None:
+        return None
+    mb = rangs_mb(cfg)
+    comps = {i: composantes_popularite(cfg, t["balls"], calib)
+             for i, t in enumerate(tirages)}
+    # Le RÉGRESSEUR est la log-popularité de la combinaison sortie, c'est-à-dire
+    # marginal + paires internes — exactement `popularite_log`. Les paires
+    # CROISÉES n'ont pas leur place ici : elles n'existent que dans la
+    # décomposition d'une grille de joueur face au reste de l'univers, pas dans
+    # la popularité d'un tirage. Les y ajouter change la variable expliquée en
+    # cours de route et fait s'évanouir tout l'effet.
+    pops = {i: c[0] + c[1] for i, c in comps.items()}
+    p_ref = statistics.mean(pops.values())
+    refs = tuple(statistics.mean(c[j] for c in comps.values())
+                 for j in range(3))
+
+    def regresser(indices, valeurs_p, rang):
+        """MCO du log-rapport de `rang` sur la popularité et l'affluence."""
+        ys, xs_pop, xs_aff = [], [], []
+        for i in indices:
+            t = tirages[i]
+            v = t["rapports"].get(rang)
+            aff = t["gagnants"].get(ra, 0)
+            if v and v > 0 and aff > 0:
+                ys.append(math.log(v))
+                xs_pop.append(valeurs_p[i])
+                xs_aff.append(math.log(aff))
+        if len(ys) < MIN_OBS_RANG_ELASTICITE or statistics.pstdev(ys) < 1e-12:
+            return None, len(ys)
+        return _mco([xs_pop, xs_aff], ys), len(ys)
+
+    beta, ses, ts, nobs, depuis = {}, {}, {}, {}, {}
+    for r in sorted(mb):
+        d = debut_pari_mutuel(tirages, r)
+        depuis[r] = d
+        out, n = regresser(range(d, len(tirages)), pops, r)
+        nobs[r] = n
+        if out is None:
+            beta[r], ses[r], ts[r] = 0.0, None, None
+            continue
+        (b_pop, _), (se_pop, _) = out
+        beta[r] = b_pop
+        ses[r] = se_pop
+        ts[r] = b_pop / se_pop if se_pop > 1e-12 else 0.0
+
+    # Part d'EV réellement apportée par chaque rang, hors jackpot. Mesurée sur
+    # le régime courant : les parts d'un régime de prix fixes ne décrivent plus
+    # le jeu auquel on joue ce soir.
+    # Le rang 1 est hors parts : le laisser entrer dans ce minimum le ramènerait
+    # toujours à 0 et annulerait la stratification.
+    depart_parts = min((d for r, d in depuis.items()
+                        if r != 1 and d < len(tirages) and beta.get(r)),
+                       default=0)
+    paye = dict.fromkeys(mb, 0.0)
+    for t in tirages[depart_parts:]:
+        for r, rap in t["rapports"].items():
+            if r in paye and r != 1:
+                paye[r] += (t["gagnants"].get(r, 0) or 0) * rap
+    total = sum(paye.values())
+    parts = ({r: paye[r] / total for r in paye if r != 1} if total > 0
+             else {r: 0.0 for r in paye if r != 1})
+
+    # Domaine observé : au-delà, le modèle extrapole et on doit le dire
+    ecarts = sorted(p - p_ref for p in pops.values())
+    plancher = ecarts[max(len(ecarts) // 100 - 1, 0)]
+    plafond = ecarts[min(99 * len(ecarts) // 100, len(ecarts) - 1)]
+
+    return {
+        "rang_affluence": ra,
+        "p_reference": p_ref,
+        "refs": refs,
+        "plancher": plancher,
+        "plafond": plafond,
+        "beta": beta,
+        "se": ses,
+        "t": ts,
+        "n_obs": nobs,
+        "depuis": depuis,
+        "parts": parts,
+        "charges": {r: charges_combinatoires(cfg, mb[r][0]) for r in mb},
+        "placebo": placebo_permutation(cfg, tirages, calib, ra, depuis),
+        "n_tirages": len(tirages),
+        "depart_parts": depart_parts,
+    }
+
+
+def placebo_permutation(cfg, tirages, calib, ra, depuis, n_essais: int = 6,
+                        graine: int = 20260808):
+    """Le VRAI placebo : la même mesure sur des tirages dont on a mélangé les
+    combinaisons entre eux.
+
+    Ce qui a rendu ce remplacement nécessaire
+    -----------------------------------------
+    Le placebo précédent prenait le rang à m ≈ 0 et vérifiait qu'il sortait à
+    zéro. Au Loto, ce rang paie 2,20 € — UNE seule valeur distincte sur 1474
+    tirages. Son beta était donc nul par identité comptable, l'assertion ne
+    pouvait pas échouer, et une tautologie était publiée comme une réfutation.
+
+    Ici on permute les combinaisons entre tirages : chaque tirage garde ses
+    rapports, ses gagnants et son affluence, mais reçoit les boules d'un autre
+    soir. Toute relation entre popularité et rapport est détruite, la loi
+    marginale de la popularité est intacte (contrairement à un bruit gaussien),
+    et la méthode complète est rejouée. Ce qui survit mesure ce que la méthode
+    fabrique toute seule.
+
+    Rend le |t| maximal et le nombre de coefficients qui franchiraient 1,96 —
+    zéro attendu, et un chiffre qui PEUT ne pas l'être.
+    """
+    rng = random.Random(graine)
+    mb = rangs_mb(cfg)
+    t_max, n_signif, n_coefs = 0.0, 0, 0
+    for _ in range(n_essais):
+        melange = [t["balls"] for t in tirages]
+        rng.shuffle(melange)
+        faux = {i: sum(composantes_popularite(cfg, b, calib))
+                for i, b in enumerate(melange)}
+        for r in sorted(mb):
+            ys, xs, aff = [], [], []
+            for i in range(depuis.get(r, 0), len(tirages)):
+                t = tirages[i]
+                v = t["rapports"].get(r)
+                a = t["gagnants"].get(ra, 0)
+                if v and v > 0 and a > 0:
+                    ys.append(math.log(v))
+                    xs.append(faux[i])
+                    aff.append(math.log(a))
+            if len(ys) < MIN_OBS_RANG_ELASTICITE:
+                continue
+            if statistics.pstdev(ys) < 1e-12:
+                continue
+            out = _mco([xs, aff], ys)
+            if not out:
+                continue
+            (b, _), (se, _) = out
+            n_coefs += 1
+            if se > 1e-12:
+                t_stat = abs(b / se)
+                t_max = max(t_max, t_stat)
+                n_signif += t_stat > 1.96
+    return {"n_essais": n_essais, "n_coefficients": n_coefs,
+            "n_significatifs": n_signif, "t_max": round(t_max, 2),
+            "methode": "combinaisons permutées entre tirages"}
+
+
+def facteur_partage(elast, composantes, prudent: bool = True) -> float:
+    """Multiplicateur des gains HORS jackpot d'une grille, à partir de ses
+    `composantes` (marginal, co-occurrences) rendues par
+    `composantes_popularite`.
+
+    Vaut 1 pour une grille aussi populaire qu'une combinaison quelconque, et
+    davantage pour une grille délaissée. Chaque rang reçoit l'écart ATTÉNUÉ
+    par ses charges combinatoires — c'est ce qui distingue la popularité de ta
+    grille de celle du tirage (voir le commentaire de section).
+
+    `prudent` bride l'écart total au 1er centile des combinaisons RÉELLEMENT
+    sorties. Au-delà, le modèle extrapole hors du domaine où il a été vérifié,
+    et les grilles extrêmes du mode « anti » sont précisément dans ce cas. On
+    préfère annoncer moins que promettre ce qui n'a pas été mesuré.
+
+    Réserve assumée : `ev_fixe` est le gain moyen d'une grille RÉELLEMENT
+    JOUÉE, donc d'une grille plus populaire que la moyenne, alors que le
+    facteur vaut 1 sur une combinaison quelconque. L'ancrage sous-estime donc
+    légèrement l'avantage de l'anti-partage face au joueur moyen. On garde le
+    sens prudent.
+    """
+    if (not elast or composantes is None
+            or sum(elast["parts"].values()) <= 0.0):
+        return 1.0
+    ecarts = [c - r for c, r in zip(composantes, elast["refs"], strict=True)]
+    # Le domaine observé est celui de la log-popularité d'un TIRAGE, donc
+    # marginal + paires internes. C'est sur cette échelle-là qu'on bride.
+    total = ecarts[0] + ecarts[1]
+    # Le bridage tient aux DEUX bords, et seulement en mode prudent : au-delà
+    # du domaine observé le modèle extrapole, quel que soit le côté. Ne brider
+    # que le bas rendrait `prudent` et `extrapolé` identiques sur les grilles
+    # très jouées — donc muet là où l'écart se lit le mieux.
+    borne = None
+    if prudent and total < elast["plancher"]:
+        borne = elast["plancher"]
+    elif prudent and total > elast["plafond"]:
+        borne = elast["plafond"]
+    if borne is not None and abs(total) > 1e-12:
+        k = borne / total
+        ecarts = [e * k for e in ecarts]
+    f = 0.0
+    for r, part in elast["parts"].items():
+        charges = elast["charges"].get(r, (1.0, 1.0, 0.0))
+        dp = sum(c * e for c, e in zip(charges, ecarts, strict=True))
+        # garde-fou : une calibration future pathologique ne doit pas faire
+        # tomber le moteur sur un OverflowError au moment d'afficher une EV
+        expo = min(max(elast["beta"].get(r, 0.0) * dp, -50.0), 50.0)
+        f += part * math.exp(expo)
+    return f
+
+
+def ev_grille(ev_p, jackpot: float, pop_rel: float, elast=None,
+              composantes=None) -> dict:
+    """EV(grille) = gains courants corrigés du partage
+                    + p1·J / (1 + partageurs attendus) − prix.
+
+    v2.8 : les gains courants ne sont plus une constante. Ils sont multipliés
+    par `facteur_partage`, qui applique au rapport de CHAQUE rang l'élasticité
+    mesurée sur les rapports FDJ, atténuée par les charges combinatoires du
+    rang. Sans `elast` ou sans `composantes`, le facteur vaut 1 et l'on
+    retombe exactement sur le comportement antérieur — jamais sur une
+    approximation silencieuse.
+
+    `ev` retient la version PRUDENTE (écart bridé au domaine observé) ;
+    `ev_extrapole` donne la version non bridée, pour que l'écart entre les
+    deux reste visible plutôt que tranché en coulisses.
+    """
     p1 = 1.0 / ev_p["p_jackpot_inv"]
     partageurs = ev_p["n_est"] * p1 * pop_rel
     comp_jack = p1 * jackpot / (1.0 + partageurs)
     fixe = ev_p["ev_fixe"] or 0.0
-    return {"ev": round(fixe + comp_jack - ev_p["prix"], 4),
+    f_pru = facteur_partage(elast, composantes, prudent=True)
+    f_bru = facteur_partage(elast, composantes, prudent=False)
+    ev = fixe * f_pru + comp_jack - ev_p["prix"]
+    return {"ev": round(ev, 4),
+            "ev_extrapole": round(fixe * f_bru + comp_jack - ev_p["prix"], 4),
             "comp_jackpot": round(comp_jack, 4),
-            "partageurs_attendus": round(partageurs, 4)}
+            "comp_courants": round(fixe * f_pru, 4),
+            "facteur_partage": round(f_pru, 4),
+            "facteur_partage_extrapole": round(f_bru, 4),
+            "partageurs_attendus": round(partageurs, 4),
+            "alerte": _alerte_ev(ev)}
+
+
+def _alerte_ev(ev: float) -> str | None:
+    """Avertissement obligatoire quand l'EV calculée devient positive.
+
+    Aux très gros reports, l'arithmétique donne effectivement une espérance
+    positive — au Loto, à partir d'environ 26 M€ pour une grille délaissée.
+    Publier ce chiffre nu serait un conseil de jeu, et un mauvais, pour deux
+    raisons qu'il faut dire dans la même phrase :
+
+      · `n_est` est la participation MÉDIANE des 160 derniers tirages. Or un
+        gros jackpot attire massivement plus de joueurs, donc plus de
+        partageurs. Le calcul tient la foule pour constante alors qu'elle est
+        précisément ce qui explose ces soirs-là : l'EV affichée est un
+        majorant, pas une prévision.
+      · même exacte, elle reposerait à 100 % sur un événement à 1 sur
+        19 068 840. L'espérance est positive, la médiane du joueur reste
+        « tu perds tout ». Ce n'est pas une opportunité, c'est une loterie.
+    """
+    if ev < 0:
+        return None
+    return ("EV positive sur le papier. Elle suppose la participation "
+            "CONSTANTE, alors qu'un gros jackpot attire beaucoup plus de "
+            "joueurs — donc plus de partageurs : c'est un majorant, pas une "
+            "prévision. Et elle repose entièrement sur un événement à une "
+            "chance sur des millions : l'espérance monte, le résultat le plus "
+            "probable reste de tout perdre.")
 
 
 # ==============================================================================
@@ -1811,7 +2331,7 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
     calib, prochaine_calib = None, debut
     res = {m: {"mise": 0.0, "gain": 0.0, "rangs": Counter(),
                "n_gains": 0, "meilleur_gain": 0.0, "meilleur_date": None,
-               "gains": [], "grilles_jouees": []}
+               "gains": [], "tirages": [], "grilles_jouees": []}
            for m in ("hybride", "pronostic", "anti")}
     autres_graines = [0.0] * n_graines_dispersion
 
@@ -1847,6 +2367,19 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
             r = regler_grille(cfg, {"numeros": grille, "bonus": bons_b}, t)
             res[mode]["mise"] += prix_du_tirage(cfg, t["date"])
             res[mode]["gain"] += r["gain"]
+            # Chaque tirage rejoué, gagnant OU perdant : la page montre
+            # l'historique complet, pas seulement les soirs où ça paie.
+            res[mode]["tirages"].append({
+                "date": t["date"].isoformat(),
+                "grille": list(grille),
+                "bonus": list(bons_b),
+                "sortis": list(t["balls"]),
+                "bonus_sortis": list(t["bonus"]),
+                "bons": r["bons"],
+                "bonus_ok": r["bonus_ok"],
+                "rang": r["rang"],
+                "gain": round(r["gain"], 2),
+            })
             if r["rang"]:
                 res[mode]["rangs"][r["rang"]] += 1
                 res[mode]["n_gains"] += 1
@@ -1890,6 +2423,11 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                                            / v["mise"], 1) if v["mise"] else 0,
                           "n_gains": v["n_gains"],
                           "gains": sorted(v["gains"], key=lambda g: -g["gain"]),
+                          # du plus récent au plus ancien : l'ordre de lecture
+                          # de la page
+                          "tirages": sorted(v["tirages"],
+                                            key=lambda g: g["date"],
+                                            reverse=True),
                           "meilleur_gain": round(v["meilleur_gain"], 2),
                           "meilleur_date": v["meilleur_date"],
                           "rangs": dict(sorted(v["rangs"].items())),
@@ -1898,6 +2436,280 @@ def retro_simulation(cfg, tirages, n_derniers: int = 150, seed: int = 0,
                           **({"grilles_jouees": v["grilles_jouees"]}
                              if retour_grilles else {})}
                       for m, v in res.items()}}
+
+
+# ==============================================================================
+# 8quater. BACKTEST APPARIÉ DU PARTAGE — le seul levier, enfin mesurable
+# ==============================================================================
+#
+# Pourquoi ne pas se contenter du ROI
+# -----------------------------------
+# Le ROI d'une rétro-simulation est dominé par la chance : la même stratégie
+# rejouée avec une autre graine rend de 27 € à 172 € sur les mêmes 100 tirages
+# (mesuré par tools/dispersion_simulation.py). Comparer deux stratégies
+# là-dessus revient à comparer deux lancers de dé — et c'est ce que fait tout
+# le monde, y compris ce moteur jusqu'en v2.7.
+#
+# Ce qu'on mesure à la place
+# --------------------------
+# LE RAPPORT ENCAISSÉ SACHANT QU'ON A TOUCHÉ UN RANG. La séparation est nette :
+#
+#   · la PROBABILITÉ de toucher ne dépend d'aucune stratégie. Elle est fixée
+#     par le tirage, et aucun algorithme ne la déplacera jamais ;
+#   · le MONTANT encaissé, lui, dépend de la grille — parce que tous les rangs
+#     sont pari-mutuels. C'est là, et seulement là, qu'une stratégie agit.
+#
+# La puissance statistique change d'échelle : au Loto on touche un rang une
+# fois sur ~6, donc ~11 fois par an, contre une fois tous les 122 000 ans pour
+# le jackpot. Sur l'historique complet, cela fait des centaines d'événements.
+#
+# Le test
+# -------
+# Sous l'hypothèse nulle « la grille n'a aucun effet sur le montant », les
+# tirages où une stratégie touche le rang r sont un sous-ensemble QUELCONQUE
+# des tirages où le rang r a payé. Le rapport moyen encaissé doit donc valoir
+# le rapport moyen du rang. On teste exactement cela, rang par rang.
+#
+# Deux garde-fous, sans lesquels un écart ne vaudrait rien :
+#   · la stratégie « hasard » doit sortir à zéro ;
+#   · le rang placebo (m ≈ 0) doit sortir à zéro pour TOUTES les stratégies.
+
+def grille_extreme(cfg, calib, sens: int = -1):
+    """Grille gloutonne qui minimise (sens = −1) ou maximise (sens = +1) la
+    log-popularité, co-occurrences comprises.
+
+    Déterministe, donc exempte du bruit de générateur que `generer_grilles`
+    introduit. C'est ce qui permet au backtest apparié de mesurer l'effet du
+    partage plutôt que celui de la graine.
+    """
+    choisis: list[int] = []
+    restants = list(nums(cfg))
+    while len(choisis) < cfg["pick"] and restants:
+        meilleur, score = None, None
+        for n in restants:
+            p = popularite_log(cfg, tuple(sorted([*choisis, n])), calib)
+            if score is None or sens * p > sens * score:
+                meilleur, score = n, p
+        choisis.append(meilleur)
+        restants.remove(meilleur)
+    return tuple(sorted(choisis))
+
+
+def bonus_extreme(cfg, calib, sens: int = -1):
+    """Le(s) numéro(s) bonus le(s) moins joué(s) (sens = −1) ou le plus."""
+    if calib:
+        cle = sorted(bonus_nums(cfg),
+                     key=lambda n: sens * calib["delta"].get(n, 0.0),
+                     reverse=True)
+    else:
+        cle = sorted(bonus_nums(cfg),
+                     key=lambda n: sens * _pop_bonus_heuristique(cfg, n),
+                     reverse=True)
+    return sorted(cle[:cfg["bonus_pick"]])
+
+
+def backtest_partage(cfg, tirages, n_derniers=None, pas_calib: int = 25,
+                     n_repetitions: int = 12, seed: int = 0):
+    """Backtest apparié du partage. Voir le commentaire de section.
+
+    Walk-forward strict : la calibration employée au tirage i n'est calculée
+    que sur les tirages ANTÉRIEURS, et rafraîchie tous les `pas_calib` tirages
+    comme en production.
+
+    `n_repetitions` : nombre de grilles indépendantes tirées par tirage pour
+    les stratégies à bonus aléatoire. Elles n'ont pas de grille canonique ;
+    une seule par tirage rendrait leur estimation trop bruyante pour servir de
+    témoin. L'inférence, elle, reste comptée en TIRAGES : deux grilles qui
+    touchent le même rang le même soir encaissent le même rapport, elles
+    n'apportent pas deux informations.
+
+    DEUX LEVIERS, PAS UN — et il a fallu un test raté pour s'en apercevoir.
+    Le n° Chance et les Étoiles ont leur propre popularité, et elle pèse lourd
+    sur les rangs qui les exigent : à l'EuroMillions, jouer les deux étoiles
+    les plus cochées fait chuter le rapport du rang « 1 + 2 étoiles » de 40 %,
+    alors même que ce rang ne demande qu'UN bon numéro. Mélanger les deux
+    leviers rendrait le rang placebo inutilisable — il bougerait pour une
+    raison qui n'a rien à voir avec les boules.
+
+    On les sépare donc : `anti_boules` ne joue que les boules délaissées, avec
+    un bonus tiré au sort. L'écart entre `anti` et `anti_boules` mesure ce que
+    le bonus apporte à lui seul, et les stratégies à bonus aléatoire rendent
+    le placebo interprétable.
+    """
+    debut = max(MIN_TIRAGES_CALIBRATION, len(tirages) - (n_derniers or 10**9))
+    if debut >= len(tirages):
+        return None
+    rng = random.Random(seed)
+    univers = list(nums(cfg))
+    anniv = [n for n in univers if n <= 31]
+
+    # `bonus_neutre` : le bonus est tiré au sort, donc la stratégie ne joue que
+    # sur les boules. Ce sont les seules comparables sur le rang placebo.
+    noms = {"anti": False, "anti_boules": True, "hasard": True,
+            "anniversaire": True, "populaire": False}
+    # rapports encaissés : stratégie → rang → index du tirage → liste de gains.
+    # Regrouper PAR TIRAGE dès l'accumulation est ce qui permet ensuite de
+    # compter une observation par soir, et non une par grille.
+    encaisse = {s: defaultdict(lambda: defaultdict(list)) for s in noms}
+    mise = dict.fromkeys(noms, 0.0)
+    gain = dict.fromkeys(noms, 0.0)
+    n_grilles = dict.fromkeys(noms, 0)
+
+    calib, prochaine, g_anti, g_pop, b_anti, b_pop = None, debut, None, None, None, None
+    for i in range(debut, len(tirages)):
+        if i >= prochaine:
+            calib = calibration_empirique(cfg, tirages[:i])
+            g_anti = grille_extreme(cfg, calib, -1)
+            g_pop = grille_extreme(cfg, calib, +1)
+            b_anti = bonus_extreme(cfg, calib, -1)
+            b_pop = bonus_extreme(cfg, calib, +1)
+            prochaine = i + pas_calib
+        t = tirages[i]
+        prix = prix_du_tirage(cfg, t["date"])
+        bonus_alea = [rng.sample(list(bonus_nums(cfg)), cfg["bonus_pick"])
+                      for _ in range(n_repetitions)]
+        tirees = {
+            "anti": [(list(g_anti), list(b_anti))],
+            "populaire": [(list(g_pop), list(b_pop))],
+            "anti_boules": [(list(g_anti), b) for b in bonus_alea],
+            "hasard": [(rng.sample(univers, cfg["pick"]), b)
+                       for b in bonus_alea],
+            "anniversaire": [(rng.sample(anniv, cfg["pick"]), b)
+                             for b in bonus_alea],
+        }
+        for s, grilles in tirees.items():
+            for numeros, bons in grilles:
+                r = regler_grille(cfg, {"numeros": numeros, "bonus": bons}, t)
+                mise[s] += prix
+                gain[s] += r["gain"]
+                n_grilles[s] += 1
+                if r["rang"] and r["gain"] > 0:
+                    encaisse[s][r["rang"]][i].append(r["gain"])
+
+    # Référence : ce que le rang r paie en moyenne, sur son SEUL régime
+    # pari-mutuel. Avant le 04/11/2019 les rangs du Loto payaient un montant
+    # fixe ; les mêler à la référence la déplacerait sans qu'aucune stratégie
+    # n'y soit pour rien.
+    testes = tirages[debut:]
+    ref_moy, ref_log, ref_sd, ref_n = {}, {}, {}, {}
+    for r in sorted(rangs_mb(cfg)):
+        d = debut_pari_mutuel(testes, r)
+        vals = [t["rapports"][r] for t in testes[d:]
+                if t["rapports"].get(r) and t["rapports"][r] > 0]
+        if len(vals) >= 30:
+            logs = [math.log(v) for v in vals]
+            ref_moy[r] = statistics.mean(vals)
+            ref_log[r] = statistics.mean(logs)
+            ref_sd[r] = statistics.pstdev(logs)
+            ref_n[r] = len(vals)
+
+    ra = rang_affluence(cfg, testes)
+    strategies = {}
+    for s in noms:
+        rangs = {}
+        retenus = set()
+        for r in sorted(ref_moy):
+            par_tirage = encaisse[s].get(r) or {}
+            n_t = len(par_tirage)                 # tirages DISTINCTS touchés
+            if n_t < MIN_TIRAGES_RANG_PARTAGE:
+                continue
+            retenus.add(r)
+            # UNE observation par tirage : deux grilles qui touchent le même
+            # rang le même soir encaissent le même rapport, elles n'apportent
+            # pas deux informations. Compter les grilles biaiserait la moyenne
+            # des stratégies dont le nombre de grilles gagnantes dépend du
+            # tirage — « anniversaire » au premier chef.
+            moyennes = [statistics.mean(v) for v in par_tirage.values()]
+            moy_log = statistics.mean(math.log(v) for v in moyennes)
+            ecart = moy_log - ref_log[r]
+            # correction de population finie : le sous-échantillon touché est
+            # inclus dans la référence, l'écart est donc moins dispersé que
+            # ref_sd/√n ne le dit.
+            fpc = math.sqrt(max(0.0, 1.0 - n_t / ref_n[r]))
+            se = ref_sd[r] / math.sqrt(n_t) * fpc if ref_sd[r] > 1e-12 else 0.0
+            rangs[r] = {
+                "n_tirages": n_t,
+                "rapport_moyen": round(statistics.mean(moyennes), 2),
+                "rapport_reference": round(ref_moy[r], 2),
+                "ecart_pct": round(100 * (math.exp(ecart) - 1), 2),
+                "t": round(ecart / se, 2) if se > 1e-12 else 0.0,
+                "placebo": r == ra,
+            }
+        # Surcote globale, en euros : à rangs touchés identiques, combien la
+        # stratégie a-t-elle encaissé de plus que le rapport moyen de ces rangs.
+        # Restreinte aux rangs PUBLIÉS : sans ce filtre, un rang touché deux
+        # fois et absent du tableau pouvait porter 30 % du chiffre de tête.
+        attendu = recu = 0.0
+        for r in retenus:
+            for vals in encaisse[s][r].values():
+                m = statistics.mean(vals)
+                attendu += ref_moy[r]
+                recu += m
+        strategies[s] = {
+            "rangs": rangs,
+            "bonus_neutre": noms[s],
+            "n_grilles": n_grilles[s],
+            "mise": round(mise[s], 2),
+            "gain": round(gain[s], 2),
+            "roi_pct": (round(100 * (gain[s] - mise[s]) / mise[s], 1)
+                        if mise[s] else 0.0),
+            "surcote_pct": (round(100 * (recu / attendu - 1), 2)
+                            if attendu > 0 else None),
+        }
+
+    # Ce que le seul choix du bonus apporte : mêmes boules, bonus délaissé
+    # contre bonus tiré au sort.
+    levier_bonus = None
+    if (strategies.get("anti", {}).get("surcote_pct") is not None
+            and strategies.get("anti_boules", {}).get("surcote_pct")
+            is not None):
+        levier_bonus = round(strategies["anti"]["surcote_pct"]
+                             - strategies["anti_boules"]["surcote_pct"], 2)
+
+    return {
+        "n_tirages": len(testes),
+        "depart": tirages[debut]["date"].isoformat(),
+        "rang_placebo": ra,
+        "n_repetitions": n_repetitions,
+        "strategies": strategies,
+        "levier_bonus_pct": levier_bonus,
+        "note": ("rapport encaissé sachant le rang touché ; la probabilité de "
+                 "toucher ne dépend d'aucune stratégie"),
+    }
+
+
+def valeur_modes(cfg, tirages, ev_p, elast, calib, modes_grilles):
+    """Ce que vaut RÉELLEMENT chaque mode, en % de la mise, face à une grille
+    quelconque — gains courants seulement, jackpot exclu.
+
+    Le mode « pronostic » y sort négatif, et c'est le point : il joue les
+    numéros que tout le monde joue, donc il partage davantage. Un produit qui
+    propose un mode sans dire ce qu'il coûte n'est pas honnête.
+    """
+    if not ev_p or not elast or not ev_p.get("ev_fixe"):
+        return None
+    fixe = ev_p["ev_fixe"]
+    out = {}
+    for mode, grilles in modes_grilles.items():
+        if not grilles:
+            continue
+        vals, valsx = [], []
+        for g in grilles:
+            comp = g.get("pop_comp") or composantes_popularite(
+                cfg, tuple(g["numeros"]), calib)
+            vals.append(fixe * (facteur_partage(elast, comp) - 1.0))
+            valsx.append(fixe * (facteur_partage(elast, comp, prudent=False)
+                                 - 1.0))
+        gagne = statistics.mean(vals)
+        out[mode] = {
+            "gain_euro": round(gagne, 4),
+            "gain_pct_mise": round(100 * gagne / cfg["prix"], 2),
+            "gain_pct_mise_extrapole": round(
+                100 * statistics.mean(valsx) / cfg["prix"], 2),
+            "pop_rel_moyen": round(
+                statistics.mean(g["pop_rel"] for g in grilles), 3),
+        }
+    return out
 
 
 # ==============================================================================
@@ -2186,13 +2998,77 @@ def afficher(cfg, ctx):
         ligne = (f"   G{i} : [ {nums_s} ] + {bon_s}"
                  f"   score {g['score']}, partage ×{g['pop_rel']}")
         if ctx["jackpot"] and ctx["ev_p"]:
-            ev = ev_grille(ctx["ev_p"], ctx["jackpot"], g["pop_rel"])
+            ev = ev_grille(ctx["ev_p"], ctx["jackpot"], g["pop_rel"],
+                           ctx.get("elast"), g.get("pop_comp"))
             ligne += f"   EV {ev['ev']:+.2f} €"
         p(ligne)
     if ctx["ev_p"]:
         e = ctx["ev_p"]
         p(f"   (participation estimée ≈ {e['n_est']:,} grilles/tirage · "
           f"gains hors-jackpot ≈ {e['ev_fixe']} €/grille)".replace(",", " "))
+
+    el = ctx.get("elast")
+    if el:
+        p("\n▶ LE PARTAGE JOUE À TOUS LES RANGS (v2.8)")
+        p("   Tous les rangs sont pari-mutuels : une part fixe de la cagnotte")
+        p("   divisée par le nombre de gagnants. Jouer délaissé augmente donc")
+        p("   le rapport à CHAQUE rang, pas seulement au jackpot.")
+        p(f"   Élasticité mesurée sur {el['n_tirages']} tirages, rapports FDJ "
+          "réels :")
+        mb = rangs_mb(cfg)
+        for r in sorted(el["beta"]):
+            if el["n_obs"].get(r, 0) < MIN_OBS_RANG_ELASTICITE:
+                continue
+            t_ = el["t"].get(r)
+            ligne_r = (f"     rang {r} (m={mb[r][0]:.2f})  "
+                       f"β = {el['beta'][r]:+.4f}")
+            if t_ is not None:
+                ligne_r += f"   t = {t_:+7.1f}"
+            if r == el["rang_affluence"]:
+                ligne_r += "   ← PLACEBO (m≈0), doit valoir 0"
+            p(ligne_r)
+        if el["placebo"]:
+            pl = el["placebo"]
+            p(f"   Placebo ({pl['methode']}, {pl['n_essais']} essais) : "
+              f"|t| max = {pl['t_max']} · {pl['n_significatifs']}"
+              f"/{pl['n_coefficients']} coefficients significatifs")
+
+    vm = ctx.get("valeur_modes")
+    if vm:
+        p("\n▶ CE QUE CHAQUE MODE VAUT, EN EUROS (gains courants, hors jackpot)")
+        for mode in ("anti", "hybride", "pronostic"):
+            v = vm.get(mode)
+            if not v:
+                continue
+            signe = "gagne" if v["gain_euro"] >= 0 else "PERD"
+            p(f"   · {mode:10s} partage ×{v['pop_rel_moyen']:.3f}  →  "
+              f"{signe} {abs(v['gain_euro']):.4f} € par grille "
+              f"({v['gain_pct_mise']:+.2f} % de la mise)")
+        if vm.get("pronostic", {}).get("gain_pct_mise", 0) < 0:
+            p("   Le mode « pronostic » joue les numéros que tout le monde")
+            p("   joue : il partage plus, donc il DÉTRUIT de la valeur. Il est")
+            p("   conservé pour le fun, jamais recommandé.")
+
+    bp = ctx.get("partage")
+    if bp:
+        p(f"\n▶ BACKTEST APPARIÉ DU PARTAGE — {bp['n_tirages']} tirages "
+          f"depuis {bp['depart']}")
+        p("   Mesure : le rapport encaissé SACHANT qu'on a touché un rang.")
+        p("   La probabilité de toucher, elle, ne dépend d'aucune stratégie.")
+        for s in ("anti", "anti_boules", "hasard", "anniversaire",
+                  "populaire"):
+            d = bp["strategies"].get(s)
+            if not d or d["surcote_pct"] is None:
+                continue
+            p(f"   · {s:13s} surcote du rapport {d['surcote_pct']:+6.2f} %"
+              f"   ({d['n_grilles']} grilles réglées)")
+        if bp.get("levier_bonus_pct") is not None:
+            p(f"   Dont le seul choix du {cfg['bonus_nom']} : "
+              f"{bp['levier_bonus_pct']:+.2f} % "
+              "(« anti » et « anti_boules » jouent les mêmes boules)")
+        p(f"   Rang placebo : {bp['rang_placebo']} — il doit rester à 0 pour")
+        p("   les stratégies à bonus neutre, sans quoi la mesure capte autre")
+        p("   chose que le partage des boules.")
 
     trj = ctx.get("trj")
     if trj:
@@ -2320,13 +3196,86 @@ def afficher(cfg, ctx):
 # 11. EXPORT WEB
 # ==============================================================================
 
+def _export_elasticite(cfg, el):
+    """Sérialise l'élasticité : clés de rang en chaînes (contrainte JSON) et
+    arrondis lisibles. Le `m` de chaque rang accompagne son beta — sans lui,
+    la prédiction « |beta| croît avec m » n'est pas vérifiable par le lecteur.
+    """
+    if not el:
+        return None
+    mb = rangs_mb(cfg)
+    rangs = {}
+    for r in sorted(el["beta"]):
+        if el["n_obs"].get(r, 0) < MIN_OBS_RANG_ELASTICITE:
+            continue
+        ch = el["charges"].get(r, (1.0, 1.0, 0.0))
+        rangs[str(r)] = {
+            "m": round(mb[r][0], 4),
+            "b": round(mb[r][1], 4),
+            "beta": round(el["beta"][r], 4),
+            "charge_marginale": round(ch[0], 4),
+            "charge_paires": round(ch[1], 4),
+            "charge_paires_croisees": round(ch[2], 4),
+            "se": (None if el["se"].get(r) is None
+                   else round(el["se"][r], 4)),
+            "t": (None if el["t"].get(r) is None else round(el["t"][r], 2)),
+            "n_obs": el["n_obs"][r],
+            "depuis_tirage": el["depuis"].get(r),
+            "part_ev": round(el["parts"].get(r, 0.0), 4),
+            "prix_fixe": el["n_obs"].get(r, 0) < MIN_OBS_RANG_ELASTICITE,
+            # le rang d'affluence est le témoin : il voit la même foule que
+            # les autres mais ne dépend presque pas des numéros tirés — la
+            # page et le contrat l'affichent comme tel
+            "placebo": r == el["rang_affluence"],
+        }
+    # Les rangs à prix fixe n'ont pas d'élasticité à estimer, mais ils pèsent
+    # dans l'EV : les taire donnerait un total de parts inférieur à 1 sans
+    # explication. Au Loto, le rang 9 vaut à lui seul 26 % des gains.
+    fixes = {str(r): round(el["parts"].get(r, 0.0), 4)
+             for r in sorted(el["parts"])
+             if str(r) not in rangs and el["parts"].get(r, 0.0) > 0.001}
+    return {
+        "n_tirages": el["n_tirages"],
+        "rang_affluence": el["rang_affluence"],
+        # Les trois références, sans lesquelles `pop_comp` ne sert à rien : le
+        # facteur de partage se calcule sur des ÉCARTS à la grille quelconque.
+        # Les exporter, c'est permettre à la page — et au contrat — de
+        # reproduire exactement le calcul du moteur au lieu de le croire.
+        "references": [round(v, 4) for v in el["refs"]],
+        "domaine_observe": {"plancher": round(el["plancher"], 4),
+                            "plafond": round(el["plafond"], 4)},
+        "placebo": el["placebo"],
+        "rangs": rangs,
+        "rangs_a_prix_fixe": fixes,
+        "note": ("beta = élasticité du rapport à la log-popularité de la "
+                 "combinaison sortie, tirée au sort par la FDJ ; estimée sur "
+                 "le seul régime pari-mutuel de chaque rang"),
+    }
+
+
+def _export_partage(bp):
+    """Sérialise le backtest apparié (clés de rang en chaînes)."""
+    if not bp:
+        return None
+    out = dict(bp)
+    out["strategies"] = {
+        s: dict(d, rangs={str(r): v for r, v in d["rangs"].items()})
+        for s, d in bp["strategies"].items()}
+    return out
+
+
 def export_web(chemin, cfg, ctx, args):
+    dern = ctx["tirages"][-1]
     modes = {}
     for mode in ("hybride", "pronostic", "anti"):
         rng_m = random.Random(args.seed if args.seed is not None else 0)
         fin = score_final(cfg, ctx["folklore"], ctx["anti"], mode)
         grs = generer_grilles(cfg, fin, ctx["sb"], ctx["tirages"], mode,
                               max(args.grilles, 3), rng_m, ctx["calib"])
+        # `vs_dernier` : ce que chaque grille affichée aurait fait au dernier
+        # tirage réel, réglé aux rapports FDJ de ce soir-là. La page montre
+        # ainsi chaque grille à côté des vraies boules, jamais dans le vide.
+        grs = [dict(g, vs_dernier=regler_grille(cfg, g, dern)) for g in grs]
         modes[mode] = {
             "scores": {str(n): round(fin[n], 1) for n in nums(cfg)},
             "classement": sorted(nums(cfg), key=lambda n: -fin[n]),
@@ -2334,7 +3283,11 @@ def export_web(chemin, cfg, ctx, args):
                       score_bonus_mode(ctx["sb"], mode).items()},
             "grilles": grs,
         }
-    dern = ctx["tirages"][-1]
+    systeme = ctx["systeme"]
+    if systeme:
+        systeme = dict(systeme, grilles=[
+            dict(g, vs_dernier=regler_grille(cfg, g, dern))
+            for g in systeme["grilles"]])
     calib = ctx["calib"]
     rapport = {
         "meta": {
@@ -2381,14 +3334,18 @@ def export_web(chemin, cfg, ctx, args):
             "n_significatifs": calib["n_significatifs"],
             "rangs_utilises": calib["rangs"],
         }),
-        "systeme": ctx["systeme"],
+        "systeme": systeme,
         "historique": ctx.get("histo"),
         "simulation": ctx.get("sim"),
+        # v2.8 — le partage joue à TOUS les rangs, et on le publie
+        "elasticite": _export_elasticite(cfg, ctx.get("elast")),
         "verdicts": {"backtest": ctx["bt"],
                      "effet_anniversaire": ctx["pop"],
                      "frequences": ctx.get("freq_tab"),
                      "chi2": ctx["chi2"],
                      "trj": ctx.get("trj"),
+                     "valeur_modes": ctx.get("valeur_modes"),
+                     "partage": _export_partage(ctx.get("partage")),
                      "recherche": ctx.get("recherche")},
     }
     os.makedirs(os.path.dirname(os.path.abspath(chemin)), exist_ok=True)
@@ -2429,6 +3386,10 @@ def main():
                     default=None, metavar="BUDGET",
                     help="Recherche exhaustive d'une formule prédictive, "
                          "validée hors échantillon contre un témoin permuté")
+    ap.add_argument("--partage", type=int, nargs="?", const=0, default=None,
+                    metavar="N",
+                    help="Backtest apparié du partage sur les N derniers "
+                         "tirages (0 = tout l'historique exploitable)")
     args = ap.parse_args()
 
     cfg = JEUX[args.jeu]
@@ -2464,7 +3425,9 @@ def main():
             "grilles": [{"numeros": list(g),
                          "bonus": ([tb[i % 3]] if cfg["bonus_pick"] == 1
                                    else sorted([tb[0], tb[1 + i % 3]])),
-                         "pop_rel": round(pop_rel_grille(cfg, g, calib), 3)}
+                         "pop_rel": round(pop_rel_grille(cfg, g, calib), 3),
+                         "pop_comp": [round(v, 4) for v in
+                                      composantes_popularite(cfg, g, calib)]}
                         for i, g in enumerate(gr)],
             "cout": round(len(gr) * cfg["prix"], 2),
         }
@@ -2472,14 +3435,32 @@ def main():
     bt = None if args.no_backtest else backtest(cfg, tirages, rng)
     pop = test_popularite(tirages)
     chi2 = test_chi2(cfg, tirages)
+    elast = elasticite_rangs(cfg, tirages, calib)
 
     ctx = {"tirages": tirages, "date_tirage": date_tirage, "mode": args.mode,
            "couches": couches, "folklore": folklore, "anti": anti,
            "anti_mode": anti_mode, "calib": calib, "final": final, "sb": sb,
            "grilles": grilles, "jackpot": jackpot, "ev_p": ev_p,
            "systeme": systeme, "bt": bt, "pop": pop, "chi2": chi2,
+           "elast": elast,
            "trj": decomposition_trj(cfg, tirages),
            "alertes": alertes, "sources": sources}
+
+    # Ce que vaut chaque mode, mesuré sur les grilles réellement publiables.
+    # Calculé ici parce qu'il faut les grilles des TROIS modes, alors que
+    # `grilles` ne porte que le mode demandé en ligne de commande.
+    ctx["valeur_modes"] = valeur_modes(
+        cfg, tirages, ev_p, elast, calib,
+        {m: generer_grilles(cfg, score_final(cfg, folklore, anti, m), sb,
+                            tirages, m, max(args.grilles, 3),
+                            random.Random(args.seed or 0), calib)
+         for m in ("hybride", "pronostic", "anti")})
+
+    if args.partage is not None:
+        print("\n   ⚖️  Backtest apparié du partage… (walk-forward strict)")
+        ctx["partage"] = backtest_partage(cfg, tirages,
+                                          n_derniers=args.partage or None,
+                                          seed=args.seed or 0)
 
     if args.recherche:
         import recherche as _rech

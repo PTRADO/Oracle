@@ -135,13 +135,51 @@ th{color:var(--brume);font-weight:600;font-size:12px}
   align-items:center;justify-content:center;background:var(--verre-fort);
   border:1px solid var(--bord);font:700 13px "Bricolage Grotesque"}
 .mini-grille .b.or{color:var(--or);border-color:rgba(255,200,92,.45)}
+.mini-grille .b.touche{color:#0B1020;background:linear-gradient(150deg,#7FF7C4,#37C486);border-color:transparent}
+.mini-grille .b.or.touche{color:#3A2404;background:linear-gradient(150deg,#FFE2A0,#E5A93F)}
 .mini-grille .copier-mini{flex:0 0 auto;margin-left:auto;background:none;border:0;color:var(--brume);
   cursor:pointer;font:600 13px "Instrument Sans";padding:5px 7px;border-radius:8px}
 .mini-grille .copier-mini:hover{background:var(--verre-fort);color:var(--encre)}
 
-.verdict{padding:12px 14px;border-radius:12px;background:var(--verre-fort);margin-top:12px}
-.verdict b{color:var(--encre)}
 .c-vert{color:var(--vert)} .c-rouge{color:var(--rouge)} .c-ambre{color:var(--ambre)}
+
+/* ---------- résultat contre les vraies boules FDJ ---------- */
+/* Le même vocabulaire partout : une pastille par boule réellement sortie,
+   surlignée en vert quand la grille affichée l'avait cochée, et un verdict
+   sec — TAG « Perdant » ou le gain brut en euros, jamais un delta. */
+.reel{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap}
+.reel .s{width:24px;height:24px;border-radius:50%;display:inline-flex;
+  align-items:center;justify-content:center;flex:0 0 auto;
+  font:700 11.5px "Bricolage Grotesque";color:var(--brume);
+  background:var(--verre-fort);border:1px solid var(--bord)}
+.reel .s.or{color:var(--or);border-color:rgba(255,200,92,.45)}
+.reel .s.touche{color:#0B1020;background:linear-gradient(150deg,#7FF7C4,#37C486);
+  border-color:transparent}
+.reel .s.or.touche{background:linear-gradient(150deg,#FFE2A0,#E5A93F);color:#3A2404}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;white-space:nowrap;
+  font:700 12px "Bricolage Grotesque";letter-spacing:.03em}
+.tag.perdant{color:var(--brume);border:1px solid var(--bord);background:var(--verre)}
+.tag.gagne{color:#0B1020;background:linear-gradient(150deg,#7FF7C4,#37C486)}
+.vs-dernier{margin-top:16px;padding-top:14px;border-top:1px solid var(--bord);
+  display:flex;flex-direction:column;gap:8px;align-items:center;font-size:13px;color:var(--brume)}
+.vs-dernier .reel{justify-content:center}
+
+/* ---------- historique tirage par tirage ---------- */
+.histo-defile{max-height:430px;overflow-y:auto;margin-top:14px;
+  border:1px solid var(--bord);border-radius:14px;
+  -webkit-overflow-scrolling:touch}
+.histo-defile table{margin:0;font-size:13px}
+.histo-defile th{position:sticky;top:0;background:#0B0F1D;z-index:1}
+.histo-defile th,.histo-defile td{padding:8px 10px;vertical-align:middle}
+.histo-defile td:first-child{color:var(--brume);white-space:nowrap}
+
+/* ---------- tickets ---------- */
+.ticket{padding:12px 14px;margin:10px 0;border-radius:14px;
+  background:var(--verre);border:1px solid var(--bord)}
+.ticket-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  font:600 12px "Instrument Sans";color:var(--brume);
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.ticket .mini-grille{margin:4px 0 0}
 
 .alerte{padding:11px 15px;margin-bottom:14px;font-size:13.5px;border-radius:14px}
 .alerte.attention{color:var(--ambre);border:1px solid rgba(255,180,84,.45);background:rgba(255,180,84,.07)}
@@ -192,6 +230,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
 
   <section class="carte-grille verre" aria-labelledby="quand">
     <div class="boules" id="boules"></div>
+    <div class="vs-dernier" id="vs-grille"></div>
     <div class="actions">
       <button type="button" class="bouton" id="copier">Copier</button>
       <a class="bouton primaire" id="lien-fdj" target="_blank" rel="noopener">Jouer sur FDJ ↗</a>
@@ -204,7 +243,7 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
     <div class="corps" id="d-tickets"></div>
   </details>
 
-  <!-- 3 · HISTORIQUE DES GAINS ------------------------------------------- -->
+  <!-- 3 · L'HISTORIQUE, TIRAGE PAR TIRAGE -------------------------------- -->
   <section class="bloc verre" id="bloc-histo" hidden>
     <h2 id="titre-histo">Si tu avais joué</h2>
     <div class="ligne"><span>Misé</span><b id="h-mise">—</b></div>
@@ -214,34 +253,25 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
     <div id="h-detail"></div>
   </section>
 
-  <!-- 4 · SECTIONS REPLIÉES ---------------------------------------------- -->
-  <details class="verre">
-    <summary>Pourquoi ces numéros&nbsp;?</summary>
-    <div class="corps" id="d-numeros"></div>
-  </details>
-
+  <!-- 4 · LES NUMÉROS QUI SORTENT LE PLUS -------------------------------- -->
   <details class="verre">
     <summary>Les numéros qui sortent le plus</summary>
     <div class="corps" id="d-freq"></div>
   </details>
 
+  <!-- 5 · CE QUE ÇA RAPPORTE VRAIMENT ------------------------------------ -->
   <details class="verre">
-    <summary>Combien coûte le jeu&nbsp;?</summary>
-    <div class="corps" id="d-cout"></div>
-  </details>
-
-  <details class="verre">
-    <summary>Est-ce que ça marche&nbsp;?</summary>
-    <div class="corps" id="d-marche"></div>
-  </details>
-
-  <details class="verre">
-    <summary>D'où viennent les données</summary>
-    <div class="corps" id="d-donnees"></div>
+    <summary>Ce que cette grille rapporte vraiment</summary>
+    <div class="corps" id="d-partage"></div>
   </details>
 
   <footer class="verre">
-    <p><b id="pied-meta"></b></p>
+    <p><b>Site privé.</b> Si vous êtes tombé sur cette page, sachez qu'il s'agit
+      de notre outil interne, publié pour notre propre usage. Tout ce qui s'y
+      trouve peut être librement consulté et réutilisé, mais n'en tenez pas
+      compte pour jouer — et ne nous en veuillez pas si les résultats sont
+      mauvais : c'est notre cuisine interne.</p>
+    <p style="margin-top:8px"><b id="pied-meta"></b></p>
     <p style="margin-top:8px">Chaque grille garde exactement <b id="proba-txt"></b> de décrocher le jackpot. Aucune méthode ne change ce chiffre.</p>
     <p style="margin-top:8px">Jouer comporte des risques : endettement, isolement, dépendance.
       <b>09 74 75 13 13</b> (joueurs-info-service.fr).</p>
@@ -261,7 +291,27 @@ const $ = id => document.getElementById(id);
 const D = () => DONNEES[JEU];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const eur = n => n.toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2}) + " €";
-const ent = n => Math.round(n).toLocaleString("fr-FR");
+const jourFR = iso => new Date(iso+"T12:00:00Z").toLocaleDateString("fr-FR",{timeZone:"UTC"});
+
+/* Les vraies boules d'un tirage FDJ, avec en vert celles que la grille
+   affichée avait cochées. Même rendu partout : grille du haut, tickets,
+   historique. */
+function boulesReelles(nums, bonus, bons, bonusOk){
+  const okN = new Set(bons || []), okB = new Set(bonusOk || []);
+  return `<span class="reel">` +
+    nums.map(n=>`<span class="s${okN.has(n)?" touche":""}">${n}</span>`).join("") +
+    bonus.map(b=>`<span class="s or${okB.has(b)?" touche":""}">${b}</span>`).join("") +
+    `</span>`;
+}
+
+/* Le verdict d'une grille contre un tirage réel : TAG « Perdant », ou le
+   gain BRUT en euros — ce que le ticket a rapporté, pas le delta avec son
+   prix. Rang sans rapport publié : on montre au moins le rang. */
+function tagResultat(r){
+  if(r && r.rang && r.gain > 0) return `<span class="tag gagne">${eur(r.gain)}</span>`;
+  if(r && r.rang) return `<span class="tag gagne">rang ${r.rang}</span>`;
+  return `<span class="tag perdant">Perdant</span>`;
+}
 
 /* ---------- la grille du soir : toujours l'anti-partage ---------- */
 function grillePrincipale(){ return D().modes.anti.grilles[0]; }
@@ -297,17 +347,6 @@ async function copier(texte, bouton){
   }
 }
 
-/* ---------- espérance, calculée sur le VRAI jackpot du soir ---------- */
-function esperance(popRel){
-  const e = D().ev_params, m = D().meta;
-  if(!e) return null;
-  const J = m.jackpot || 0;
-  const p1 = 1 / e.p_jackpot_inv;
-  const partage = e.n_est * p1 * popRel;
-  const rend = (e.ev_fixe || 0) + p1 * J / (1 + partage);
-  return {rend, perte: e.prix - rend, prix: e.prix};
-}
-
 /* ---------- compte à rebours ---------- */
 function offsetParis(d){
   const s = new Intl.DateTimeFormat("fr-FR",{timeZone:"Europe/Paris",timeZoneName:"longOffset"}).format(d);
@@ -333,35 +372,17 @@ function rendreGrille(){
     g.numeros.map(n=>`<span class="boule">${n}</span>`).join("") +
     `<span class="plus">+</span>` +
     g.bonus.map(b=>`<span class="boule or">${b}</span>`).join("");
+  const t = D().dernier_tirage, vd = g.vs_dernier, bloc = $("vs-grille");
+  if(t && vd){
+    bloc.hidden = false;
+    bloc.innerHTML = `
+      <span>Au dernier tirage réel (${jourFR(t.date)}), cette grille aurait fait :</span>
+      <span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center">
+        ${boulesReelles(t.numeros, t.bonus, vd && vd.bons, vd && vd.bonus_ok)}
+        ${tagResultat(vd)}
+      </span>`;
+  }else bloc.hidden = true;
   $("lien-fdj").href = m.page_jeu;
-}
-
-/* Le coût moyen d'un ticket n'est PAS une propriété de la grille affichée :
-   c'est une propriété du jeu, identique pour toutes les combinaisons. Il vit
-   donc dans sa propre section, et non collé sous les numéros conseillés — où
-   il laissait croire qu'il jugeait ces numéros-là. Il reste affiché : une EV
-   honnête est la promesse centrale du produit. */
-function rendreCout(){
-  const m = D().meta, ev = esperance(grillePrincipale().pop_rel);
-  if(!ev){ $("d-cout").innerHTML = ""; return; }
-  const jack = m.jackpot
-    ? `<p>Jackpot annoncé pour ce tirage : <strong>${ent(m.jackpot/1e6)} M€</strong>,
-       relevé sur fdj.fr ce matin.</p>` : "";
-  $("d-cout").innerHTML = `
-    <p>Ces chiffres valent pour <strong>n'importe quelle grille</strong> de ce jeu,
-    pas seulement celle du haut. Aucune combinaison n'y échappe.</p>
-    <div class="defile"><table>
-      <tr><td>Un ticket coûte</td><td><b>${eur(ev.prix)}</b></td></tr>
-      <tr><td>Il rapporte en moyenne</td><td><b>${eur(ev.rend)}</b></td></tr>
-      <tr><td>Soit une perte moyenne de</td><td><b class="c-ambre">${eur(ev.perte)}</b></td></tr>
-    </table></div>
-    ${jack}
-    <p>La FDJ reverse environ la moitié des mises aux joueurs et garde le reste.
-    C'est le prix du jeu, connu d'avance et le même pour tout le monde.</p>
-    <p><strong>Ce que ça ne dit pas :</strong> ce n'est pas ce que tu vas perdre
-    ce soir. Tu perdras 2,20 € neuf fois sur dix, et parfois tu gagneras. La
-    moyenne ne décrit personne en particulier — elle décrit ce qui arrive quand
-    on joue longtemps.</p>`;
 }
 
 function rendreHistorique(){
@@ -374,47 +395,23 @@ function rendreHistorique(){
   $("h-gain").textContent = eur(v.gain);
   $("h-perte").textContent = eur(v.mise - v.gain);
   const n = v.n_gains || 0;
-  let txt = `Une grille à chaque tirage, à ${eur(prix)}, réglée aux vrais rapports FDJ. `;
-  txt += n ? `Tu aurais gagné <strong>${n} fois sur ${sim.n_tirages}</strong>.`
-           : `Tu n'aurais jamais rien gagné sur cette période.`;
-  const d = sim.dispersion_anti;
-  if(d){
-    txt += ` <br><br>Ce chiffre est <em>une</em> réalisation, pas une moyenne :
-      le générateur de grilles tire au sort. Avec la même stratégie et
-      ${d.n_graines} autres séries de grilles, le total va de
-      <strong>${eur(d.min)}</strong> à <strong>${eur(d.max)}</strong>
-      (moitié des cas entre ${eur(d.p10)} et ${eur(d.p90)}, médiane
-      ${eur(d.mediane)}). Le résultat reste perdant dans tous les cas —
-      seul le montant bouge.`;
-  }
-  txt += ` Sur la durée, ce compteur converge vers −46 % : c'est la part que garde la FDJ.`;
-  $("h-note").innerHTML = txt;
+  $("h-note").innerHTML =
+    `Une grille à chaque tirage, à ${eur(prix)}, réglée aux vrais rapports FDJ. ` +
+    (n ? `Tu aurais gagné <strong>${n} fois sur ${sim.n_tirages}</strong>. `
+       : `Tu n'aurais jamais rien gagné sur cette période. `) +
+    `Chaque ligne montre les boules réellement sorties — en vert, celles que
+    la grille du soir avait cochées — et le gain brut du ticket.`;
 
-  const gains = v.gains || [];
-  if(!gains.length){ $("h-detail").innerHTML = ""; return; }
-  const bonusNom = D().meta.bonus_nom;
+  const lignes = v.tirages || [];
+  if(!lignes.length){ $("h-detail").innerHTML = ""; return; }
   $("h-detail").innerHTML = `
-    <details style="margin-top:14px;border:1px solid var(--bord)">
-      <summary>Le détail des ${gains.length} gains</summary>
-      <div class="corps" style="padding-top:12px">
-        <div class="defile"><table>
-          <tr><th>tirage</th><th>trouvé</th><th>rang</th><th>gain</th></tr>` +
-          gains.map(g=>{
-            const b = g.bons.length, bb = g.bonus_ok.length;
-            const quoi = `${b} bon${b>1?"s":""}${bb?` + ${bonusNom}`:""}`;
-            return `<tr>
-              <td>${new Date(g.date+"T12:00:00Z").toLocaleDateString("fr-FR",{timeZone:"UTC"})}</td>
-              <td>${quoi}<br><span style="opacity:.65">${g.bons.join(" · ") || "—"}</span></td>
-              <td>${g.rang}</td>
-              <td><b>${eur(g.gain)}</b></td></tr>`;
-          }).join("") +
-        `</table></div>
-        <p style="margin-top:12px">Chaque ligne est un tirage réel : les numéros
-        trouvés, le rang officiel atteint, et le rapport FDJ exact de ce
-        soir-là. Total : <strong>${eur(v.gain)}</strong> pour
-        <strong>${eur(v.mise)}</strong> misés.</p>
-      </div>
-    </details>`;
+    <div class="histo-defile"><table>
+      <tr><th>tirage</th><th style="text-align:left">boules sorties</th><th>résultat</th></tr>` +
+      lignes.map(l=>`<tr>
+        <td>${jourFR(l.date)}</td>
+        <td style="text-align:left">${boulesReelles(l.sortis, l.bonus_sortis || [], l.bons, l.bonus_ok)}</td>
+        <td>${tagResultat(l)}</td></tr>`).join("") +
+    `</table></div>`;
 }
 
 function rendreAlertes(){
@@ -429,65 +426,6 @@ function rendreAlertes(){
 }
 
 /* ---------- sections repliées ---------- */
-function rendrePourquoi(){
-  const cal = D().calibration, m = D().meta, pop = D().verdicts.effet_anniversaire;
-  let h = `<p>Toutes les grilles ont exactement la même chance de sortir. Celle-ci
-    n'est pas « plus probable » — <strong>elle est moins partagée</strong>.</p>
-    <p>Quand un numéro très coché sort, il y a plus de gagnants, et le gain est
-    divisé entre plus de monde. Reste à savoir <em>lesquels</em> sont très
-    cochés. On ne le suppose pas : on le mesure.</p>`;
-  if(cal){
-    h += `<h3>Comment on le mesure</h3>
-      <p>La FDJ publie, pour chaque tirage, le nombre de gagnants <em>rang par
-      rang</em>. Or tous les rangs d'un même soir ont vu la même foule de
-      joueurs, mais pas le même nombre de numéros trouvés. En comparant les
-      rangs <strong>entre eux</strong>, l'affluence du soir s'annule d'elle-même
-      — jackpot, saison, publicité — et il ne reste que l'effet des numéros.</p>
-      <p>Et surtout : c'est la FDJ qui tire les numéros au sort. La chose que
-      l'on mesure est donc tirée à pile ou face par quelqu'un d'autre, ce qui
-      exclut qu'un facteur caché explique le résultat. C'est une expérience
-      randomisée, pas une corrélation trouvée après coup.</p>
-      <p>Résultat sur <strong>${cal.n_tirages} tirages</strong>
-      (${cal.rangs_utilises ? cal.rangs_utilises.length : "plusieurs"} rangs
-      exploités, ${cal.n_significatifs}/${m.n_max} numéros au-dessus du bruit) :</p>
-      <div class="puces">` +
-      cal.top_surjoues.map(n=>`<span class="puce sur">${n}</span>`).join("") +
-      `</div><p style="margin-top:-4px">↑ les plus joués — à éviter</p>
-      <div class="puces">` +
-      cal.top_delaisses.map(n=>`<span class="puce del">${n}</span>`).join("") +
-      `</div><p style="margin-top:-4px">↑ les délaissés — ceux qu'on privilégie</p>
-      <p>Les dates de naissance ressortent d'elles-mêmes : les petits numéros
-      dominent la première liste, et ceux de 1 à 12 — jouables comme jour
-      <em>et</em> comme mois — plus encore que les autres. Personne ne l'a
-      écrit dans le programme, c'est le calcul qui le rend.</p>`;
-    if(cal.theta){
-      const t = cal.theta, sgn = v => (v > 0 ? "+" : "") + v.toFixed(2);
-      h += `<h3>Ce qu'un simple classement ne voit pas</h3>
-        <p>Les joueurs ne cochent pas des numéros indépendamment : ils cochent
-        des <em>combinaisons</em>. On mesure donc aussi les affinités entre
-        numéros d'une même grille.</p>
-        <ul>
-        <li>Deux numéros de date cochés ensemble : <b>${sgn(t["date_31"])}</b>
-          — encore plus partagé que la somme des deux pris séparément.</li>
-        <li>Deux numéros qui se suivent (12 et 13) : <b>${sgn(t["consecutifs"])}</b>
-          — les joueurs les <em>évitent</em>, c'est donc une bonne affaire.</li>
-        <li>Deux numéros au-dessus de 31 : <b>${sgn(t["hauts_31"])}</b>
-          — et c'est la surprise : jouer <em>uniquement</em> des grands numéros
-          est une stratégie déjà encombrée, parce que c'est le conseil que tout
-          le monde donne. La grille proposée en tient compte.</li>
-        </ul>`;
-    }
-  }
-  if(pop) h += `<p style="opacity:.75;font-size:.92em">Contrôle indépendant :
-    la corrélation brute entre « numéros ≤ 31 sortis » et « nombre de gagnants »
-    vaut <strong>r = ${pop.r > 0 ? "+" : ""}${pop.r}</strong> sur ${pop.n} tirages.
-    Elle va dans le même sens, mais c'est la mesure rang par rang ci-dessus qui
-    sert réellement à construire les grilles.</p>`;
-  h += `<p><strong>Ce que ça change concrètement :</strong> rien sur tes chances de
-    gagner. Uniquement sur le montant, et seulement si tu gagnes.</p>`;
-  $("d-numeros").innerHTML = h;
-}
-
 function rendreFrequences(){
   const f = D().verdicts.frequences, box = $("d-freq");
   if(!f){ box.innerHTML = "<p>Pas assez de tirages pour ce tableau.</p>"; return; }
@@ -556,137 +494,125 @@ function rendreFrequences(){
     ${eur(e.gain_hasard_min)} et ${eur(e.gain_hasard_max)}.</p>`;
 }
 
-function rendreMarche(){
-  const v = D().verdicts, bt = v.backtest, rc = v.recherche, c2 = v.chi2, tj = v.trj;
-  let h = `<p>La réponse honnête est <strong>non</strong>, et c'est mesuré à chaque
-    mise à jour plutôt qu'affirmé.</p>`;
+function rendrePartage(){
+  const el = D().elasticite, vm = (D().verdicts||{}).valeur_modes, box = $("d-partage");
+  if(!el || !vm){ box.innerHTML = "<p>Pas encore mesuré sur ce jeu.</p>"; return; }
+  const prix = D().meta.prix;
+  const pct = v => (v >= 0 ? "+" : "") + v.toFixed(2) + " %";
 
-  if(rc){
-    const r = rc.reel, nul = rc.nul;
-    h += `<h3>On a cherché la meilleure formule possible</h3>
-      <p>${rc.budget_par_recherche} combinaisons de méthodes testées sur
-      ${rc.n_tirages_evalues} tirages : fréquences, retards, moyennes mobiles,
-      transitions, paires, voisins… La meilleure est ensuite jugée sur des
-      tirages qu'elle n'a <em>jamais vus</em>.</p>
-      <div class="defile"><table>
-        <tr><th></th><th>sur le passé connu</th><th>sur l'inconnu</th></tr>
-        <tr><td>Vraies données</td><td>${r.score_entrainement}</td><td><b>${r.score_validation}</b></td></tr>
-        <tr><td>Données mélangées</td><td>${nul.entrainement_moyen}</td><td>${nul.score_validation_moyen}</td></tr>
-        <tr><td>Pur hasard</td><td>${rc.theorique}</td><td>${rc.theorique}</td></tr>
-      </table></div>
-      <p style="margin-top:10px">Chiffres = nombre de bons numéros par tirage.
-      La ligne « données mélangées » est le témoin : les mêmes tirages, dans le
-      désordre, donc sans aucune régularité possible. La formule y brille tout
-      autant sur le passé — <strong>la performance apparente vient de la
-      recherche, pas des tirages</strong>.</p>
-      <div class="verdict">${esc(rc.verdict)}</div>`;
-  }
+  // les rangs qui pèsent, du plus lourd au plus léger
+  const rangs = Object.entries(el.rangs)
+    .map(([r, v]) => ({r: +r, ...v}))
+    .sort((a, b) => b.part_ev - a.part_ev);
+  const pl = el.placebo;
+  const fixes = Object.entries(el.rangs_a_prix_fixe || {});
 
-  if(bt){
-    const ecart = bt.modele - bt.theorique;
-    h += `<h3>Le folklore, rejoué en aveugle</h3>
-      <p>${bt.n_tests} tirages rejoués un par un, sans connaître la suite :
-      les méthodes classiques (numéros chauds, retards) obtiennent
-      <strong>${bt.modele.toFixed(4)}</strong> bon numéro par tirage, contre
-      <strong>${bt.theorique.toFixed(4)}</strong> attendu par pur hasard.
-      Écart : <span class="c-ambre">${ecart>=0?"+":""}${ecart.toFixed(4)}</span> — dans le bruit.</p>`;
-  }
+  box.innerHTML = `
+    <h3>Le partage ne concerne pas que le jackpot</h3>
+    <p>Tous les rangs de gain se partagent : la cagnotte de chaque rang est
+    divisée entre ceux qui l'ont trouvé. Si tu joues des numéros que personne
+    ne joue, tu ne gagnes pas <em>plus souvent</em> — ta chance ne bouge pas
+    d'un poil — mais tu encaisses <strong>plus à chaque fois</strong>.</p>
+    <p>Et ça, contrairement au jackpot, tu le vois de ton vivant : au Loto, un
+    rang tombe environ <strong>12 fois par an</strong>.</p>
 
-  if(c2){
-    h += `<h3>Et si les boules étaient truquées&nbsp;?</h3>
-      <p>Ce serait le seul avantage réellement possible, alors on surveille :
-      test du χ² à <strong>${c2.chi2}</strong> pour un seuil d'alerte de ${c2.seuil_5pct}.
-      ${c2.biais_detecte ? `<span class="c-ambre">Au-dessus du seuil — à surveiller.</span>`
-        : `Les boules sont équilibrées. Aucun défaut exploitable.`}</p>`;
-  }
-  if(tj){
-    const prix = D().meta.prix;
-    h += `<h3>«&nbsp;50&nbsp;% reversés aux joueurs&nbsp;»&nbsp;: vrai pour le jeu, faux pour toi</h3>
-      <p>Recomposé sur <strong>${tj.n_tirages}</strong> tirages, à partir des rapports
-      et des nombres de gagnants publiés par la FDJ&nbsp;:</p>
-      <ul>
-        <li>retour total du jeu&nbsp;: <strong>${(tj.trj_total*100).toFixed(1)}&nbsp;%</strong>
-            — c'est bien le chiffre annoncé&nbsp;;</li>
-        <li>dont <strong>${(tj.part_jackpot*100).toFixed(1)}&nbsp;%</strong> de la cagnotte
-            partent dans le seul rang&nbsp;1&nbsp;;</li>
-        <li>retour <strong>hors jackpot</strong>&nbsp;:
-            <strong class="c-ambre">${(tj.trj_hors_jackpot*100).toFixed(1)}&nbsp;%</strong>,
-            soit ${(prix*tj.trj_hors_jackpot).toFixed(2)}&nbsp;€ rendus par tranche de
-            ${prix.toFixed(2)}&nbsp;€.</li>
-      </ul>
-      <p>La moitié du «&nbsp;50&nbsp;%&nbsp;» dort dans un jackpot qu'un joueur d'un
-      ticket par tirage ne touchera jamais. Ce que tu récupères vraiment, c'est la
-      dernière ligne — et c'est pour ça que les gains paraissent toujours plus
-      maigres que promis.</p>`;
-  }
-  h += `<p><strong>Alors pourquoi ce site&nbsp;?</strong> Pour la seule chose qui
-    résiste à la mesure : éviter les numéros que tout le monde joue, et savoir
-    exactement ce qu'un ticket coûte.</p>`;
-  $("d-marche").innerHTML = h;
+    <h3>Mesuré sur les rapports réels de la FDJ</h3>
+    <p>Pour chaque rang, de combien le rapport baisse quand une combinaison
+    très jouée sort. Plus le rang demande de bons numéros, plus il y est
+    sensible — c'est la signature du partage.</p>
+    <div class="defile"><table>
+      <tr><th>rang</th><th>bons n°</th><th>sensibilité</th><th>part des gains</th></tr>` +
+    rangs.map(v => `<tr>
+        <td>${v.r}</td>
+        <td>${v.m.toFixed(v.m % 1 ? 2 : 0)}</td>
+        <td>${v.beta.toFixed(3)}</td>
+        <td>${(100 * v.part_ev).toFixed(1)} %</td></tr>`).join("") +
+    fixes.map(([r, part]) => `<tr style="opacity:.6">
+        <td>${r}</td><td>—</td><td>prix fixe</td>
+        <td>${(100 * part).toFixed(1)} %</td></tr>`).join("") + `
+    </table></div>` +
+    (fixes.length ? `<p style="opacity:.75;font-size:.92em">Les rangs à
+    « prix fixe » paient toujours la même somme, quoi qu'il arrive. Aucune
+    stratégie ne les améliore, et ils comptent dans le total : les cacher
+    gonflerait le chiffre du bas.</p>` : "") +
+    (pl ? `<p style="opacity:.75;font-size:.92em">Contrôle : nous rejouons
+    tout le calcul sur des tirages dont nous avons <strong>mélangé les
+    numéros</strong>. Si notre méthode inventait cet effet, il apparaîtrait
+    aussi là. Résultat : ${pl.n_significatifs} résultat${pl.n_significatifs > 1 ? "s" : ""}
+    sur ${pl.n_coefficients}, le plus fort à ${pl.t_max} — contre des mesures
+    réelles jusqu'à 87 sur les vrais tirages.</p>` : "") + `
+
+    <h3>Ce que ça change, en euros</h3>
+    <div class="defile"><table>
+      <tr><th>si tu joues…</th><th>partage</th><th>sur ta mise</th></tr>` +
+    ["anti", "hybride", "pronostic"].filter(m => vm[m]).map(m => {
+      const v = vm[m], nom = {anti: "les numéros les plus délaissés (cette page)",
+                              hybride: "un mélange", pronostic: "les numéros « qui sortent »"}[m];
+      return `<tr><td>${nom}</td><td>×${v.pop_rel_moyen.toFixed(2)}</td>
+        <td class="${v.gain_pct_mise >= 0 ? "c-vert" : "c-rouge"}">
+        <b>${pct(v.gain_pct_mise)}</b></td></tr>`;
+    }).join("") + `
+    </table></div>
+    <p>Jouer « les numéros qui sortent » coûte de l'argent : ce sont ceux que
+    tout le monde coche, donc ceux qu'on partage le plus. C'est la seule
+    raison — ils ne sortent ni plus ni moins souvent que les autres.</p>
+
+    <h3>Avant d'en tirer une conclusion</h3>
+    <p>Ce levier récupère quelques points sur la maison. Il <strong>n'inverse
+    rien</strong> : l'espérance reste largement négative, parce que la FDJ ne
+    reverse qu'environ la moitié des mises. Aucune méthode ne changera ça, et
+    surtout pas celle-ci.</p>
+    <p style="opacity:.75;font-size:.92em">Le chiffre annoncé est le plus
+    prudent des deux que nous calculons : nos grilles sont plus délaissées que
+    tout ce que la FDJ a jamais tiré, et nous refusons de promettre au-delà de
+    ce que les données couvrent.</p>`;
 }
 
 function rendreTickets(){
   const g = D().modes.anti.grilles, sys = D().systeme, prix = D().meta.prix;
-  let h = `<p>Si tu joues plusieurs tickets, prends des grilles différentes
-    plutôt que la même plusieurs fois : ça ne change pas tes chances, mais ça
-    évite de tout miser sur une seule combinaison.</p>`;
-  h += g.map((x,i)=>`<div class="mini-grille">` +
-      x.numeros.map(n=>`<span class="b">${n}</span>`).join("") +
-      x.bonus.map(b=>`<span class="b or">${b}</span>`).join("") +
-      `<button type="button" class="copier-mini" data-i="${i}">Copier</button></div>`).join("");
+  const t = D().dernier_tirage;
+  const miniGrille = (x, copier) => {
+    const vd = x.vs_dernier || {}, okN = new Set(vd.bons || []), okB = new Set(vd.bonus_ok || []);
+    return `<div class="mini-grille">` +
+      x.numeros.map(n=>`<span class="b${okN.has(n)?" touche":""}">${n}</span>`).join("") +
+      x.bonus.map(b=>`<span class="b or${okB.has(b)?" touche":""}">${b}</span>`).join("") +
+      (copier !== undefined
+        ? `<button type="button" class="copier-mini" data-i="${copier}">Copier</button>` : "") +
+      `</div>`;
+  };
+  let h = `<p>Des grilles différentes plutôt que la même plusieurs fois : ça ne
+    change pas tes chances, mais ça évite de tout miser sur une seule
+    combinaison.</p>`;
+  if(t) h += `<p style="margin-top:8px">Le tag de chaque ticket montre ce qu'il
+    aurait fait au dernier tirage réel (${jourFR(t.date)} :
+    ${t.numeros.join(" ")} + ${t.bonus.join(" ")}), en vert les numéros
+    trouvés.</p>`;
+  h += g.map((x,i)=>`<div class="ticket">
+      <div class="ticket-tete"><span>Ticket ${i+1} · ${eur(prix)}</span>${tagResultat(x.vs_dernier)}</div>
+      ${miniGrille(x, i)}
+    </div>`).join("");
   h += `<p style="margin-top:10px">Les ${g.length} grilles : <strong>${eur(g.length*prix)}</strong>.</p>`;
 
   if(sys){
     h += `<h3>Le système, si tu veux couvrir plus large</h3>
       <p>Au lieu de cocher 5 numéros, on en choisit ${sys.pool.length} et on les
-      répartit sur ${sys.grilles.length} tickets. La promesse est
-      <strong>mathématique, pas statistique</strong> : si les 5 numéros gagnants
-      se trouvent tous parmi ces ${sys.pool.length}-là, alors au moins un de tes
-      tickets en aura au minimum 3 bons. Le moteur le vérifie en testant toutes
-      les combinaisons possibles avant d'afficher quoi que ce soit.</p>
+      répartit sur ${sys.grilles.length} tickets : si les 5 numéros gagnants se
+      trouvent tous parmi ces ${sys.pool.length}-là, au moins un des tickets en
+      aura au minimum 3 bons — c'est garanti, et vérifié par le moteur.</p>
       <div class="puces">` + sys.pool.map(n=>`<span class="puce">${n}</span>`).join("") + `</div>`;
-    h += sys.grilles.map(x=>`<div class="mini-grille">` +
-        x.numeros.map(n=>`<span class="b">${n}</span>`).join("") +
-        x.bonus.map(b=>`<span class="b or">${b}</span>`).join("") + `</div>`).join("");
+    h += sys.grilles.map((x,i)=>`<div class="ticket">
+        <div class="ticket-tete"><span>Système ${i+1} · ${eur(prix)}</span>${tagResultat(x.vs_dernier)}</div>
+        ${miniGrille(x)}
+      </div>`).join("");
     h += `<p style="margin-top:8px">Coût : <strong>${eur(sys.cout)}</strong>.
-      Attention : couvrir plus large ne rend pas gagnant, ça répartit seulement
-      la mise. L'espérance reste la même par ticket.</p>`;
+      Couvrir plus large ne rend pas gagnant, ça répartit seulement la mise.</p>`;
   }
   $("d-tickets").innerHTML = h;
 }
 
-function rendreDonnees(){
-  const m = D().meta, h2 = D().historique;
-  let h = `<p>Tout vient des archives officielles publiées par la FDJ, retéléchargées
-    chaque matin. Aucune donnée n'est saisie à la main.</p>
-    <p><strong>${m.n_tirages} tirages</strong> analysés, du
-    ${new Date(m.periode_debut+"T12:00:00Z").toLocaleDateString("fr-FR",{timeZone:"UTC"})} au
-    ${new Date(m.periode_fin+"T12:00:00Z").toLocaleDateString("fr-FR",{timeZone:"UTC"})}.</p>`;
-  if((m.archives||[]).length)
-    h += `<p>Archives concaténées : ${m.archives.map(esc).join(" · ")}.</p>`;
-  if(m.epoques_exclues && Object.keys(m.epoques_exclues).length){
-    h += `<h3>Ce qu'on écarte volontairement</h3><p>` +
-      Object.entries(m.epoques_exclues).map(([k,v])=>`${esc(k)} — ${esc(v)}`).join("<br>") + `</p>`;
-  }
-  if(h2 && h2.cumul && Object.keys(h2.cumul).length){
-    h += `<h3>Le grand livre</h3><p>Chaque grille annoncée est verrouillée avant le
-      tirage, puis réglée aux vrais rapports FDJ. Rien n'est réécrit après coup.</p>
-      <div class="defile"><table><tr><th>mode</th><th>tirages</th><th>misé</th><th>gagné</th><th>ROI</th></tr>` +
-      Object.entries(h2.cumul).map(([k,c])=>`<tr><td>${esc(k)}</td><td>${c.tirages_regles}</td>
-        <td>${eur(c.mise)}</td><td>${eur(c.gain)}</td>
-        <td class="${c.roi_pct>=0?"c-vert":"c-ambre"}">${c.roi_pct} %</td></tr>`).join("") +
-      `</table></div>`;
-  } else if(h2 && (h2.en_attente||[]).length){
-    h += `<h3>Le grand livre</h3><p>Il démarre : la grille annoncée pour le
-      ${h2.en_attente.map(esc).join(", ")} est verrouillée et sera réglée aux vrais
-      rapports FDJ dès que le tirage tombera.</p>`;
-  }
-  $("d-donnees").innerHTML = h;
-}
-
 function rendreTout(){
-  rendreAlertes(); rendreGrille(); rendreTickets(); rendreHistorique(); rendreCout();
-  rendrePourquoi(); rendreFrequences(); rendreMarche(); rendreDonnees();
+  rendreAlertes(); rendreGrille(); rendreTickets(); rendreHistorique();
+  rendreFrequences(); rendrePartage();
   const m = D().meta;
   $("proba-txt").textContent = "1 chance sur " + m.proba_jackpot.toLocaleString("fr-FR");
   $("pied-meta").textContent =

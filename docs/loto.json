@@ -9,14 +9,14 @@
   "bonus_max": 10,
   "n_max": 49,
   "prix": 2.2,
-  "genere_le": "2026-08-06T21:33:30",
+  "genere_le": "2026-08-07T08:47:56",
   "n_tirages": 1474,
   "periode_debut": "2017-03-06",
   "periode_fin": "2026-08-05",
   "prochain_tirage": "2026-08-08",
   "prochain_jour": "samedi",
   "proba_jackpot": 19068840,
-  "jackpot": 7000000.0,
+  "jackpot": 8000000.0,
   "page_jeu": "https://www.fdj.fr/jeux-de-tirage/loto",
   "alertes": [
    {
@@ -11440,162 +11440,7 @@
     "pop_rel_moyen": 0.221
    }
   },
-  "partage": {
-   "n_tirages": 600,
-   "depart": "2022-10-08",
-   "rang_placebo": 9,
-   "n_repetitions": 12,
-   "strategies": {
-    "anti": {
-     "rangs": {
-      "6": {
-       "n_tirages": 5,
-       "rapport_moyen": 25.82,
-       "rapport_reference": 20.8,
-       "ecart_pct": 27.12,
-       "t": 2.23,
-       "placebo": false
-      },
-      "8": {
-       "n_tirages": 47,
-       "rapport_moyen": 4.83,
-       "rapport_reference": 4.4,
-       "ecart_pct": 9.95,
-       "t": 4.55,
-       "placebo": false
-      }
-     },
-     "bonus_neutre": false,
-     "n_grilles": 600,
-     "mise": 1320.0,
-     "gain": 526.2,
-     "roi_pct": -60.1,
-     "surcote_pct": 14.47
-    },
-    "anti_boules": {
-     "rangs": {
-      "6": {
-       "n_tirages": 5,
-       "rapport_moyen": 25.82,
-       "rapport_reference": 20.8,
-       "ecart_pct": 27.12,
-       "t": 2.23,
-       "placebo": false
-      },
-      "7": {
-       "n_tirages": 33,
-       "rapport_moyen": 11.12,
-       "rapport_reference": 10.4,
-       "ecart_pct": 6.48,
-       "t": 1.37,
-       "placebo": false
-      },
-      "8": {
-       "n_tirages": 50,
-       "rapport_moyen": 4.85,
-       "rapport_reference": 4.4,
-       "ecart_pct": 10.37,
-       "t": 4.9,
-       "placebo": false
-      }
-     },
-     "bonus_neutre": true,
-     "n_grilles": 7200,
-     "mise": 15840.0,
-     "gain": 6423.1,
-     "roi_pct": -59.5,
-     "surcote_pct": 10.62
-    },
-    "hasard": {
-     "rangs": {
-      "6": {
-       "n_tirages": 42,
-       "rapport_moyen": 20.67,
-       "rapport_reference": 20.8,
-       "ecart_pct": -0.43,
-       "t": -0.12,
-       "placebo": false
-      },
-      "7": {
-       "n_tirages": 41,
-       "rapport_moyen": 9.92,
-       "rapport_reference": 10.4,
-       "ecart_pct": -3.6,
-       "t": -0.9,
-       "placebo": false
-      },
-      "8": {
-       "n_tirages": 312,
-       "rapport_moyen": 4.38,
-       "rapport_reference": 4.4,
-       "ecart_pct": -0.29,
-       "t": -0.49,
-       "placebo": false
-      }
-     },
-     "bonus_neutre": true,
-     "n_grilles": 7200,
-     "mise": 15840.0,
-     "gain": 4782.1,
-     "roi_pct": -69.8,
-     "surcote_pct": -1.16
-    },
-    "anniversaire": {
-     "rangs": {
-      "6": {
-       "n_tirages": 39,
-       "rapport_moyen": 17.1,
-       "rapport_reference": 20.8,
-       "ecart_pct": -17.77,
-       "t": -5.24,
-       "placebo": false
-      },
-      "7": {
-       "n_tirages": 54,
-       "rapport_moyen": 9.75,
-       "rapport_reference": 10.4,
-       "ecart_pct": -5.83,
-       "t": -1.71,
-       "placebo": false
-      },
-      "8": {
-       "n_tirages": 312,
-       "rapport_moyen": 4.17,
-       "rapport_reference": 4.4,
-       "ecart_pct": -5.02,
-       "t": -8.83,
-       "placebo": false
-      }
-     },
-     "bonus_neutre": true,
-     "n_grilles": 7200,
-     "mise": 15840.0,
-     "gain": 5152.1,
-     "roi_pct": -67.5,
-     "surcote_pct": -9.19
-    },
-    "populaire": {
-     "rangs": {
-      "8": {
-       "n_tirages": 43,
-       "rapport_moyen": 3.74,
-       "rapport_reference": 4.4,
-       "ecart_pct": -14.41,
-       "t": -7.12,
-       "placebo": false
-      }
-     },
-     "bonus_neutre": false,
-     "n_grilles": 600,
-     "mise": 1320.0,
-     "gain": 330.1,
-     "roi_pct": -75.0,
-     "surcote_pct": -14.94
-    }
-   },
-   "levier_bonus_pct": 3.85,
-   "note": "rapport encaissé sachant le rang touché ; la probabilité de toucher ne dépend d'aucune stratégie"
-  },
+  "partage": null,
   "recherche": {
    "n_tirages_evalues": 1414,
    "theorique": 0.5102,

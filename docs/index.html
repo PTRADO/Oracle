@@ -168,6 +168,22 @@ th{color:var(--brume);font-weight:600;font-size:12px}
 .histo-defile{max-height:430px;overflow-y:auto;margin-top:14px;
   border:1px solid var(--bord);border-radius:14px;
   -webkit-overflow-scrolling:touch}
+/* La barre native (bloc blanc pleine hauteur) jure avec le verre : un fil de
+   5 px, arrondi, à peine visible, qui se révèle au survol. ATTENTION : dans
+   Chrome ≥ 121, poser `scrollbar-width`/`scrollbar-color` DÉSACTIVE les
+   styles ::-webkit-scrollbar et ramène la barre native — c'est exactement le
+   bug qu'on corrige. Les propriétés standard ne s'appliquent donc QUE là où
+   ::-webkit-scrollbar n'existe pas (Firefox). */
+.histo-defile::-webkit-scrollbar{width:5px;background:transparent}
+.histo-defile::-webkit-scrollbar-track{background:transparent;margin:12px 4px}
+.histo-defile::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:99px}
+.histo-defile:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22)}
+.histo-defile::-webkit-scrollbar-thumb:active{background:rgba(255,255,255,.34)}
+.histo-defile::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){
+  .histo-defile{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+}
+.bilan-histo{margin-top:14px}
 .histo-defile table{margin:0;font-size:13px}
 .histo-defile th{position:sticky;top:0;background:#0B0F1D;z-index:1}
 .histo-defile th,.histo-defile td{padding:8px 10px;vertical-align:middle}
@@ -246,11 +262,15 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
   <!-- 3 · L'HISTORIQUE, TIRAGE PAR TIRAGE -------------------------------- -->
   <section class="bloc verre" id="bloc-histo" hidden>
     <h2 id="titre-histo">Si tu avais joué</h2>
-    <div class="ligne"><span>Misé</span><b id="h-mise">—</b></div>
-    <div class="ligne"><span>Récupéré</span><b id="h-gain">—</b></div>
-    <div class="ligne total"><span>Perdu</span><b id="h-perte">—</b></div>
-    <p class="note" id="h-note"></p>
+    <p class="note" style="margin-top:0" id="h-note"></p>
     <div id="h-detail"></div>
+    <!-- le bilan APRÈS le détail : on parcourt l'historique, puis on lit
+         l'addition — pas l'inverse -->
+    <div class="bilan-histo">
+      <div class="ligne"><span>Misé</span><b id="h-mise">—</b></div>
+      <div class="ligne"><span>Récupéré</span><b id="h-gain">—</b></div>
+      <div class="ligne total"><span>Perdu</span><b id="h-perte">—</b></div>
+    </div>
   </section>
 
   <!-- 4 · LES NUMÉROS QUI SORTENT LE PLUS -------------------------------- -->
@@ -507,14 +527,62 @@ function rendrePartage(){
   const pl = el.placebo;
   const fixes = Object.entries(el.rangs_a_prix_fixe || {});
 
-  box.innerHTML = `
-    <h3>Le partage ne concerne pas que le jackpot</h3>
+  // ---- LE CHIFFRE QUI COMPTE : si ça tombe, tu gardes combien ? ----------
+  // Il suffit d'une fois. C'est l'unique événement pour lequel on joue, et
+  // c'est là que l'anti-partage frappe le plus fort : au rang 1 il faut les
+  // 5 numéros, donc la combinaison sortie EST la grille — la popularité s'y
+  // transmet sans la moindre atténuation. Ne pas afficher ce montant, c'était
+  // taire la seule ligne qui intéresse celui qui joue pour ça.
+  const ev = D().ev_params, jackpot = D().meta.jackpot;
+  const g0 = grillePrincipale();
+  let siCaTombe = "";
+  if(ev && jackpot && g0 && typeof g0.pop_rel === "number"){
+    const p1 = 1 / ev.p_jackpot_inv;
+    const part = pr => jackpot / (1 + ev.n_est * p1 * pr);
+    const seul = pr => Math.exp(-ev.n_est * p1 * pr);
+    const gPro = ((D().modes.pronostic || {}).grilles || [])[0];
+    const gain = part(g0.pop_rel) - part(1);
+    // gros montants : les centimes n'apportent rien et cassent la lecture
+    const gros = n => Math.round(n).toLocaleString("fr-FR") + " €";
+    siCaTombe = `
+    <h3>Si ça tombe, tu gardes combien ?</h3>
+    <p>C'est la seule fois qui compte, et c'est là que ça se joue le plus fort :
+    pour décrocher le gros lot il faut les ${g0.numeros.length} numéros, donc
+    <strong>tous ceux qui les ont cochés partagent avec toi</strong>. Moins ils
+    sont joués, moins vous êtes à table.</p>
+    <div class="defile"><table>
+      <tr><th>avec…</th><th>tu gardes</th><th>seul(e) ?</th></tr>
+      <tr><td>une grille quelconque</td><td>${gros(part(1))}</td>
+        <td>${(100 * seul(1)).toFixed(1)} %</td></tr>
+      <tr><td><b>cette grille</b></td>
+        <td class="c-vert"><b>${gros(part(g0.pop_rel))}</b></td>
+        <td class="c-vert"><b>${(100 * seul(g0.pop_rel)).toFixed(1)} %</b></td></tr>` +
+      // La grille « pronostic » du soir n'est pas toujours plus populaire que
+      // la moyenne — elle l'est en général, pas systématiquement. On colore
+      // donc selon ce qu'elle vaut CE SOIR, au lieu de la peindre en rouge par
+      // principe : la page dirait autre chose que ses propres chiffres.
+      (gPro ? `<tr><td>les numéros « qui sortent »</td>
+        <td class="${part(gPro.pop_rel) < part(1) ? "c-rouge" : ""}">${gros(part(gPro.pop_rel))}</td>
+        <td>${(100 * seul(gPro.pop_rel)).toFixed(1)} %</td></tr>` : "") + `
+    </table></div>
+    <p>Sur un gros lot de ${gros(jackpot)}, cette grille te laisse
+    <strong class="c-vert">${gros(gain)} de plus</strong> qu'une grille prise au
+    hasard. Ta <em>chance</em> de l'avoir, elle, ne change pas d'un pouce — et
+    elle reste minuscule. Mais le jour où ça tombe, c'est ce montant-là qui
+    change.</p>`;
+  }
+
+  box.innerHTML = siCaTombe + `
+    <h3>Et pas seulement sur le gros lot</h3>
     <p>Tous les rangs de gain se partagent : la cagnotte de chaque rang est
     divisée entre ceux qui l'ont trouvé. Si tu joues des numéros que personne
     ne joue, tu ne gagnes pas <em>plus souvent</em> — ta chance ne bouge pas
     d'un poil — mais tu encaisses <strong>plus à chaque fois</strong>.</p>
-    <p>Et ça, contrairement au jackpot, tu le vois de ton vivant : au Loto, un
-    rang tombe environ <strong>12 fois par an</strong>.</p>
+    <p>Et ça, contrairement au gros lot, tu le vois de ton vivant : en jouant
+    chaque tirage, un rang tombe environ
+    <strong>${D().meta.jeu === "loto" ? 12 : 8} fois par an</strong>. C'est ce
+    qui nous permet de <em>vérifier</em> que la méthode marche, au lieu de te
+    demander de nous croire.</p>
 
     <h3>Mesuré sur les rapports réels de la FDJ</h3>
     <p>Pour chaque rang, de combien le rapport baisse quand une combinaison

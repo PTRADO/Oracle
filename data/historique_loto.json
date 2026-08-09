@@ -237,7 +237,15 @@
        2
       ],
       "score": 68.4,
-      "pop_rel": 0.265
+      "pop_rel": 0.265,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -251,7 +259,15 @@
        1
       ],
       "score": 68.3,
-      "pop_rel": 0.274
+      "pop_rel": 0.274,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -265,7 +281,16 @@
        10
       ],
       "score": 67.7,
-      "pop_rel": 0.276
+      "pop_rel": 0.276,
+      "reglement": {
+       "bons": [
+        6,
+        36
+       ],
+       "bonus_ok": [],
+       "rang": 8,
+       "gain": 4.5
+      }
      },
      {
       "numeros": [
@@ -279,7 +304,15 @@
        2
       ],
       "score": 66.8,
-      "pop_rel": 0.248
+      "pop_rel": 0.248,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      }
     ],
     "pronostic": [
@@ -295,7 +328,15 @@
        3
       ],
       "score": 69.2,
-      "pop_rel": 1.635
+      "pop_rel": 1.635,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [
+        3
+       ],
+       "rang": 9,
+       "gain": 2.2
+      }
      },
      {
       "numeros": [
@@ -309,7 +350,13 @@
        2
       ],
       "score": 69.0,
-      "pop_rel": 1.19
+      "pop_rel": 1.19,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -323,7 +370,15 @@
        7
       ],
       "score": 68.8,
-      "pop_rel": 0.733
+      "pop_rel": 0.733,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -337,7 +392,17 @@
        3
       ],
       "score": 68.8,
-      "pop_rel": 1.705
+      "pop_rel": 1.705,
+      "reglement": {
+       "bons": [
+        6
+       ],
+       "bonus_ok": [
+        3
+       ],
+       "rang": 9,
+       "gain": 2.2
+      }
      }
     ],
     "anti": [
@@ -353,7 +418,15 @@
        1
       ],
       "score": 79.8,
-      "pop_rel": 0.214
+      "pop_rel": 0.214,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -367,7 +440,15 @@
        10
       ],
       "score": 79.1,
-      "pop_rel": 0.219
+      "pop_rel": 0.219,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -381,7 +462,16 @@
        2
       ],
       "score": 78.5,
-      "pop_rel": 0.225
+      "pop_rel": 0.225,
+      "reglement": {
+       "bons": [
+        36,
+        37
+       ],
+       "bonus_ok": [],
+       "rang": 8,
+       "gain": 4.5
+      }
      },
      {
       "numeros": [
@@ -395,7 +485,15 @@
        1
       ],
       "score": 78.1,
-      "pop_rel": 0.227
+      "pop_rel": 0.227,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      }
     ]
    },
@@ -424,7 +522,15 @@
       "bonus": [
        2
       ],
-      "pop_rel": 0.177
+      "pop_rel": 0.177,
+      "reglement": {
+       "bons": [
+        36
+       ],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
      },
      {
       "numeros": [
@@ -437,7 +543,320 @@
       "bonus": [
        1
       ],
-      "pop_rel": 0.409
+      "pop_rel": 0.409,
+      "reglement": {
+       "bons": [],
+       "bonus_ok": [],
+       "rang": null,
+       "gain": 0.0
+      }
+     }
+    ],
+    "cout": 4.4
+   },
+   "regle": true,
+   "resultat": {
+    "numeros": [
+     4,
+     6,
+     22,
+     36,
+     37
+    ],
+    "bonus": [
+     3
+    ]
+   }
+  },
+  "2026-08-10": {
+   "annonce_le": "2026-08-09T07:51:09",
+   "jeu": "LOTO",
+   "prix": 2.2,
+   "modes": {
+    "hybride": [
+     {
+      "numeros": [
+       6,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 66.7,
+      "pop_rel": 0.229,
+      "pop_comp": [
+       -1.4639,
+       -0.0101,
+       12.3868
+      ]
+     },
+     {
+      "numeros": [
+       15,
+       30,
+       31,
+       36,
+       37
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 66.3,
+      "pop_rel": 0.288,
+      "pop_comp": [
+       -1.1183,
+       -0.1252,
+       10.3486
+      ]
+     },
+     {
+      "numeros": [
+       6,
+       31,
+       32,
+       36,
+       37
+      ],
+      "bonus": [
+       10
+      ],
+      "score": 65.7,
+      "pop_rel": 0.241,
+      "pop_comp": [
+       -1.413,
+       -0.0101,
+       12.3868
+      ]
+     },
+     {
+      "numeros": [
+       24,
+       31,
+       32,
+       36,
+       37
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 65.5,
+      "pop_rel": 0.243,
+      "pop_comp": [
+       -1.4041,
+       -0.0101,
+       11.3556
+      ]
+     }
+    ],
+    "pronostic": [
+     {
+      "numeros": [
+       13,
+       15,
+       30,
+       31,
+       36
+      ],
+      "bonus": [
+       3
+      ],
+      "score": 68.1,
+      "pop_rel": 0.733,
+      "pop_comp": [
+       -0.4765,
+       0.1664,
+       8.528
+      ]
+     },
+     {
+      "numeros": [
+       13,
+       30,
+       31,
+       36,
+       41
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 67.8,
+      "pop_rel": 0.491,
+      "pop_comp": [
+       -0.9014,
+       0.1909,
+       9.7674
+      ]
+     },
+     {
+      "numeros": [
+       13,
+       15,
+       24,
+       31,
+       36
+      ],
+      "bonus": [
+       5
+      ],
+      "score": 67.3,
+      "pop_rel": 1.054,
+      "pop_comp": [
+       -0.3279,
+       0.3803,
+       8.1002
+      ]
+     },
+     {
+      "numeros": [
+       6,
+       13,
+       31,
+       36,
+       41
+      ],
+      "bonus": [
+       3
+      ],
+      "score": 67.2,
+      "pop_rel": 0.7,
+      "pop_comp": [
+       -0.7617,
+       0.4048,
+       10.3708
+      ]
+     }
+    ],
+    "anti": [
+     {
+      "numeros": [
+       26,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 79.8,
+      "pop_rel": 0.214,
+      "pop_comp": [
+       -1.5329,
+       -0.0101,
+       11.3556
+      ]
+     },
+     {
+      "numeros": [
+       25,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       10
+      ],
+      "score": 79.1,
+      "pop_rel": 0.219,
+      "pop_comp": [
+       -1.5107,
+       -0.0101,
+       11.3556
+      ]
+     },
+     {
+      "numeros": [
+       1,
+       31,
+       32,
+       36,
+       37
+      ],
+      "bonus": [
+       2
+      ],
+      "score": 78.5,
+      "pop_rel": 0.225,
+      "pop_comp": [
+       -1.4834,
+       -0.0101,
+       12.6007
+      ]
+     },
+     {
+      "numeros": [
+       3,
+       31,
+       32,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "score": 78.1,
+      "pop_rel": 0.227,
+      "pop_comp": [
+       -1.4722,
+       -0.0101,
+       12.3868
+      ]
+     }
+    ]
+   },
+   "systeme": {
+    "pool": [
+     31,
+     32,
+     34,
+     35,
+     36,
+     38,
+     41,
+     46,
+     47
+    ],
+    "garantie": "≥3 numéros si les 5 sortants sont dans le pool",
+    "grilles": [
+     {
+      "numeros": [
+       31,
+       32,
+       34,
+       35,
+       36
+      ],
+      "bonus": [
+       1
+      ],
+      "pop_rel": 0.177,
+      "pop_comp": [
+       -1.8687,
+       0.1352,
+       12.3024
+      ]
+     },
+     {
+      "numeros": [
+       31,
+       38,
+       41,
+       46,
+       47
+      ],
+      "bonus": [
+       2
+      ],
+      "pop_rel": 0.409,
+      "pop_comp": [
+       -1.7641,
+       0.8698,
+       10.9866
+      ]
      }
     ],
     "cout": 4.4
@@ -447,34 +866,45 @@
  },
  "cumul": {
   "hybride": {
-   "tirages_regles": 1,
-   "mise": 6.6,
-   "gain": 2.2,
-   "roi_pct": -66.7,
+   "tirages_regles": 2,
+   "mise": 15.4,
+   "gain": 6.7,
+   "roi_pct": -56.5,
    "meilleur": {
-    "date": "2026-08-05",
-    "rang": 9,
-    "gain": 2.2
+    "date": "2026-08-08",
+    "rang": 8,
+    "gain": 4.5
    }
   },
   "pronostic": {
-   "tirages_regles": 1,
-   "mise": 6.6,
-   "gain": 0.0,
-   "roi_pct": -100.0,
-   "meilleur": null
-  },
-  "anti": {
-   "tirages_regles": 1,
-   "mise": 6.6,
-   "gain": 2.2,
-   "roi_pct": -66.7,
+   "tirages_regles": 2,
+   "mise": 15.4,
+   "gain": 4.4,
+   "roi_pct": -71.4,
    "meilleur": {
-    "date": "2026-08-05",
+    "date": "2026-08-08",
     "rang": 9,
     "gain": 2.2
    }
+  },
+  "anti": {
+   "tirages_regles": 2,
+   "mise": 15.4,
+   "gain": 6.7,
+   "roi_pct": -56.5,
+   "meilleur": {
+    "date": "2026-08-08",
+    "rang": 8,
+    "gain": 4.5
+   }
+  },
+  "systeme": {
+   "tirages_regles": 1,
+   "mise": 4.4,
+   "gain": 0.0,
+   "roi_pct": -100.0,
+   "meilleur": null
   }
  },
- "maj_le": "2026-08-08T06:36:19"
+ "maj_le": "2026-08-09T07:51:09"
 }

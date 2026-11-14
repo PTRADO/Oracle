@@ -9,14 +9,14 @@
   "bonus_max": 10,
   "n_max": 49,
   "prix": 2.2,
-  "genere_le": "2026-11-13T12:42:54",
+  "genere_le": "2026-11-14T11:50:11",
   "n_tirages": 1516,
   "periode_debut": "2017-03-06",
   "periode_fin": "2026-11-11",
   "prochain_tirage": "2026-11-14",
   "prochain_jour": "samedi",
   "proba_jackpot": 19068840,
-  "jackpot": 2000000.0,
+  "jackpot": 22000000.0,
   "page_jeu": "https://www.fdj.fr/jeux-de-tirage/loto",
   "alertes": [
    {
